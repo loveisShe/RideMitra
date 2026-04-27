@@ -1012,6 +1012,58 @@
             sync();
         } catch(e) {}
     }
+    function clearAllMarkers() {
+    if (pickupMarker) {
+        map.removeLayer(pickupMarker);
+        pickupMarker = null;
+    }
+
+    if (dropMarker) {
+        map.removeLayer(dropMarker);
+        dropMarker = null;
+    }
+
+    if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+    }
+
+    // Reset UI
+    document.getElementById('map-from-inp').value = '';
+    document.getElementById('map-to-inp').value = '';
+    document.getElementById('f-from').value = '';
+    document.getElementById('f-to').value = '';
+
+    document.getElementById('route-info-bar').style.display = 'none';
+    document.getElementById('map-dist-overlay').style.display = 'none';
+
+    nextPin = 'pickup';
+    updateInstruction('pickup');
+
+    sync();
+}
+
+function postRide() {
+    const from = document.getElementById('f-from').value;
+    const to = document.getElementById('f-to').value;
+    const date = document.getElementById('f-date').value;
+    const time = document.getElementById('f-time').value;
+
+    if (!from || !to || !date || !time) {
+        alert("Please fill all required fields");
+        return;
+    }
+
+    // Show success toast
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+
+    console.log("Ride Posted:", { from, to, date, time });
+}
 
     window.onload = () => { 
     initMap(); 
