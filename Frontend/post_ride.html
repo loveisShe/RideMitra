@@ -1043,26 +1043,54 @@
     sync();
 }
 
-function postRide() {
-    const from = document.getElementById('f-from').value;
-    const to = document.getElementById('f-to').value;
+async function postRide() {
+    const pickup = document.getElementById('f-from').value;
+    const destination = document.getElementById('f-to').value;
     const date = document.getElementById('f-date').value;
     const time = document.getElementById('f-time').value;
 
-    if (!from || !to || !date || !time) {
+    // ✅ NEW VALUES
+    const fare = parseInt(document.getElementById('priceRange').value);
+    const seatsValue = seats; // already defined globally
+
+    if (!pickup || !destination || !date || !time) {
         alert("Please fill all required fields");
         return;
     }
 
-    // Show success toast
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
+    try {
+        const token = localStorage.getItem("token");
 
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
+        const res = await fetch("http://localhost:3000/api/v4/rides/post-ride", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token && { "Authorization": `Bearer ${token}` })
+            },
+            body: JSON.stringify({
+                pickup,
+                destination,
+                date,
+                time,
+                fare,        // ✅ ADDED
+                seats: seatsValue // ✅ ADDED
+            })
+        });
 
-    console.log("Ride Posted:", { from, to, date, time });
+        const data = await res.json();
+        console.log("Response:", data);
+
+        if (!res.ok) {
+            alert(data.message || "Error posting ride");
+            return;
+        }
+
+        alert("Ride Posted Successfully 🚀");
+
+    } catch (err) {
+        console.error(err);
+        alert("Error posting ride");
+    }
 }
 
     window.onload = () => { 
