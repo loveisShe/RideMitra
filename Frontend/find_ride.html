@@ -947,37 +947,38 @@
 
     <!-- Search Card -->
     <div class="search-card">
-      <div class="search-row">
-        <div class="input-wrap">
-          <span class="input-icon">📍</span>
-          <input class="search-input" id="inp-from" placeholder="From — pickup location" />
-        </div>
-        <div class="swap-btn" onclick="swapLocations()">⇄</div>
-        <div class="input-wrap">
-          <span class="input-icon">🏁</span>
-          <input class="search-input" id="inp-to" placeholder="To — destination" />
-        </div>
-        <div class="input-wrap" style="flex:0 0 148px">
-          <span class="input-icon">📅</span>
-          <input class="search-input" type="date" id="inp-date" style="padding-left:34px" />
-        </div>
-        <select class="seats-select" id="inp-seats">
-          <option value="1">1 seat</option>
-          <option value="2">2 seats</option>
-          <option value="3">3 seats</option>
-          <option value="4">4 seats</option>
-        </select>
-        <button class="search-btn" onclick="fetchRides()">Search →</button>
-      </div>
-      <div class="popular-row">
-        <span class="popular-label">Popular:</span>
-        <span class="chip" onclick="setDest('Gurgaon')">📍 Gurgaon</span>
-        <span class="chip" onclick="setDest('IGI Airport')">✈️ IGI Airport</span>
-        <span class="chip" onclick="setDest('Connaught Place')">📍 Connaught Place</span>
-        <span class="chip" onclick="setDest('AIIMS')">🏥 AIIMS</span>
-        <span class="chip" onclick="setDest('Noida Sector 18')">📍 Noida Sector 18</span>
-      </div>
+  <div class="search-row">
+    <div class="input-wrap">
+      <span class="input-icon">📍</span>
+      <input class="search-input" id="inp-from" placeholder="From — pickup location" />
     </div>
+    <div class="swap-btn" onclick="swapLocations()">⇄</div>
+    <div class="input-wrap">
+      <span class="input-icon">🏁</span>
+      <input class="search-input" id="inp-to" placeholder="To — destination" />
+    </div>
+    <div class="input-wrap" style="flex:0 0 148px">
+      <span class="input-icon">📅</span>
+      <input class="search-input" type="date" id="inp-date" style="padding-left:34px" />
+    </div>
+    <select class="seats-select" id="inp-seats">
+      <option value="1">1 seat</option>
+      <option value="2">2 seats</option>
+      <option value="3">3 seats</option>
+      <option value="4">4 seats</option>
+    </select>
+    <button class="search-btn" onclick="fetchRides()">Search →</button>
+  </div>
+  
+  <div class="popular-row">
+    <span class="popular-label">Popular:</span>
+    <span class="chip" onclick="setDest('Gurgaon')">📍 Gurgaon</span>
+    <span class="chip" onclick="setDest('IGI Airport')">✈️ IGI Airport</span>
+    <span class="chip" onclick="setDest('Connaught Place')">📍 Connaught Place</span>
+    <span class="chip" onclick="setDest('AIIMS')">🏥 AIIMS</span>
+    <span class="chip" onclick="setDest('Noida Sector 18')">📍 Noida Sector 18</span>
+  </div>
+</div>
 
     <!-- Results -->
     <div class="results-layout">
@@ -1057,242 +1058,138 @@
     </div>
   </div>
 
-  <script>
+<script>
     let rides = [];
-    const tagClass = {
-      "Verified": "tag-verified",
-      "AC": "tag-ac",
-      "Music OK": "tag-music",
-      "Women Only": "tag-women",
-      "Pets OK": "tag-pets",
-      "No Smoking": "tag-nosmoking"
-    };
-
-    const tagIcon = {
-      "Verified": "✓",
-      "AC": "❄",
-      "Music OK": "♪",
-      "Women Only": "♀",
-      "Pets OK": "🐾",
-      "No Smoking": "🚭"
-    };
-
-    let filterAC = false, filterVerified = false, maxFare = 500, sortBy = "recommended";
+    let filterAC = false, filterVerified = false, maxFare = 2000;
 
     async function fetchRides() {
-      const fromInput = document.getElementById('inp-from').value.trim().toLowerCase();
-      const toInput = document.getElementById('inp-to').value.trim().toLowerCase();
-      const container = document.getElementById('rides-container');
+        const fromInput = document.getElementById('inp-from').value.trim();
+        const toInput = document.getElementById('inp-to').value.trim();
+        const dateInput = document.getElementById('inp-date').value; 
+        const container = document.getElementById('rides-container');
 
-      if (!fromInput && !toInput) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">🔍</div>
-                <h3>Ready to find a ride?</h3>
-                <p>Enter a pickup and destination to see available rides.</p>
-            </div>`;
-        document.getElementById('ride-count').textContent = "0";
-        return;
-      }
+        container.innerHTML = `<p>Searching...</p>`;
 
-      container.innerHTML = `<div class="empty-state"><p>Searching for matches...</p></div>`;
+        try {
+            // Using 'destination' to match your backend query params
+            let url = `http://localhost:3000/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
+            if (dateInput) url += `&date=${dateInput}`;
 
-      try {
-        const response = await fetch('http://localhost:3000/api/v4/rides/all-rides');
-        if (!response.ok) throw new Error("Backend not responding");
+            const response = await fetch(url);
+            const data = await response.json();
 
-        const allData = await response.json();
+            // FIX: Mapping 'driverName' specifically to avoid "undefined"
+            rides = data.map(r => ({
+                id: r._id,
+                // Try both r.driverName and r.drivername just in case
+                driver: r.userId ? r.userId.name  :"Unknown Driver", 
+                avatar: (r.driverName || r.drivername || "S").charAt(0).toUpperCase(),
+                from: r.pickup,
+                to: r.destination, 
+                date: r.date,
+                time: r.time,
+                seats: r.seats,
+                fare: r.fare,
+                car: r.vehicleType || "Sedan"
+            }));
+            renderRides(); 
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            container.innerHTML = `<p>Error connecting to server.</p>`;
+        }
+    }
+    async function bookRide(id) {
+    console.log("Booking ride ID:", id);
 
-        const filtered = allData.filter(ride => {
-          const ridePickup = (ride.pickup || "").toLowerCase().trim();
-          const rideDropoff = (ride.dropoff || "").toLowerCase().trim();
-          const matchFrom = fromInput === "" || ridePickup.includes(fromInput);
-          const matchTo = toInput === "" || rideDropoff.includes(toInput);
-          return matchFrom && matchTo;
+    try {
+        const response = await fetch(`http://localhost:3000/api/v4/rides/update-seats/${id}`, {
+            method: 'PATCH',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                bookedSeats: 1
+            })
         });
 
-        rides = filtered.map(r => ({
-          id: r.id || Date.now() + Math.random(),
-          driver: r.driverName || "Mitra Driver",
-          avatar: r.driverName ? r.driverName.charAt(0).toUpperCase() : "MD",
-          color: "#4F46E5",
-          rating: 4.5,
-          reviews: 12,
-          from: r.pickup,
-          to: r.dropoff,
-          date: r.date || "Today",
-          time: r.time || "Flexible",
-          seats: parseInt(r.seats) || 0,
-          fare: parseInt(r.price) || 0,
-          tags: r.amenities || ["AC"],
-          car: r.vehicleType || "Sedan"
-        }));
+        // 🔥 READ BODY ONLY ONCE
+        const text = await response.text();
 
-        renderRides();
+        let data;
+        try {
+            data = JSON.parse(text);  // try converting to JSON
+        } catch {
+            console.error("Not JSON:", text);
+            alert("Server returned invalid response");
+            return;
+        }
 
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        container.innerHTML = `<div class="empty-state"><h3>⚠️ Connection Error</h3><p>Make sure your server is running on port 3000.</p></div>`;
-      }
+        if (response.ok) {
+            alert("Ride booked successfully!");
+            fetchRides();
+        } else {
+            alert(data.message || "Booking failed");
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error: " + error.message);
     }
+}
+
+    // FIX: Added missing bookRide function to resolve ReferenceError
+    
 
     function renderRides() {
-      let list = rides
-        .filter(r => !filterAC || r.tags.includes("AC"))
-        .filter(r => !filterVerified || r.tags.includes("Verified"))
-        .filter(r => r.fare <= maxFare);
+        const container = document.getElementById('rides-container');
+        let list = rides.filter(r => r.fare <= maxFare);
 
-      if (sortBy === 'fare') list.sort((a, b) => a.fare - b.fare);
-      if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
-      if (sortBy === 'seats') list.sort((a, b) => b.seats - a.seats);
+        if (list.length === 0) {
+            container.innerHTML = `<h3>No rides found.</h3>`;
+            return;
+        }
 
-      document.getElementById('ride-count').textContent = list.length;
-      const container = document.getElementById('rides-container');
-
-      if (list.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">🔍</div>
-                <h3>No rides found</h3>
-                <p>Try searching for a different location or adjusting filters.</p>
-            </div>`;
-        return;
-      }
-
-      container.innerHTML = list.map(r => `
-        <div class="ride-card">
-            <div class="card-top">
-                <div class="driver-info">
-                    <div class="driver-avatar" style="background:${r.color}">${r.avatar}</div>
-                    <div>
-                        <div class="driver-name">${r.driver}</div>
-                        <div class="driver-meta"><span class="stars">★★★★</span> ${r.rating} · ${r.reviews} reviews</div>
-                        <div class="driver-meta">${r.car}</div>
+        container.innerHTML = list.map(r => `
+            <div class="ride-card">
+                <div class="card-top">
+                    <div class="driver-info">
+                        <div class="driver-avatar">${r.avatar}</div>
+                        <div>
+                            <div class="driver-name">${r.driver}</div>
+                            <div class="driver-meta">${r.car}</div>
+                        </div>
+                    </div>
+                    <div class="fare-box">
+                        <div class="fare-amt">₹${r.fare}</div>
                     </div>
                 </div>
-                <div class="fare-box">
-                    <div class="fare-amt">₹${r.fare}</div>
-                    <div class="fare-lbl">per seat</div>
+                <div class="route-row">
+                    <span>${r.from}</span> → <span>${r.to}</span>
+                </div>
+                <div class="meta-row">
+                    <span>📅 ${r.date}</span>
+                    <span>💺 ${r.seats} seats left</span>
+                </div>
+                <div class="card-bottom">
+                    <button class="book-btn" onclick="bookRide('${r.id}')">Book Seat →</button>
                 </div>
             </div>
-            <div class="route-row">
-                <div class="route-dots">
-                    <div class="route-dot" style="background:#7C3AED"></div>
-                    <div class="route-line"></div>
-                    <div class="route-dot" style="background:#4ADE80"></div>
-                </div>
-                <div class="route-labels">
-                    <span class="route-from">${r.from}</span>
-                    <span class="route-to">${r.to}</span>
-                </div>
-            </div>
-            <div class="meta-row">
-                <div class="meta-item">📅 ${r.date}</div>
-                <div class="meta-item">🕒 ${r.time}</div>
-                <div class="meta-item">💺 ${r.seats} left</div>
-            </div>
-            <div class="tags-row">
-                ${r.tags.map(t => `<span class="tag ${tagClass[t] || ''}">${tagIcon[t] || ''} ${t}</span>`).join('')}
-            </div>
-            <div class="card-bottom">
-                <div class="seats-badge"><span>${r.seats}</span> seat${r.seats > 1 ? 's' : ''} available</div>
-                <button class="book-btn" ${r.seats <= 0 ? 'disabled' : ''} onclick="bookRide(${r.id})">
-                    ${r.seats > 0 ? 'Book Seat →' : 'Full'}
-                </button>
-            </div>
-        </div>
-    `).join('');
+        `).join('');
     }
 
-    async function bookRide(rideId) {
-      const requestedSeats = parseInt(document.getElementById('inp-seats').value);
-      const rideIndex = rides.findIndex(r => r.id == rideId);
-
-      if (rideIndex !== -1) {
-        const ride = rides[rideIndex];
-        if (ride.seats >= requestedSeats) {
-          try {
-            const response = await fetch(`http://localhost:3000/api/v4/rides/update-seats/${rideId}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ bookedSeats: requestedSeats })
-            });
-            if (response.ok) {
-              ride.seats -= requestedSeats;
-              showToast(`🎉 Success! ${requestedSeats} seat(s) booked.`);
-              renderRides();
-            } else {
-              alert("Failed to confirm booking on the server.");
-            }
-          } catch (error) {
-            console.error("Booking Error:", error);
-            alert("Connection error. Could not book seat.");
-          }
-        } else {
-          alert("Not enough seats available!");
-        }
-      }
-    }
-
+    // UI Helper Functions
     function swapLocations() {
-      const f = document.getElementById('inp-from');
-      const t = document.getElementById('inp-to');
-      [f.value, t.value] = [t.value, f.value];
-      fetchRides();
+        const f = document.getElementById('inp-from');
+        const t = document.getElementById('inp-to');
+        [f.value, t.value] = [t.value, f.value];
     }
 
-    function setDest(d) {
-      document.getElementById('inp-to').value = d;
-      fetchRides();
+    function updateFare(val) {
+        maxFare = parseInt(val);
+        document.getElementById('fare-display').textContent = `₹${val}`;
+        renderRides();
     }
-
-    function toggleFilter(f) {
-      if (f === 'ac') {
-        filterAC = !filterAC;
-        document.getElementById('tog-ac').classList.toggle('on', filterAC);
-      } else {
-        filterVerified = !filterVerified;
-        document.getElementById('tog-verified').classList.toggle('on', filterVerified);
-      }
-      renderRides();
-    }
-
-    function updateFare(v) {
-      maxFare = +v;
-      document.getElementById('fare-display').textContent = '₹' + v;
-      renderRides();
-    }
-
-    function setSort(s) {
-      sortBy = s;
-      document.querySelectorAll('.sort-option').forEach(el => el.classList.remove('active'));
-      const el = document.getElementById('sort-' + s);
-      if (el) el.classList.add('active');
-      renderRides();
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      if (msg) t.querySelector('div div:first-child').textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    window.onload = () => {
-      document.getElementById('rides-container').innerHTML = `
-        <div class="empty-state">
-            <div class="icon">🚗</div>
-            <h3>Find your next trip</h3>
-            <p>Enter pickup and destination above to begin.</p>
-        </div>`;
-    };
-
-    [document.getElementById('inp-from'), document.getElementById('inp-to')].forEach(input => {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') fetchRides();
-      });
-    });
-  </script>
+</script>
 </body>
 
 </html>

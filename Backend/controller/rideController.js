@@ -38,20 +38,34 @@ export const postRide = async (req, res) => {
 // GET ALL RIDES
 export const getAllRides = async (req, res) => {
     try {
-        const rides = await Ride.find().populate("userId");
+        const { pickup, destination, date } = req.query;
 
-        res.status(200).json(rides);
+        let query = {};
 
+        if (pickup) {
+            query.pickup = { $regex: pickup, $options: "i" }; // case-insensitive match
+        }
+
+        if (destination) {
+            query.destination = { $regex: destination, $options: "i" };
+        }
+
+        if (date) {
+            query.date = date;
+        }
+
+        const rides = await Ride.find(query).populate("userId");
+
+        res.json(rides);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Error fetching rides" });
     }
 };
-
 // UPDATE SEATS 
 export const updateRideSeats = async (req, res) => {
     try {
         const rideId = req.params.id;
-        const { bookedSeats } = req.body;
+        const { bookedSeats = 1 } = req.body; // ✅ default = 1
 
         const ride = await Ride.findById(rideId);
 
