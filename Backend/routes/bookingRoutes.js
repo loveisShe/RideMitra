@@ -3,78 +3,84 @@ import Booking from "../models/Booking.js";
 import Notification from "../models/Notification.js";
 import Ride from "../models/Ride.js";
 import User from "../models/User.js";
+import { protect } from "../middlewares/auth.js";
 
 const io = global.io;
 
 const router = express.Router();
 
 // ✅ REQUEST BOOKING
-router.post("/request-booking", async (req, res) => {
+router.post("/request-booking", protect, async (req, res) => {
   try {
-    const { rideId, passengerId, seatsRequested } = req.body;
+    const { rideId, seatsRequested } = req.body;
+
+    if (!rideId || !seatsRequested) {
+      return res.status(400).json({ message: "Missing rideId or seatsRequested" });
+    }
 
     const ride = await Ride.findById(rideId);
-
     if (!ride) {
       return res.status(404).json({ message: "Ride not found" });
     }
 
     const booking = await Booking.create({
       rideId,
-      passengerId,
-      driverId: ride.userId,
+      passengerId: req.user.id, // ✅ comes from protect middleware
       seatsRequested,
       status: "pending"
     });
 
-    // 🔥 FIXED
+    // 🔥 Get passenger name safely
     const passenger = await User.findById(booking.passengerId);
+    const requesterName = passenger?.name || "Someone";
 
-const requesterName = passenger?.name || "Someone";
-    const notification = await Notification.create({    
+    // 🔥 Create notification for ride owner
+    await Notification.create({
       userId: ride.userId,
       message: `${requesterName} requested a ride`,
-      message: "New booking request received",
       type: "request",
       bookingId: booking._id,
-      requesterName: requesterName
+      requesterName
     });
 
-    // console.log("Notification created:", notification);
-
-    // 🔥 SOCKET
-    
-    if (booking && booking.passengerId) {
-  io.to(booking.passengerId.toString()).emit("new-notification", {
-    message: "New booking request received"
-  });
-}
+    // 🔥 Send real-time notification to ride owner
+    if (ride.userId && io) {
+      io.to(ride.userId.toString()).emit("new-notification", {
+        message: `${requesterName} requested a ride`
+      });
+    }
 
     res.json({ message: "Request sent to driver" });
 
   } catch (err) {
-    console.error(err);
+    console.error("REQUEST BOOKING ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 
-// ✅ ACCEPT / REJECT
-router.patch("/handle-booking/:id", async (req, res) => {
+// ✅ ACCEPT / REJECT BOOKING
+router.patch("/handle-booking/:id", protect, async (req, res) => {
   try {
     const { action } = req.body;
 
-    console.log("Action received:", action);
+    if (!action) {
+      return res.status(400).json({ message: "Action is required" });
+    }
+
+    console.log("Action:", action);
     console.log("Booking ID:", req.params.id);
 
-    // 1. Find booking first
+    // 1. Find booking safely
     const booking = await Booking.findById(req.params.id).populate("passengerId");
-    const requesterName = booking.passengerId.name;
+
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // 2. Find ride safely
+    const requesterName = booking.passengerId?.name || "Someone";
+
+    // 2. Find ride
     const ride = await Ride.findById(booking.rideId);
     if (!ride) {
       return res.status(404).json({ message: "Ride not found" });
@@ -93,20 +99,36 @@ router.patch("/handle-booking/:id", async (req, res) => {
       booking.status = "accepted";
 
       await Notification.create({
-        userId: booking.passengerId,
-        message: "Your booking is accepted",
-        type: "accepted"
+        userId: booking.passengerId._id,
+        message: `Your booking has been accepted`,
+        type: "accepted",
+        bookingId: booking._id
       });
+
+      // 🔥 real-time notify passenger
+      if (booking.passengerId?._id && io) {
+        io.to(booking.passengerId._id.toString()).emit("new-notification", {
+          message: `Your booking has been accepted`
+        });
+      }
 
     } else if (action === "reject") {
 
       booking.status = "rejected";
 
-      await Notification.create({        
-        userId: booking.passengerId,
-        message: "Your booking is rejected",
-        type: "rejected"
+      await Notification.create({
+        userId: booking.passengerId._id,
+        message: `Your booking has been rejected`,
+        type: "rejected",
+        bookingId: booking._id
       });
+
+      // 🔥 real-time notify passenger
+      if (booking.passengerId?._id && io) {
+        io.to(booking.passengerId._id.toString()).emit("new-notification", {
+          message: `Your booking has been rejected`
+        });
+      }
 
     } else {
       return res.status(400).json({ message: "Invalid action" });
@@ -115,14 +137,14 @@ router.patch("/handle-booking/:id", async (req, res) => {
     // 4. Save booking
     await booking.save();
 
-    // 5. Return UPDATED booking (VERY IMPORTANT)
+    // 5. Send response
     res.json({
       message: "Updated successfully",
       booking
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("HANDLE BOOKING ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });

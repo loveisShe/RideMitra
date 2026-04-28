@@ -1,10 +1,9 @@
 import express from "express";
 import Notification from "../models/Notification.js";
-import auth from "../middlewares/auth.js";
-
+import { protect } from "../middlewares/auth.js";  // ✅ CORRECT
 const router = express.Router();
 
-router.get("/", auth, async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const userId = req.user.id;
 
