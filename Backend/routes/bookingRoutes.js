@@ -2,7 +2,7 @@ import express from "express";
 import Booking from "../models/Booking.js";
 import Notification from "../models/Notification.js";
 import Ride from "../models/Ride.js";
-import { io } from "../server.js";
+const io = global.io;
 
 const router = express.Router();
 

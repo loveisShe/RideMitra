@@ -56,26 +56,33 @@ app.use((err, req, res, next) => {
 // ✅ START SERVER + SOCKET TOGETHER
 const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, async () => {
-  await connectDB();
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();  // ✅ connect first
 
-// ✅ SOCKET.IO
-const io = new Server(server, {
-  cors: {
-    origin: "*"
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+    const io = new Server(server, {
+      cors: { origin: "*" }
+    });
+
+    // export io properly
+    global.io = io;
+
+    io.on("connection", (socket) => {
+      console.log("User connected:", socket.id);
+
+      socket.on("join", (userId) => {
+        console.log("Joined room:", userId);
+        socket.join(userId.toString());
+      });
+    });
+
+  } catch (err) {
+    console.error("DB Connection Failed:", err.message);
   }
-});
+};
 
-export { io };
-
-// ✅ SOCKET CONNECTION
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("join", (userId) => {
-    console.log("Joined room:", userId);
-    socket.join(userId.toString());
-  });
-});
+startServer();
