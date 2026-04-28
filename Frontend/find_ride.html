@@ -1105,43 +1105,29 @@
     }
 }
     async function bookRide(id) {
-      const seats = parseInt(document.getElementById("inp-seats").value);
-    console.log("Booking ride ID:", id);
+  const seats = parseInt(document.getElementById("inp-seats").value);
 
-    try {
-        const response = await fetch(`http://localhost:3000/api/v4/rides/update-seats/${id}`, {
-            method: 'PATCH',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                bookedSeats: seats
-            })
-        });
+  try {
+    const response = await fetch("http://localhost:3000/api/bookings/request-booking", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        rideId: id,
+        passengerId: localStorage.getItem("userId"),
+        seatsRequested: seats
+      })
+    });
 
-        // 🔥 READ BODY ONLY ONCE
-        const text = await response.text();
+    const data = await response.json();  // ✅ directly parse JSON
 
-        let data;
-        try {
-            data = JSON.parse(text);  // try converting to JSON
-        } catch {
-            console.error("Not JSON:", text);
-            alert("Server returned invalid response");
-            return;
-        }
+    alert(data.message);
 
-        if (response.ok) {
-            alert("Ride booked successfully!");
-            fetchRides();
-        } else {
-            alert(data.message || "Booking failed");
-        }
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Error: " + error.message);
-    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error connecting to server");
+  }
 }
 
     // FIX: Added missing bookRide function to resolve ReferenceError

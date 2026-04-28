@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications – Ride Mitra</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #FAFAF8;
+  --white: #fff;
+  --orange: #FF8C00;
+  --navy: #1A1A2E;
+  --muted: #6B7280;
+  --border: #E8E6DF;
+}
+
+body {
+  margin:0;
+  display:flex;
+  font-family:'Plus Jakarta Sans', sans-serif;
+  background:var(--bg);
+}
+
+/* SIDEBAR (same as yours) */
+#sidebar {
+  width:240px;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:20px;
+}
+
+.logo {
+  font-weight:800;
+  font-size:20px;
+  margin-bottom:20px;
+}
+
+.nav-item {
+  display:block;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:10px;
+  text-decoration:none;
+  color:var(--muted);
+}
+
+.nav-item.active {
+  background:#FFF3E0;
+  color:var(--orange);
+}
+
+/* MAIN */
+#main {
+  flex:1;
+  padding:30px;
+}
+
+.title {
+  font-size:24px;
+  font-weight:800;
+  margin-bottom:20px;
+}
+
+/* NOTIFICATION CARD */
+.notification {
+  background:var(--white);
+  border:1px solid var(--border);
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.notification p {
+  margin:0;
+  font-size:14px;
+}
+
+.actions button {
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-left:6px;
+}
+
+.accept {
+  background:#2ECC71;
+  color:white;
+}
+
+.reject {
+  background:#EF4444;
+  color:white;
+}
+
+.status {
+  font-size:12px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="logo">🚗 Ride मित्र</div>
+
+  <a href="Dashboard.html" class="nav-item">📊 Dashboard</a>
+  <a href="find_ride.html" class="nav-item">🗺️ Find a Ride</a>
+  <a href="post_ride.html" class="nav-item">📅 My Rides</a>
+  <a href="#" class="nav-item">💰 Payments</a>
+
+  <hr>
+
+  <a href="notifications.html" class="nav-item active">🔔 Notifications</a>
+  <a href="AccountSettings.html" class="nav-item">⚙️ Settings</a>
+  <a href="login.html" class="nav-item">🔐 Logout</a>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="title">🔔 Notifications</div>
+
+  <div id="notifications"></div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+const USER_ID = localStorage.getItem("userId");
+
+console.log("USER_ID:", USER_ID);
+
+const socket = io("http://localhost:3000");
+
+// ✅ CONNECT FIRST THEN JOIN
+socket.on("connect", () => {
+  console.log("Socket connected:", socket.id);
+
+  socket.emit("join", USER_ID);
+});
+
+// ✅ REAL-TIME LISTENER
+socket.on("new-notification", (data) => {
+  console.log("Realtime:", data);
+  loadNotifications();
+});
+
+// 🔹 LOAD NOTIFICATIONS
+async function loadNotifications() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/notifications/${USER_ID}`);
+    const data = await res.json();
+
+    console.log("Fetched notifications:", data);
+
+    const container = document.getElementById("notifications");
+
+    if (!data.length) {
+      container.innerHTML = "<p>No notifications</p>";
+      return;
+    }
+
+    container.innerHTML = data.map(n => `
+      <div class="notification">
+        <div>
+          <p>${n.message}</p>
+          <small>${n.type}</small>
+        </div>
+
+        ${
+          n.type === "request" && n.bookingId
+          ? `<div>
+              <button onclick="handle('${n.bookingId}','accept')">Accept</button>
+              <button onclick="handle('${n.bookingId}','reject')">Reject</button>
+             </div>`
+          : ""
+        }
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// 🔹 ACCEPT / REJECT
+async function handle(id, action) {
+  await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action })
+  });
+
+  loadNotifications();
+}
+
+// initial load
+loadNotifications();
+</script>
+
+</body>
+</html>
