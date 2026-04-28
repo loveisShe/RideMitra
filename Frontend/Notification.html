@@ -183,6 +183,7 @@ async function loadNotifications() {
       <div class="notification">
         <div>
           <p>${n.message}</p>
+          <small>From: ${n.requesterName || "Unknown user"}</small>
           <small>${n.type}</small>
         </div>
 
@@ -204,23 +205,6 @@ async function loadNotifications() {
   }
 }
 
-async function handle(id, action) {
-  console.log("Clicked:", id, action); // ✅ debug
-
-  const res = await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
-    method: "PATCH",
-    headers: { 
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ action })
-  });
-
-  const data = await res.json();
-  console.log("Response:", data); // ✅ debug
-
-  loadNotifications();
-}
 
 // 🔹 ACCEPT / REJECT (WITH TOKEN)
 async function handle(id, action) {

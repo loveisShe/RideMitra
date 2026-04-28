@@ -1104,29 +1104,38 @@
         container.innerHTML = `<p>Error connecting to server.</p>`;
     }
 }
-    async function bookRide(id) {
-  const seats = parseInt(document.getElementById("inp-seats").value);
+    async function bookRide(rideId) {
+  const token = localStorage.getItem("token");
+
+  const seatsRequested = 1;
+
+  console.log("Sending booking:", rideId, seatsRequested);
+
+  if (!rideId) {
+    alert("Ride ID missing");
+    return;
+  }
 
   try {
-    const response = await fetch("http://localhost:3000/api/bookings/request-booking", {
+    const res = await fetch("http://localhost:3000/api/bookings/request-booking", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        rideId: id,
-        passengerId: localStorage.getItem("userId"),
-        seatsRequested: seats
+        rideId: rideId,
+        seatsRequested: seatsRequested
       })
     });
 
-    const data = await response.json();  // ✅ directly parse JSON
+    const data = await res.json();
+    console.log("Response:", data);
 
-    alert(data.message);
+    alert("Request Sent ✅");
 
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error connecting to server");
+  } catch (err) {
+    console.error("Booking error:", err);
   }
 }
 

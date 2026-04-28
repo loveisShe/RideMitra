@@ -26,18 +26,22 @@ router.post("/request-booking", async (req, res) => {
     });
 
     // 🔥 FIXED
-    const notification = await Notification.create({
+    const passenger = await User.findById(booking.passengerId);
+
+const requesterName = passenger?.name || "Someone";
+    const notification = await Notification.create({    
       userId: ride.userId,
+      message: `${requesterName} requested a ride`,
       message: "New booking request received",
       type: "request",
-      bookingId: booking._id
+      bookingId: booking._id,
+      requesterName: requesterName
     });
 
-    console.log("Notification created:", notification);
+    // console.log("Notification created:", notification);
 
     // 🔥 SOCKET
-    console.log("Booking:", booking);
-console.log("PassengerId:", booking?.passengerId);
+    
     if (booking && booking.passengerId) {
   io.to(booking.passengerId.toString()).emit("new-notification", {
     message: "New booking request received"
@@ -62,7 +66,8 @@ router.patch("/handle-booking/:id", async (req, res) => {
     console.log("Booking ID:", req.params.id);
 
     // 1. Find booking first
-    const booking = await Booking.findById(req.params.id);
+    const booking = await Booking.findById(req.params.id).populate("passengerId");
+    const requesterName = booking.passengerId.name;
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
@@ -95,7 +100,7 @@ router.patch("/handle-booking/:id", async (req, res) => {
 
       booking.status = "rejected";
 
-      await Notification.create({
+      await Notification.create({        
         userId: booking.passengerId,
         message: "Your booking is rejected",
         type: "rejected"
