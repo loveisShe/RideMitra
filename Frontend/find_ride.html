@@ -1036,7 +1036,7 @@
       <!-- Rides -->
       <div class="rides-list">
         <div class="results-header">
-          <div class="results-count"><span id="ride-count">5</span> rides found</div>
+          <div class="results-count"><span id="ride-count"></span>  Ride Found</div>
           <select class="sort-select" onchange="setSort(this.value)">
             <option value="recommended">Recommended</option>
             <option value="fare">Lowest Fare</option>
@@ -1063,42 +1063,49 @@
     let filterAC = false, filterVerified = false, maxFare = 2000;
 
     async function fetchRides() {
-        const fromInput = document.getElementById('inp-from').value.trim();
-        const toInput = document.getElementById('inp-to').value.trim();
-        const dateInput = document.getElementById('inp-date').value; 
-        const container = document.getElementById('rides-container');
+    const fromInput = document.getElementById('inp-from').value.trim();
+    const toInput = document.getElementById('inp-to').value.trim();
+    const dateInput = document.getElementById('inp-date').value; 
+    const container = document.getElementById('rides-container');
 
-        container.innerHTML = `<p>Searching...</p>`;
-
-        try {
-            // Using 'destination' to match your backend query params
-            let url = `http://localhost:3000/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
-            if (dateInput) url += `&date=${dateInput}`;
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            // FIX: Mapping 'driverName' specifically to avoid "undefined"
-            rides = data.map(r => ({
-                id: r._id,
-                // Try both r.driverName and r.drivername just in case
-                driver: r.userId ? r.userId.name  :"Unknown Driver", 
-                avatar: (r.driverName || r.drivername || "S").charAt(0).toUpperCase(),
-                from: r.pickup,
-                to: r.destination, 
-                date: r.date,
-                time: r.time,
-                seats: r.seats,
-                fare: r.fare,
-                car: r.vehicleType || "Sedan"
-            }));
-            renderRides(); 
-        } catch (error) {
-            console.error("Fetch Error:", error);
-            container.innerHTML = `<p>Error connecting to server.</p>`;
-        }
+    // ✅ STOP if empty
+    if (!fromInput || !toInput || !dateInput) {
+        container.innerHTML = `<h3>Please enter Date </h3>`;
+        document.getElementById('ride-count').textContent = 0;
+        return;
     }
+
+    container.innerHTML = `<p>Searching...</p>`;
+
+    try {
+        let url = `http://localhost:3000/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
+        if (dateInput) url += `&date=${dateInput}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        rides = data.map(r => ({
+            id: r._id,
+            driver: r.userId ? r.userId.name : "Unknown Driver",
+            avatar: (r.driverName || "S").charAt(0).toUpperCase(),
+            from: r.pickup,
+            to: r.destination, 
+            date: r.date,
+            time: r.time,
+            seats: r.seats,
+            fare: r.fare,
+            car: r.vehicleType || "Sedan"
+        }));
+
+        renderRides();
+
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        container.innerHTML = `<p>Error connecting to server.</p>`;
+    }
+}
     async function bookRide(id) {
+      const seats = parseInt(document.getElementById("inp-seats").value);
     console.log("Booking ride ID:", id);
 
     try {
@@ -1108,7 +1115,7 @@
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                bookedSeats: 1
+                bookedSeats: seats
             })
         });
 
@@ -1143,6 +1150,7 @@
     function renderRides() {
         const container = document.getElementById('rides-container');
         let list = rides.filter(r => r.fare <= maxFare);
+         document.getElementById('ride-count').textContent = list.length;
 
         if (list.length === 0) {
             container.innerHTML = `<h3>No rides found.</h3>`;
@@ -1189,6 +1197,14 @@
         document.getElementById('fare-display').textContent = `₹${val}`;
         renderRides();
     }
+    window.onload = () => {
+    document.getElementById('rides-container').innerHTML = `<h3>Search for rides to begin</h3>`;
+    document.getElementById('ride-count').textContent = 0;
+};
+
+// ✅ SET MIN DATE (today)
+const today = new Date().toISOString().split("T")[0];
+document.getElementById("inp-date").setAttribute("min", today);
 </script>
 </body>
 
