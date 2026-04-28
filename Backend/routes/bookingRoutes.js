@@ -36,9 +36,13 @@ router.post("/request-booking", async (req, res) => {
     console.log("Notification created:", notification);
 
     // 🔥 SOCKET
-    io.to(ride.userId.toString()).emit("new-notification", {
-      message: "New booking request received"
-    });
+    console.log("Booking:", booking);
+console.log("PassengerId:", booking?.passengerId);
+    if (booking && booking.passengerId) {
+  io.to(booking.passengerId.toString()).emit("new-notification", {
+    message: "New booking request received"
+  });
+}
 
     res.json({ message: "Request sent to driver" });
 
@@ -54,17 +58,26 @@ router.patch("/handle-booking/:id", async (req, res) => {
   try {
     const { action } = req.body;
 
-    const booking = await Booking.findById(req.params.id);
-    const ride = await Ride.findById(booking.rideId);
+    console.log("Action received:", action);
+    console.log("Booking ID:", req.params.id);
 
-    if (!booking || !ride) {
-      return res.status(404).json({ message: "Data not found" });
+    // 1. Find booking first
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
     }
 
+    // 2. Find ride safely
+    const ride = await Ride.findById(booking.rideId);
+    if (!ride) {
+      return res.status(404).json({ message: "Ride not found" });
+    }
+
+    // 3. Handle action
     if (action === "accept") {
 
       if (ride.seats < booking.seatsRequested) {
-        return res.json({ message: "Not enough seats" });
+        return res.status(400).json({ message: "Not enough seats" });
       }
 
       ride.seats -= booking.seatsRequested;
@@ -78,7 +91,8 @@ router.patch("/handle-booking/:id", async (req, res) => {
         type: "accepted"
       });
 
-    } else {
+    } else if (action === "reject") {
+
       booking.status = "rejected";
 
       await Notification.create({
@@ -86,11 +100,19 @@ router.patch("/handle-booking/:id", async (req, res) => {
         message: "Your booking is rejected",
         type: "rejected"
       });
+
+    } else {
+      return res.status(400).json({ message: "Invalid action" });
     }
 
+    // 4. Save booking
     await booking.save();
 
-    res.json({ message: "Updated successfully" });
+    // 5. Return UPDATED booking (VERY IMPORTANT)
+    res.json({
+      message: "Updated successfully",
+      booking
+    });
 
   } catch (err) {
     console.error(err);

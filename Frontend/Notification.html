@@ -187,19 +187,39 @@ async function loadNotifications() {
         </div>
 
         ${
-          n.type === "request" && n.bookingId
-          ? `<div>
-              <button onclick="handle('${n.bookingId}','accept')">Accept</button>
-              <button onclick="handle('${n.bookingId}','reject')">Reject</button>
-             </div>`
-          : ""
-        }
+  n.type === "request" && n.bookingId
+  ? (n.status === "pending" || !n.status)
+    ? `<div class="actions">
+        <button class="accept" onclick="handle('${n.bookingId}','accept')">Accept</button>
+        <button class="reject" onclick="handle('${n.bookingId}','reject')">Reject</button>
+       </div>`
+    : `<span class="status">${n.status}</span>`
+  : ""
+}
       </div>
     `).join('');
 
   } catch (err) {
     console.error(err);
   }
+}
+
+async function handle(id, action) {
+  console.log("Clicked:", id, action); // ✅ debug
+
+  const res = await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
+    method: "PATCH",
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ action })
+  });
+
+  const data = await res.json();
+  console.log("Response:", data); // ✅ debug
+
+  loadNotifications();
 }
 
 // 🔹 ACCEPT / REJECT (WITH TOKEN)
