@@ -1,24 +1,22 @@
 import express from "express";
 import Notification from "../models/Notification.js";
+import auth from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/:userId", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    console.log("Fetching notifications for:", req.params.userId);
+    const userId = req.user.id;
 
     const notifications = await Notification
-      .find({ userId: req.params.userId })
+      .find({ userId })
       .sort({ createdAt: -1 });
-
-    console.log("Found:", notifications.length);
 
     res.json(notifications);
 
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-export default router;
+export default router; // 🔥 MUST BE THIS

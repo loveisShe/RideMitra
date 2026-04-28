@@ -134,17 +134,23 @@ body {
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
 <script>
-const USER_ID = localStorage.getItem("userId");
+const token = localStorage.getItem("token");
 
-console.log("USER_ID:", USER_ID);
+// 🔐 CHECK LOGIN
+if (!token) {
+  alert("User not logged in");
+  window.location.href = "login.html";
+}
+
+console.log("TOKEN:", token);
 
 const socket = io("http://localhost:3000");
 
-// ✅ CONNECT FIRST THEN JOIN
+// ✅ CONNECT FIRST THEN JOIN (SEND TOKEN)
 socket.on("connect", () => {
   console.log("Socket connected:", socket.id);
 
-  socket.emit("join", USER_ID);
+  socket.emit("join", token); // 🔥 send token instead of userId
 });
 
 // ✅ REAL-TIME LISTENER
@@ -153,10 +159,15 @@ socket.on("new-notification", (data) => {
   loadNotifications();
 });
 
-// 🔹 LOAD NOTIFICATIONS
+// 🔹 LOAD NOTIFICATIONS (TOKEN BASED)
 async function loadNotifications() {
   try {
-    const res = await fetch(`http://localhost:3000/api/notifications/${USER_ID}`);
+    const res = await fetch(`http://localhost:3000/api/notifications`, {
+      headers: {
+        Authorization: `Bearer ${token}` // 🔥 send token
+      }
+    });
+
     const data = await res.json();
 
     console.log("Fetched notifications:", data);
@@ -191,11 +202,14 @@ async function loadNotifications() {
   }
 }
 
-// 🔹 ACCEPT / REJECT
+// 🔹 ACCEPT / REJECT (WITH TOKEN)
 async function handle(id, action) {
   await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}` // 🔥 send token
+    },
     body: JSON.stringify({ action })
   });
 
