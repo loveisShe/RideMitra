@@ -4,12 +4,12 @@ const bookingSchema = new mongoose.Schema({
   rideId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Ride",
-    required: true   // ✅ Fixed: was missing required
+    required: true
   },
   passengerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true   // ✅ Fixed: was missing required
+    required: true
   },
   driverId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,7 +17,7 @@ const bookingSchema = new mongoose.Schema({
   },
   seatsRequested: {
     type: Number,
-    required: true   // ✅ Fixed: was missing required
+    required: true
   },
   status: {
     type: String,

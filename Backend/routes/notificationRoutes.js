@@ -1,9 +1,10 @@
 import express from "express";
 import Notification from "../models/Notification.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
 
-// ── GET unread notifications only ─────────────────────────────────
+// ================= GET NOTIFICATIONS =================
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const notifications = await Notification
@@ -16,7 +17,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// ── PATCH mark a single notification as read ──────────────────────
+// ================= MARK ONE AS READ =================
 router.patch("/mark-read/:id", authMiddleware, async (req, res) => {
   try {
     await Notification.findByIdAndUpdate(req.params.id, { read: true });
@@ -26,7 +27,7 @@ router.patch("/mark-read/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// ── PATCH mark ALL notifications as read ─────────────────────────
+// ================= MARK ALL AS READ =================
 router.patch("/mark-all-read", authMiddleware, async (req, res) => {
   try {
     await Notification.updateMany(

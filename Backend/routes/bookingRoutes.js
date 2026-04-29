@@ -6,7 +6,6 @@ import User from "../models/User.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
-// global.io is used inline below so it's always read after server.js sets it
 
 // ================= REQUEST BOOKING =================
 router.post("/request-booking", authMiddleware, async (req, res) => {
@@ -22,7 +21,7 @@ router.post("/request-booking", authMiddleware, async (req, res) => {
 
     const booking = await Booking.create({
       rideId,
-      passengerId: req.user._id, // ✅ FIXED
+      passengerId: req.user._id,
       seatsRequested,
       status: "pending"
     });
@@ -62,11 +61,9 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
     const ride = await Ride.findById(booking.rideId);
     if (!ride) return res.status(404).json({ message: "Ride not found" });
 
-    // ✅ Only the driver who posted the ride can accept/reject bookings
     if (ride.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Forbidden: You are not the driver of this ride" });
     }
-
 
     if (action === "accept") {
       if (ride.seats < booking.seatsRequested) {
@@ -75,7 +72,6 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
       ride.seats -= booking.seatsRequested;
       await ride.save();
-
       booking.status = "accepted";
 
       await Notification.create({
@@ -89,7 +85,6 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
         global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
           message: "Your booking has been accepted! 🎉"
         });
-        // Tell passenger's Dashboard to refresh
         global.io.to(booking.passengerId._id.toString()).emit("booking-updated", { status: "accepted" });
       }
 
@@ -108,7 +103,6 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
         global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
           message: "Your booking has been rejected."
         });
-        // Tell passenger's Dashboard to refresh
         global.io.to(booking.passengerId._id.toString()).emit("booking-updated", { status: "rejected" });
       }
 
@@ -118,13 +112,11 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
     await booking.save();
 
-    // Auto-mark the driver's "request" notification as read so it never reappears
     await Notification.findOneAndUpdate(
       { bookingId: booking._id, userId: req.user._id, type: "request" },
       { read: true }
     );
 
-    // Refresh driver's Dashboard too (seat count changed)
     if (global.io) {
       global.io.to(req.user._id.toString()).emit("booking-updated", { status: action });
     }
@@ -137,59 +129,56 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// ================= MY POSTED RIDES (simple) =================
+// ================= MY RIDES =================
 router.get("/my-rides", authMiddleware, async (req, res) => {
-    try {
-        const rides = await Ride.find({ userId: req.user._id });
-        res.json(rides);
-    } catch (err) {
-        res.status(500).json({ message: "Error fetching rides" });
-    }
+  try {
+    const rides = await Ride.find({ userId: req.user._id });
+    res.json(rides);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching rides" });
+  }
 });
 
-// ================= MY POSTED RIDES WITH PASSENGERS =================
+// ================= MY RIDES WITH PASSENGERS =================
 router.get("/my-rides-with-passengers", authMiddleware, async (req, res) => {
-    try {
-        const rides = await Ride.find({ userId: req.user._id }).sort({ date: -1 });
+  try {
+    const rides = await Ride.find({ userId: req.user._id }).sort({ date: -1 });
 
-        const ridesWithPassengers = await Promise.all(
-            rides.map(async (ride) => {
-                const bookings = await Booking.find({ rideId: ride._id })
-                    .populate("passengerId", "name email");
+    const ridesWithPassengers = await Promise.all(
+      rides.map(async (ride) => {
+        const bookings = await Booking.find({ rideId: ride._id })
+          .populate("passengerId", "name email");
 
-                return {
-                    _id: ride._id,
-                    pickup: ride.pickup,
-                    destination: ride.destination,
-                    date: ride.date,
-                    fare: ride.fare,
-                    seats: ride.seats,
-                    bookings: bookings.map(b => ({
-                        bookingId: b._id,
-                        passengerName: b.passengerId?.name || "Passenger",
-                        seatsRequested: b.seatsRequested || 1,
-                        status: b.status || "pending"
-                    }))
-                };
-            })
-        );
+        return {
+          _id: ride._id,
+          pickup: ride.pickup,
+          destination: ride.destination,
+          date: ride.date,
+          fare: ride.fare,
+          seats: ride.seats,
+          bookings: bookings.map(b => ({
+            bookingId: b._id,
+            passengerName: b.passengerId?.name || "Passenger",
+            seatsRequested: b.seatsRequested || 1,
+            status: b.status || "pending"
+          }))
+        };
+      })
+    );
 
-        res.json(ridesWithPassengers);
-    } catch (err) {
-        res.status(500).json({ message: "Error fetching rides with passengers" });
-    }
+    res.json(ridesWithPassengers);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching rides with passengers" });
+  }
 });
 
-// ================= MY BOOKINGS (as passenger) =================
+// ================= MY BOOKINGS =================
 router.get("/my-bookings", authMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ passengerId: req.user._id })
       .populate({
         path: "rideId",
-        populate: {
-          path: "userId",
-          select: "name"
-        }
+        populate: { path: "userId", select: "name" }
       })
       .sort({ createdAt: -1 });
 
@@ -204,7 +193,6 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
     }));
 
     res.json(formatted);
-
   } catch (err) {
     res.status(500).json({ message: "Error fetching bookings" });
   }

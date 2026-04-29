@@ -15,7 +15,7 @@ const rideSchema = new mongoose.Schema({
     required: true
   },
   date: {
-    type: Date,    // ✅ Fixed: was String — date comparisons and sorting were broken
+    type: Date,
     required: true
   },
   time: {

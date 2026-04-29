@@ -13,7 +13,6 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/google-login", googleLogin);
 
-// Routes using ID parameters
 router.get("/me", authMiddleware, getUserById);
 router.get("/get-user/:id", authMiddleware, getUserById);
 router.put("/update-profile/:id", authMiddleware, updateUser);
