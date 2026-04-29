@@ -496,10 +496,10 @@
 
   <div class="sidebar-bottom">
     <div class="user-card">
-      <div class="avatar">SG</div>
+      <div class="avatar" id="sb-avatar">--</div>
       <div>
-        <div class="user-name">Shubhi Govil</div>
-        <div class="user-role">Passenger</div>
+        <div class="user-name" id="sb-name">Loading...</div>
+        <div class="user-role" id="sb-role">Passenger</div>
       </div>
       <span style="margin-left:auto; color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
     </div>
@@ -518,8 +518,8 @@
     <div class="topbar-right">
       <div class="notif-btn">🔔<div class="notif-dot"></div></div>
       <div class="user-pill">
-        <div class="av">SG</div>
-        <span>Shubhi Govil</span>
+        <div class="av" id="top-avatar">--</div>
+        <span id="top-name">Loading...</span>
       </div>
     </div>
   </div>
@@ -705,6 +705,28 @@ async function handle(id, action, cardId) {
 
 // initial load
 loadNotifications();
+</script>
+
+<script>
+  (async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const u = data.user;
+        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        document.getElementById("sb-avatar").textContent = initials;
+        document.getElementById("sb-name").textContent = u.name || "User";
+        document.getElementById("sb-role").textContent = u.role || "Passenger";
+        document.getElementById("top-avatar").textContent = initials;
+        document.getElementById("top-name").textContent = u.name || "User";
+      }
+    } catch (e) { /* silent */ }
+  })();
 </script>
 
 </body>

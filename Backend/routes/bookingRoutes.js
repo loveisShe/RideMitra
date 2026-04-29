@@ -122,7 +122,7 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// ================= MY POSTED RIDES =================
+// ================= MY POSTED RIDES (simple) =================
 router.get("/my-rides", authMiddleware, async (req, res) => {
     try {
         const rides = await Ride.find({ userId: req.user._id });
@@ -132,7 +132,40 @@ router.get("/my-rides", authMiddleware, async (req, res) => {
     }
 });
 
-// ================= MY BOOKINGS =================
+// ================= MY POSTED RIDES WITH PASSENGERS =================
+router.get("/my-rides-with-passengers", authMiddleware, async (req, res) => {
+    try {
+        const rides = await Ride.find({ userId: req.user._id }).sort({ date: -1 });
+
+        const ridesWithPassengers = await Promise.all(
+            rides.map(async (ride) => {
+                const bookings = await Booking.find({ rideId: ride._id })
+                    .populate("passengerId", "name email");
+
+                return {
+                    _id: ride._id,
+                    pickup: ride.pickup,
+                    destination: ride.destination,
+                    date: ride.date,
+                    fare: ride.fare,
+                    seats: ride.seats,
+                    bookings: bookings.map(b => ({
+                        bookingId: b._id,
+                        passengerName: b.passengerId?.name || "Passenger",
+                        seatsRequested: b.seatsRequested || 1,
+                        status: b.status || "pending"
+                    }))
+                };
+            })
+        );
+
+        res.json(ridesWithPassengers);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching rides with passengers" });
+    }
+});
+
+// ================= MY BOOKINGS (as passenger) =================
 router.get("/my-bookings", authMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ passengerId: req.user._id })
@@ -142,14 +175,17 @@ router.get("/my-bookings", authMiddleware, async (req, res) => {
           path: "userId",
           select: "name"
         }
-      });
+      })
+      .sort({ createdAt: -1 });
 
     const formatted = bookings.map(b => ({
-      pickup: b.rideId?.pickup,
-      destination: b.rideId?.destination,
-      fare: b.rideId?.fare,
+      pickup: b.rideId?.pickup || "—",
+      destination: b.rideId?.destination || "—",
+      date: b.rideId?.date || null,
+      fare: b.rideId?.fare || 0,
+      seatsRequested: b.seatsRequested || 1,
       driverName: b.rideId?.userId?.name || "Driver",
-      status: b.status
+      status: b.status || "pending"
     }));
 
     res.json(formatted);

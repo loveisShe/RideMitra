@@ -1,0 +1,39 @@
+BASE = http://localhost:3000
+
+━━━ USER ━━━
+
+register          = POST   http://localhost:3000/api/v4/user/register
+login             = POST   http://localhost:3000/api/v4/user/login
+googleLogin       = POST   http://localhost:3000/api/v4/user/google-login
+getMe             = GET    http://localhost:3000/api/v4/user/me
+getUserById       = GET    http://localhost:3000/api/v4/user/get-user/:id
+updateProfile     = PUT    http://localhost:3000/api/v4/user/update-profile/:id
+deleteUser        = DELETE http://localhost:3000/api/v4/user/delete-user/:id
+
+━━━ RIDES ━━━
+
+postRide          = POST   http://localhost:3000/api/v4/rides/post-ride
+getAllRides        = GET    http://localhost:3000/api/v4/rides/all-rides
+getAllRides+filter = GET    http://localhost:3000/api/v4/rides/all-rides?pickup=Noida&destination=Delhi&date=2025-04-30
+updateSeats       = PATCH  http://localhost:3000/api/v4/rides/update-seats/:id
+
+━━━ BOOKINGS ━━━
+
+requestBooking       = POST   http://localhost:3000/api/v4/bookings/request-booking
+handleBooking        = PATCH  http://localhost:3000/api/v4/bookings/handle-booking/:bookingId
+myRides              = GET    http://localhost:3000/api/v4/bookings/my-rides
+myRidesWithPassengers= GET    http://localhost:3000/api/v4/bookings/my-rides-with-passengers
+myBookings           = GET    http://localhost:3000/api/v4/bookings/my-bookings
+
+━━━ NOTIFICATIONS ━━━
+
+getNotifications  = GET    http://localhost:3000/api/v4/notifications
+
+━━━ AUTH HEADER (add this in Postman for protected routes) ━━━
+
+Key   = Authorization
+Value = Bearer <paste token here>
+
+━━━ TOKEN DECODE ━━━
+
+https://jwt.io

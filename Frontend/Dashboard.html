@@ -713,6 +713,55 @@
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ── Table enhancements ── */
+  th { padding: 0 10px 12px; }
+  th:first-child { padding-left: 0; }
+  th:last-child  { padding-right: 0; }
+  td { padding: 11px 10px; }
+  td:first-child { padding-left: 0; }
+  td:last-child  { padding-right: 0; }
+
+  /* Ride group header inside Posted table */
+  .ride-group-header {
+    background: linear-gradient(90deg, rgba(255,140,0,0.06), rgba(255,140,0,0.02));
+    border-top: 1px solid var(--border);
+  }
+  .ride-group-header td {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.4px;
+    padding: 8px 0 6px;
+    border-bottom: none;
+  }
+  .ride-group-header:first-child { border-top: none; }
+
+  /* No-booking placeholder row */
+  .no-booking-row td {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 5px 0 12px;
+    border-bottom: none;
+    font-style: italic;
+  }
+
+  /* Empty state */
+  .table-empty td {
+    text-align: center;
+    padding: 28px 0;
+    color: var(--muted);
+    font-size: 13px;
+    border-bottom: none;
+  }
+
+  /* Route + date stacked cell */
+  .route-cell .route-main { font-weight: 600; font-size: 13px; color: var(--text); }
+  .route-cell .route-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Fare × seats stacked cell */
+  .fare-cell .fare-main { font-weight: 700; font-size: 13px; color: var(--text); }
+  .fare-cell .fare-seats { font-size: 11px; color: var(--muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -745,10 +794,10 @@
 
   <div class="sidebar-bottom">
     <div class="user-card">
-      <div class="avatar">SG</div>
+      <div class="avatar" id="sb-avatar">--</div>
       <div class="user-info">
-        <div class="user-name">Shubhi Govil </div>
-        <div class="user-role">Passenger</div>
+        <div class="user-name" id="sb-name">Loading...</div>
+        <div class="user-role" id="sb-role">Passenger</div>
       </div>
       <span style="color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
     </div>
@@ -766,8 +815,8 @@
       
       <div class="notif-btn">🔔<div class="notif-dot"></div></div>
       <div style="padding:8px 12px; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:10px; display:flex; gap:10px; align-items:center; box-shadow:var(--card-shadow);">
-        <div class="avatar" style="width:30px;height:30px;font-size:11px;">SG</div>
-        <span style="font-size:13px; font-weight:600; color:var(--text);">Shubhi Govil </span>
+        <div class="avatar" id="top-avatar" style="width:30px;height:30px;font-size:11px;">--</div>
+        <span id="top-name" style="font-size:13px; font-weight:600; color:var(--text);">Loading...</span>
       </div>
     </div>
   </div>
@@ -776,7 +825,7 @@
     <div class="greeting-bg-blob"></div>
     <div class="greeting-text" style="position:relative;z-index:1;">
       <div class="hello">Good morning 👋</div>
-      <h2>Welcome back, John!</h2>
+      <h2 id="greet-name">Welcome back! 👋</h2>
       <p>You have 1 upcoming ride tomorrow. <span style="color:var(--accent); cursor:pointer; font-weight:600;">View details →</span></p>
     </div>
     <div class="greeting-stats">
@@ -864,8 +913,9 @@
     <table>
       <thead>
         <tr>
+          <th>Passenger</th>
           <th>Route</th>
-          <th>Fare</th>
+          <th>Fare/Seat</th>
           <th>Seats</th>
           <th>Status</th>
         </tr>
@@ -888,7 +938,7 @@
         <tr>
           <th>Driver</th>
           <th>Route</th>
-          <th>Fare</th>
+          <th>Fare &amp; Seats</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -901,86 +951,128 @@
   <script>
 const token = localStorage.getItem("token");
 
-// ================= POSTED RIDES =================
+function statusBadge(status) {
+  const map = {
+    accepted: { cls: "status-active",    label: "✅ Accepted" },
+    rejected: { cls: "status-cancelled", label: "❌ Rejected" },
+    pending:  { cls: "status-pending",   label: "⏳ Pending"  }
+  };
+  const s = map[status] || { cls: "status-pending", label: status || "Pending" };
+  return `<span class="status-badge ${s.cls}">${s.label}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+// ================= POSTED RIDES (driver view) =================
 async function fetchPostedRides() {
   try {
-    const res = await fetch("http://localhost:3000/api/v4/rides/my-rides", {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const res = await fetch("http://localhost:3000/api/v4/bookings/my-rides-with-passengers", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const rides = await res.json();
+    const tbody = document.getElementById("postedRidesTable");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(rides) || !rides.length) {
+      tbody.innerHTML = `<tr class="table-empty"><td colspan="5">No rides posted yet — share your journey! 🚀</td></tr>`;
+      return;
+    }
+
+    rides.forEach(ride => {
+      const from    = ride.pickup      || '—';
+      const to      = ride.destination || '—';
+      const fare    = ride.fare        != null ? ride.fare : '—';
+      const seats   = ride.seats       != null ? ride.seats : '—';
+
+      tbody.innerHTML += `
+        <tr class="ride-group-header">
+          <td colspan="5">📍 ${from} → ${to} &nbsp;·&nbsp; ${fmtDate(ride.date)} &nbsp;·&nbsp; ₹${fare}/seat &nbsp;·&nbsp; ${seats} seats total</td>
+        </tr>`;
+
+      if (!ride.bookings || !ride.bookings.length) {
+        tbody.innerHTML += `<tr class="no-booking-row"><td colspan="5">No booking requests yet</td></tr>`;
+      } else {
+        ride.bookings.forEach(b => {
+          const name    = b.passengerName || 'Passenger';
+          const initial = name.charAt(0).toUpperCase();
+          const seatNum = b.seatsRequested || 1;
+          tbody.innerHTML += `
+            <tr>
+              <td>
+                <div class="rider-info">
+                  <div class="rider-avatar" style="background:linear-gradient(135deg,var(--accent),#FF6B00)">${initial}</div>
+                  <div><div class="rider-name">${name}</div></div>
+                </div>
+              </td>
+              <td>${from} → ${to}</td>
+              <td>₹${fare}</td>
+              <td>${seatNum} seat${seatNum > 1 ? 's' : ''}</td>
+              <td>${statusBadge(b.status)}</td>
+            </tr>`;
+        });
       }
     });
 
-    const data = await res.json();
-
-    const table = document.getElementById("postedRidesTable");
-    table.innerHTML = "";
-
-    if (!data.length) {
-      table.innerHTML = `<tr><td colspan="4">No rides posted</td></tr>`;
-      return;
-    }
-
-    data.forEach(ride => {
-      table.innerHTML += `
-        <tr>
-          <td>${ride.pickup} → ${ride.destination}</td>
-          <td>₹${ride.fare}</td>
-          <td>${ride.seats}</td>
-          <td>
-            <span class="status-badge status-active">
-              ${ride.status || "Active"}
-            </span>
-          </td>
-        </tr>
-      `;
-    });
-
   } catch (err) {
-    console.log("Posted rides error:", err);
+    console.error("Posted rides error:", err);
+    document.getElementById("postedRidesTable").innerHTML =
+      `<tr class="table-empty"><td colspan="5">Could not load rides. Is the server running?</td></tr>`;
   }
 }
 
-// ================= BOOKED RIDES =================
+// ================= BOOKED RIDES (passenger view) =================
 async function fetchBookedRides() {
   try {
-    const res = await fetch("http://localhost:3000/api/v4/rides/my-bookings", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
-
+    const res = await fetch("http://localhost:3000/api/v4/bookings/my-bookings", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
     const data = await res.json();
+    const tbody = document.getElementById("bookedRidesTable");
+    tbody.innerHTML = "";
 
-    const table = document.getElementById("bookedRidesTable");
-    table.innerHTML = "";
-
-    if (!data.length) {
-      table.innerHTML = `<tr><td colspan="4">No bookings found</td></tr>`;
+    if (!Array.isArray(data) || !data.length) {
+      tbody.innerHTML = `<tr class="table-empty"><td colspan="4">No bookings yet — find a ride to get started 🚗</td></tr>`;
       return;
     }
 
-    data.forEach(booking => {
-      const ride = booking.rideId;
-
-      // Safety check
-      if (!ride) return;
-
-      table.innerHTML += `
+    data.forEach(b => {
+      const driver  = b.driverName || 'Driver';
+      const initial = driver.charAt(0).toUpperCase();
+      const seats   = b.seatsRequested || 1;
+      tbody.innerHTML += `
         <tr>
-          <td>${ride.userId?.name || "Driver"}</td>
-          <td>${ride.pickup} → ${ride.destination}</td>
-          <td>₹${ride.fare}</td>
           <td>
-            <span class="status-badge status-active">
-              ${booking.status || "Booked"}
-            </span>
+            <div class="rider-info">
+              <div class="rider-avatar" style="background:linear-gradient(135deg,var(--green),#27AE60)">${initial}</div>
+              <div>
+                <div class="rider-name">${driver}</div>
+                <div class="rider-id">Driver</div>
+              </div>
+            </div>
           </td>
-        </tr>
-      `;
+          <td>
+            <div class="route-cell">
+              <div class="route-main">${b.pickup || '—'} → ${b.destination || '—'}</div>
+              <div class="route-date">${fmtDate(b.date)}</div>
+            </div>
+          </td>
+          <td>
+            <div class="fare-cell">
+              <div class="fare-main">₹${b.fare || 0}</div>
+              <div class="fare-seats">${seats} seat${seats > 1 ? 's' : ''}</div>
+            </div>
+          </td>
+          <td>${statusBadge(b.status)}</td>
+        </tr>`;
     });
 
   } catch (err) {
-    console.log("Booked rides error:", err);
+    console.error("Booked rides error:", err);
+    document.getElementById("bookedRidesTable").innerHTML =
+      `<tr class="table-empty"><td colspan="4">Could not load bookings. Is the server running?</td></tr>`;
   }
 }
 
@@ -991,6 +1083,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 </main>
+
+<script>
+  (async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const u = data.user;
+        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        const firstName = u.name ? u.name.split(" ")[0] : "there";
+        document.getElementById("sb-avatar").textContent = initials;
+        document.getElementById("sb-name").textContent = u.name || "User";
+        document.getElementById("sb-role").textContent = u.role || "Passenger";
+        document.getElementById("top-avatar").textContent = initials;
+        document.getElementById("top-name").textContent = u.name || "User";
+        document.getElementById("greet-name").textContent = `Welcome back, ${firstName}! 👋`;
+      }
+    } catch (e) { /* silent */ }
+  })();
+</script>
 
 </body>
 </html>

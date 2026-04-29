@@ -930,10 +930,10 @@
 
     <div class="user-row">
       <div class="user-card">
-        <div class="avatar">SG</div>
+        <div class="avatar" id="sb-avatar">--</div>
         <div>
-          <div style="font-size:13px; font-weight:700; color:var(--navy)">Shubhi Govil</div>
-          <div style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
+          <div id="sb-name" style="font-size:13px; font-weight:700; color:var(--navy)">Loading...</div>
+          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
         </div>
         <span style="margin-left:auto; color:var(--muted2); font-size:14px; cursor:pointer;">⋯</span>
       </div>
@@ -1201,6 +1201,25 @@
 const today = new Date().toISOString().split("T")[0];
 document.getElementById("inp-date").setAttribute("min", today);
 </script>
-</body>
+<script>
+  (async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const u = data.user;
+        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        document.getElementById("sb-avatar").textContent = initials;
+        document.getElementById("sb-name").textContent = u.name || "User";
+        document.getElementById("sb-role").textContent = u.role || "Passenger";
+      }
+    } catch (e) { /* silent */ }
+  })();
+</script>
 
+</body>
 </html>

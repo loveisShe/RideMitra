@@ -40,7 +40,13 @@
       --shadow-orange-hover: 0 12px 32px rgba(255, 140, 0, 0.38);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -55,66 +61,493 @@
     }
 
     /* ── SIDEBAR ── */
-    .sb {
-      width: 185px; min-height: 100vh;
-      background: var(--sb-bg);
-      backdrop-filter: blur(20px) saturate(1.4);
-      border-right: 1px solid rgba(232, 229, 223, 0.9);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
-      box-shadow: 2px 0 24px rgba(26, 26, 46, 0.05);
+    #sidebar {
+      width: 240px;
+      min-width: 240px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 24px rgba(0, 0, 0, 0.04);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
     }
-    .sb-logo { display: flex; align-items: center; gap: 9px; padding: 18px 16px 20px; border-bottom: 1px solid var(--border) }
-    .sb-logo-icon { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--orange), #FFA040); display: grid; place-items: center; font-size: 17px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3) }
-    .sb-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 14px; line-height: 1.2; color: var(--navy) }
-    .sb-logo-text em { font-style: normal; font-family: 'Rozha One', 'Noto Sans Devanagari', serif; color: var(--orange); font-weight: 400; font-size: 15px }
-    .sb-post { margin: 14px 12px; padding: 11px; background: linear-gradient(135deg, var(--orange), var(--orange-deep)); border: none; border-radius: 12px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: var(--shadow-orange); transition: all .2s }
-    .sb-post:hover { transform: translateY(-1px); box-shadow: var(--shadow-orange-hover) }
-    .sb-sec { padding: 14px 10px 4px }
-    .sb-lbl { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--t3); text-transform: uppercase; padding: 0 8px 8px; font-family: 'Plus Jakarta Sans', sans-serif }
-    .sb-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 10px; color: var(--t2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; text-decoration: none }
-    .sb-item:hover { background: var(--orange-light); color: var(--orange) }
-    .sb-item.active { background: var(--orange-light); color: var(--orange); font-weight: 700; box-shadow: inset 3px 0 0 var(--orange) }
-    .badge { margin-left: auto; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; box-shadow: 0 2px 6px rgba(255, 140, 0, 0.3) }
-    .sb-foot { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); background: rgba(250, 250, 248, 0.6) }
-    .user-chip { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 10px; cursor: pointer; transition: background .15s }
-    .user-chip:hover { background: var(--bg2) }
-    .av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--orange), var(--orange-deep)); display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0; color: #fff; box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3) }
-    .u-name { font-size: 12.5px; font-weight: 700; color: var(--navy) }
-    .u-role { font-size: 11px; color: var(--t3) }
-    .more { margin-left: auto; color: var(--t3); font-size: 16px }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 24px 32px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-box .hindi {
+      font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
+      font-weight: 900;
+      color: var(--orange);
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--orange), #FF6B00);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+    }
+
+    .post-btn {
+      margin: 0 12px 24px;
+      width: calc(100% - 24px);
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--orange), #FF6B00);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(255, 140, 0, 0.35);
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+
+    .post-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .post-btn:active { transform: translateY(0); }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted2);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0 12px 10px;
+      margin: 0 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 24px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 2px;
+      text-decoration: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .nav-item:hover { background: #F5F3EE; color: var(--navy); }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
+      color: var(--orange);
+      border: 1px solid rgba(255, 140, 0, 0.2);
+      font-weight: 600;
+    }
+
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .user-row {
+      margin-top: auto;
+      padding: 0 12px;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #F5F3EE;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--orange), #FF6B00);
+    }
 
     /* ── MAIN ── */
-    .main { margin-left: 185px; flex: 1; display: flex; flex-direction: column }
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column
+    }
+
+
+    .sb-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 18px 16px 20px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .sb-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--orange), #FFA040);
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3)
+    }
+
+    .sb-logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.2;
+      color: var(--navy)
+    }
+
+    .sb-logo-text em {
+      font-style: normal;
+      font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
+      color: var(--orange);
+      font-weight: 400;
+      font-size: 15px
+    }
+
+    .sb-post {
+      margin: 14px 12px;
+      padding: 11px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: var(--shadow-orange);
+      transition: all .2s
+    }
+
+    .sb-post:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-orange-hover)
+    }
+
+    .sb-sec {
+      padding: 14px 10px 4px
+    }
+
+    .sb-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--t3);
+      text-transform: uppercase;
+      padding: 0 8px 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif
+    }
+
+    .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: var(--t2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none
+    }
+
+    .sb-item:hover {
+      background: var(--orange-light);
+      color: var(--orange)
+    }
+
+    .sb-item.active {
+      background: var(--orange-light);
+      color: var(--orange);
+      font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--orange)
+    }
+
+    .badge {
+      margin-left: auto;
+      background: var(--orange);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      box-shadow: 0 2px 6px rgba(255, 140, 0, 0.3)
+    }
+
+    .sb-foot {
+      margin-top: auto;
+      padding: 12px 10px;
+      border-top: 1px solid var(--border);
+      background: rgba(250, 250, 248, 0.6)
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    .user-chip:hover {
+      background: var(--bg2)
+    }
+
+    .av {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3)
+    }
+
+    .u-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--navy)
+    }
+
+    .u-role {
+      font-size: 11px;
+      color: var(--t3)
+    }
+
+    .more {
+      margin-left: auto;
+      color: var(--t3);
+      font-size: 16px
+    }
+
 
     .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 28px; border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
       background: rgba(250, 250, 248, 0.9);
-      position: sticky; top: 0; z-index: 40;
-      backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 var(--border);
     }
-    .breadcrumb { font-size: 12px; color: var(--t2) }
-    .breadcrumb a { color: var(--t2); text-decoration: none }
-    .breadcrumb a:hover { color: var(--orange) }
-    .breadcrumb span { color: var(--navy); font-weight: 600 }
-    .top-right { display: flex; align-items: center; gap: 12px }
-    .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 8px 13px; box-shadow: var(--shadow-sm); transition: border-color .2s }
-    .search-box:focus-within { border-color: var(--orange) }
-    .search-box input { background: none; border: none; outline: none; color: var(--navy); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; width: 160px }
-    .search-box input::placeholder { color: var(--t3) }
-    .icon-btn { width: 34px; height: 34px; border-radius: 10px; background: var(--white); border: 1px solid var(--border); display: grid; place-items: center; cursor: pointer; font-size: 15px; color: var(--t2); transition: all .15s; position: relative; box-shadow: var(--shadow-sm) }
-    .icon-btn:hover { border-color: var(--orange); color: var(--orange) }
-    .ndot { position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); border: 2px solid var(--bg) }
-    .avbtn { display: flex; align-items: center; gap: 7px; cursor: pointer }
-    .avbtn .av { width: 32px; height: 32px; font-size: 11px }
-    .avbtn span { font-size: 13px; font-weight: 600; color: var(--navy) }
 
-    .page-header { padding: 26px 28px 0; display: flex; align-items: flex-start; justify-content: space-between }
-    .page-title { font-family: 'Rozha One', serif; font-weight: 400; font-size: 26px; color: var(--navy); letter-spacing: -0.3px }
-    .page-sub { font-size: 13px; color: var(--t2); margin-top: 5px; font-weight: 400 }
-    .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; color: var(--t2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap; box-shadow: var(--shadow-sm) }
-    .back-btn:hover { border-color: var(--orange); color: var(--orange) }
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--t2)
+    }
+
+    .breadcrumb a {
+      color: var(--t2);
+      text-decoration: none
+    }
+
+    .breadcrumb a:hover {
+      color: var(--orange)
+    }
+
+    .breadcrumb span {
+      color: var(--navy);
+      font-weight: 600
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 13px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .2s
+    }
+
+    .search-box:focus-within {
+      border-color: var(--orange)
+    }
+
+    .search-box input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--navy);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      width: 160px
+    }
+
+    .search-box input::placeholder {
+      color: var(--t3)
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--t2);
+      transition: all .15s;
+      position: relative;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .icon-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange)
+    }
+
+    .ndot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--amber);
+      border: 2px solid var(--bg)
+    }
+
+    .avbtn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer
+    }
+
+    .avbtn .av {
+      width: 32px;
+      height: 32px;
+      font-size: 11px
+    }
+
+    .avbtn span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy)
+    }
+
+    .page-header {
+      padding: 26px 28px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between
+    }
+
+    .page-title {
+      font-family: 'Rozha One', serif;
+      font-weight: 400;
+      font-size: 26px;
+      color: var(--navy);
+      letter-spacing: -0.3px
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--t2);
+      margin-top: 5px;
+      font-weight: 400
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--t2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .back-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange)
+    }
 
     /* ── CONTENT GRID ── */
     .content {
@@ -134,51 +567,133 @@
       box-shadow: var(--shadow-card);
       overflow: hidden;
     }
+
     .map-card-header {
       padding: 18px 24px 14px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       border-bottom: 1px solid var(--border2);
     }
-    .map-card-left { display: flex; align-items: center; gap: 9px }
-    .card-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-size: 14px; flex-shrink: 0 }
-    .card-icon.g { background: var(--emerald-light) }
-    .card-icon.p { background: var(--orange-light) }
-    .card-icon.a { background: #FFF8EC; border: 1px solid rgba(232,134,10,.15) }
-    .card-icon.b { background: #EFF9FF; border: 1px solid rgba(14,165,233,.15) }
-    .card-icon.map { background: linear-gradient(135deg, #EFF9FF, #E8FAF1) }
-    .card-title { font-family: 'Rozha One', serif; font-weight: 400; font-size: 16px; color: var(--navy); letter-spacing: -0.2px }
-    .card-sub { font-size: 12px; color: var(--t2) }
+
+    .map-card-left {
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      flex-shrink: 0
+    }
+
+    .card-icon.g {
+      background: var(--emerald-light)
+    }
+
+    .card-icon.p {
+      background: var(--orange-light)
+    }
+
+    .card-icon.a {
+      background: #FFF8EC;
+      border: 1px solid rgba(232, 134, 10, .15)
+    }
+
+    .card-icon.b {
+      background: #EFF9FF;
+      border: 1px solid rgba(14, 165, 233, .15)
+    }
+
+    .card-icon.map {
+      background: linear-gradient(135deg, #EFF9FF, #E8FAF1)
+    }
+
+    .card-title {
+      font-family: 'Rozha One', serif;
+      font-weight: 400;
+      font-size: 16px;
+      color: var(--navy);
+      letter-spacing: -0.2px
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--t2)
+    }
 
     /* Map mode toggle */
-    .map-mode-toggle { display: flex; gap: 5px }
-    .mode-btn {
-      padding: 5px 11px; border-radius: 8px; font-size: 11px; font-weight: 700;
-      border: 1.5px solid var(--border); background: var(--bg2); color: var(--t2);
-      cursor: pointer; transition: all .18s; font-family: 'Plus Jakarta Sans', sans-serif;
+    .map-mode-toggle {
+      display: flex;
+      gap: 5px
     }
-    .mode-btn.active { background: var(--orange); color: white; border-color: var(--orange); box-shadow: 0 3px 10px rgba(255,140,0,.25) }
+
+    .mode-btn {
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      color: var(--t2);
+      cursor: pointer;
+      transition: all .18s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .mode-btn.active {
+      background: var(--orange);
+      color: white;
+      border-color: var(--orange);
+      box-shadow: 0 3px 10px rgba(255, 140, 0, .25)
+    }
 
     /* Map instruction banner */
     .map-instruction {
-      background: linear-gradient(90deg, var(--orange-light), rgba(232,250,241,.6));
+      background: linear-gradient(90deg, var(--orange-light), rgba(232, 250, 241, .6));
       border-bottom: 1px solid var(--border2);
       padding: 9px 18px;
-      font-size: 12px; color: var(--charcoal); font-weight: 500;
-      display: flex; align-items: center; gap: 8px;
+      font-size: 12px;
+      color: var(--charcoal);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .instr-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0 }
-    .instr-dot.orange { background: var(--orange) }
-    .instr-dot.green { background: var(--emerald) }
+
+    .instr-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .instr-dot.orange {
+      background: var(--orange)
+    }
+
+    .instr-dot.green {
+      background: var(--emerald)
+    }
 
     /* Map itself */
-    #post-map { width: 100%; height: 320px }
+    #post-map {
+      width: 100%;
+      height: 320px
+    }
 
     /* Map overlays */
     .map-overlay {
-      position: absolute; z-index: 500;
-      background: rgba(255,255,255,0.95);
+      position: absolute;
+      z-index: 500;
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
-      box-shadow: 0 6px 24px rgba(26,26,46,0.12);
+      box-shadow: 0 6px 24px rgba(26, 26, 46, 0.12);
       border: 1px solid var(--border);
       backdrop-filter: blur(8px);
     }
@@ -189,247 +704,791 @@
       border-top: 1px solid var(--border2);
       background: var(--bg2);
       display: none;
-      align-items: center; gap: 16px; flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .ri-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--t2) }
-    .ri-val { font-weight: 800; color: var(--navy); font-size: 13px }
-    .ri-val.orange { color: var(--orange) }
-    .ri-val.green { color: var(--emerald-dark) }
-    .ri-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0 }
+
+    .ri-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--t2)
+    }
+
+    .ri-val {
+      font-weight: 800;
+      color: var(--navy);
+      font-size: 13px
+    }
+
+    .ri-val.orange {
+      color: var(--orange)
+    }
+
+    .ri-val.green {
+      color: var(--emerald-dark)
+    }
+
+    .ri-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      flex-shrink: 0
+    }
+
     .clear-route-btn {
-      margin-left: auto; padding: 5px 12px; border-radius: 8px;
-      background: #FFF5F5; border: 1.5px solid rgba(239,68,68,.2);
-      color: #EF4444; font-size: 11px; font-weight: 700;
-      cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all .15s;
+      margin-left: auto;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: #FFF5F5;
+      border: 1.5px solid rgba(239, 68, 68, .2);
+      color: #EF4444;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: all .15s;
     }
-    .clear-route-btn:hover { background: #EF4444; color: white }
+
+    .clear-route-btn:hover {
+      background: #EF4444;
+      color: white
+    }
 
     /* Map search inputs row */
     .map-search-row {
       padding: 12px 18px;
-      display: flex; gap: 8px; align-items: center;
+      display: flex;
+      gap: 8px;
+      align-items: center;
       border-top: 1px solid var(--border2);
       background: var(--white);
     }
-    .map-inp-wrap { flex: 1; position: relative }
-    .map-inp-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; pointer-events: none }
+
+    .map-inp-wrap {
+      flex: 1;
+      position: relative
+    }
+
+    .map-inp-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      pointer-events: none
+    }
+
     .map-search-input {
-      width: 100%; padding: 9px 9px 9px 28px;
-      background: var(--bg2); border: 1.5px solid var(--border);
-      border-radius: 10px; font-size: 12.5px; font-weight: 500;
-      color: var(--navy); font-family: 'Plus Jakarta Sans', sans-serif;
-      outline: none; transition: all .2s;
+      width: 100%;
+      padding: 9px 9px 9px 28px;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--navy);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      outline: none;
+      transition: all .2s;
     }
-    .map-search-input:focus { border-color: var(--orange); background: var(--white); box-shadow: 0 0 0 3px rgba(255,140,0,.1) }
-    .map-search-input::placeholder { color: var(--t3); font-weight: 400 }
+
+    .map-search-input:focus {
+      border-color: var(--orange);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(255, 140, 0, .1)
+    }
+
+    .map-search-input::placeholder {
+      color: var(--t3);
+      font-weight: 400
+    }
+
     .map-geo-btn {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: var(--orange-light); border: 1.5px solid var(--orange-mid);
-      color: var(--orange); font-size: 14px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: all .18s; flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--orange-light);
+      border: 1.5px solid var(--orange-mid);
+      color: var(--orange);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .18s;
+      flex-shrink: 0;
     }
-    .map-geo-btn:hover { background: var(--orange); color: white; border-color: var(--orange) }
+
+    .map-geo-btn:hover {
+      background: var(--orange);
+      color: white;
+      border-color: var(--orange)
+    }
 
     /* Geocode suggestion dropdown */
     .geo-dropdown {
-      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 600;
-      background: var(--white); border: 1px solid var(--border); border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(26,26,46,.12); overflow: hidden; display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 600;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(26, 26, 46, .12);
+      overflow: hidden;
+      display: none;
     }
+
     .geo-option {
-      padding: 9px 12px; font-size: 12px; color: var(--navy); cursor: pointer;
-      transition: background .12s; font-weight: 500; border-bottom: 1px solid var(--border2);
+      padding: 9px 12px;
+      font-size: 12px;
+      color: var(--navy);
+      cursor: pointer;
+      transition: background .12s;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border2);
     }
-    .geo-option:last-child { border-bottom: none }
-    .geo-option:hover { background: var(--orange-light); color: var(--orange) }
-    .geo-sub { font-size: 10.5px; color: var(--t3); font-weight: 400 }
+
+    .geo-option:last-child {
+      border-bottom: none
+    }
+
+    .geo-option:hover {
+      background: var(--orange-light);
+      color: var(--orange)
+    }
+
+    .geo-sub {
+      font-size: 10.5px;
+      color: var(--t3);
+      font-weight: 400
+    }
 
     /* Map controls */
     .map-controls-abs {
-      position: absolute; bottom: 14px; right: 14px; z-index: 500;
-      display: flex; flex-direction: column; gap: 5px;
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
     }
-    .map-ctrl { width: 32px; height: 32px; background: var(--white); border: 1px solid var(--border); border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; box-shadow: var(--shadow-card); transition: all .18s }
-    .map-ctrl:hover { background: var(--orange-light); border-color: var(--orange) }
+
+    .map-ctrl {
+      width: 32px;
+      height: 32px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      box-shadow: var(--shadow-card);
+      transition: all .18s
+    }
+
+    .map-ctrl:hover {
+      background: var(--orange-light);
+      border-color: var(--orange)
+    }
 
     /* Distance overlay on map */
     #map-dist-overlay {
-      top: 12px; left: 12px; padding: 10px 14px; min-width: 160px; display: none;
+      top: 12px;
+      left: 12px;
+      padding: 10px 14px;
+      min-width: 160px;
+      display: none;
     }
-    .mdo-title { font-size: 9px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 7px }
-    .mdo-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px }
-    .mdo-lbl { color: var(--t2) }
-    .mdo-val { font-weight: 800; color: var(--navy) }
-    .mdo-val.o { color: var(--orange) }
+
+    .mdo-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 7px
+    }
+
+    .mdo-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px
+    }
+
+    .mdo-lbl {
+      color: var(--t2)
+    }
+
+    .mdo-val {
+      font-weight: 800;
+      color: var(--navy)
+    }
+
+    .mdo-val.o {
+      color: var(--orange)
+    }
 
     /* ── CARDS ── */
     .card {
-      background: var(--white); border: 1px solid var(--border); border-radius: 24px;
-      padding: 22px 24px; margin-bottom: 16px;
-      box-shadow: var(--shadow-card); transition: box-shadow .2s;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow .2s;
     }
-    .card:last-child { margin-bottom: 0 }
-    .card:hover { box-shadow: 0 8px 28px rgba(26, 26, 46, 0.08) }
-    .card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 4px }
-    .card-sub-text { font-size: 12.5px; color: var(--t2); margin-bottom: 18px; margin-left: 41px }
-    .divider { border: none; border-top: 1.5px dashed var(--border); margin: 16px 0 }
+
+    .card:last-child {
+      margin-bottom: 0
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 28px rgba(26, 26, 46, 0.08)
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 4px
+    }
+
+    .card-sub-text {
+      font-size: 12.5px;
+      color: var(--t2);
+      margin-bottom: 18px;
+      margin-left: 41px
+    }
+
+    .divider {
+      border: none;
+      border-top: 1.5px dashed var(--border);
+      margin: 16px 0
+    }
 
     /* ── FORM FIELDS ── */
-    .field { margin-bottom: 14px }
-    .field:last-child { margin-bottom: 0 }
-    label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--t2); margin-bottom: 6px }
-    .fi { position: relative; display: flex; align-items: center }
-    .fi .ico { position: absolute; left: 11px; font-size: 13px; pointer-events: none; z-index: 1 }
-    .fi input, .fi select, .fi textarea {
-      width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
-      border-radius: 12px; padding: 10px 11px 10px 34px;
-      color: var(--navy); font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13.5px; font-weight: 500; outline: none;
-      transition: border-color .2s, box-shadow .2s, background .2s;
-      -webkit-appearance: none; appearance: none;
+    .field {
+      margin-bottom: 14px
     }
-    .fi input:focus, .fi select:focus, .fi textarea:focus {
-      border-color: var(--orange); background: var(--white);
+
+    .field:last-child {
+      margin-bottom: 0
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--t2);
+      margin-bottom: 6px
+    }
+
+    .fi {
+      position: relative;
+      display: flex;
+      align-items: center
+    }
+
+    .fi .ico {
+      position: absolute;
+      left: 11px;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 1
+    }
+
+    .fi input,
+    .fi select,
+    .fi textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 11px 10px 34px;
+      color: var(--navy);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .fi input:focus,
+    .fi select:focus,
+    .fi textarea:focus {
+      border-color: var(--orange);
+      background: var(--white);
       box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.10);
     }
-    .fi input::placeholder, .fi textarea::placeholder { color: var(--t3); font-weight: 400 }
-    .fi select option { background: var(--white); color: var(--navy) }
-    .fi textarea { padding-left: 34px; resize: vertical; min-height: 70px }
-    .no-ico input, .no-ico select, .no-ico textarea { padding-left: 12px }
-    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px }
-    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px }
-    .hint { font-size: 11.5px; color: var(--t3); margin-top: 5px }
+
+    .fi input::placeholder,
+    .fi textarea::placeholder {
+      color: var(--t3);
+      font-weight: 400
+    }
+
+    .fi select option {
+      background: var(--white);
+      color: var(--navy)
+    }
+
+    .fi textarea {
+      padding-left: 34px;
+      resize: vertical;
+      min-height: 70px
+    }
+
+    .no-ico input,
+    .no-ico select,
+    .no-ico textarea {
+      padding-left: 12px
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 13px
+    }
+
+    .hint {
+      font-size: 11.5px;
+      color: var(--t3);
+      margin-top: 5px
+    }
 
     /* seats picker */
-    .seat-row { display: flex; gap: 8px; flex-wrap: wrap }
-    .s-btn {
-      width: 44px; height: 44px; border-radius: 12px;
-      border: 1.5px solid var(--border); background: var(--bg2);
-      color: var(--t2); font-family: 'Rozha One', serif; font-size: 16px;
-      cursor: pointer; display: grid; place-items: center; transition: all .18s;
+    .seat-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
     }
-    .s-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-light) }
-    .s-btn.on { background: linear-gradient(135deg, var(--orange), var(--orange-deep)); border-color: var(--orange); color: #fff; box-shadow: 0 4px 14px rgba(255, 140, 0, 0.3); transform: translateY(-1px) }
+
+    .s-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      color: var(--t2);
+      font-family: 'Rozha One', serif;
+      font-size: 16px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .18s;
+    }
+
+    .s-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: var(--orange-light)
+    }
+
+    .s-btn.on {
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      border-color: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 140, 0, 0.3);
+      transform: translateY(-1px)
+    }
 
     /* amenity chips */
-    .chips { display: flex; flex-wrap: wrap; gap: 7px }
-    .chip { padding: 6px 13px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--bg2); font-size: 12px; font-weight: 600; color: var(--t2); cursor: pointer; user-select: none; transition: all .15s }
-    .chip:hover { border-color: var(--emerald); color: var(--emerald-dark); background: var(--emerald-light) }
-    .chip.on { background: var(--emerald-light); border-color: rgba(46, 204, 113, 0.4); color: var(--emerald-dark) }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px
+    }
+
+    .chip {
+      padding: 6px 13px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--t2);
+      cursor: pointer;
+      user-select: none;
+      transition: all .15s
+    }
+
+    .chip:hover {
+      border-color: var(--emerald);
+      color: var(--emerald-dark);
+      background: var(--emerald-light)
+    }
+
+    .chip.on {
+      background: var(--emerald-light);
+      border-color: rgba(46, 204, 113, 0.4);
+      color: var(--emerald-dark)
+    }
 
     /* price slider */
-    .price-display { font-family: 'Rozha One', serif; font-weight: 400; font-size: 36px; color: var(--amber); margin-bottom: 10px; display: flex; align-items: baseline; gap: 3px }
-    .price-display span { font-size: 20px }
-    input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 99px; border: none; outline: none; cursor: pointer; padding: 0 }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; cursor: pointer }
-    input[type=range].amber-r { background: linear-gradient(to right, var(--orange) 20%, var(--border) 20%) }
-    input[type=range].amber-r::-webkit-slider-thumb { background: var(--orange); box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2), 0 2px 6px rgba(255, 140, 0, 0.3) }
+    .price-display {
+      font-family: 'Rozha One', serif;
+      font-weight: 400;
+      font-size: 36px;
+      color: var(--amber);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: baseline;
+      gap: 3px
+    }
+
+    .price-display span {
+      font-size: 20px
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 99px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 0
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer
+    }
+
+    input[type=range].amber-r {
+      background: linear-gradient(to right, var(--orange) 20%, var(--border) 20%)
+    }
+
+    input[type=range].amber-r::-webkit-slider-thumb {
+      background: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2), 0 2px 6px rgba(255, 140, 0, 0.3)
+    }
 
     /* ── RIGHT COL ── */
-    .right-col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 70px }
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 70px
+    }
 
-    .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1.5px dashed var(--border); font-size: 13px }
-    .sum-row:last-child { border-bottom: none }
-    .sum-lbl { color: var(--t2); font-weight: 500 }
-    .sum-val { font-weight: 700; color: var(--navy) }
-    .sum-val.g { color: var(--emerald-dark) }
-    .sum-val.a { color: var(--amber) }
-    .sum-val.p { color: var(--orange) }
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1.5px dashed var(--border);
+      font-size: 13px
+    }
 
-    .rvis { padding: 10px 0 14px }
-    .rstop { display: flex; align-items: center; gap: 10px; padding: 3px 0; position: relative }
-    .rdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0 }
-    .rdot.f { background: var(--orange); box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2) }
-    .rdot.t { background: var(--emerald); box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2) }
-    .rline { position: absolute; left: 4.5px; top: 13px; bottom: -4px; width: 1px; background: var(--border) }
-    .rgap { height: 14px }
-    .rname { font-size: 13px; font-weight: 700; color: var(--navy) }
-    .rsub { font-size: 11px; color: var(--t3) }
+    .sum-row:last-child {
+      border-bottom: none
+    }
 
-    .vstrip { display: flex; align-items: flex-start; gap: 10px; background: var(--emerald-light); border: 1px solid rgba(46, 204, 113, 0.25); border-radius: 12px; padding: 11px 13px; margin-top: 4px }
-    .vstrip p { font-size: 12px; color: var(--t2); line-height: 1.55 }
-    .vstrip p strong { color: var(--emerald-dark) }
+    .sum-lbl {
+      color: var(--t2);
+      font-weight: 500
+    }
 
-    .btn-post { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--orange), var(--orange-deep)); border: none; border-radius: 14px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; transition: all .22s; box-shadow: var(--shadow-orange); display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 14px; letter-spacing: 0.2px }
-    .btn-post:hover { transform: translateY(-2px); box-shadow: var(--shadow-orange-hover) }
-    .btn-cancel { width: 100%; padding: 11px; background: var(--bg2); border: 1.5px solid var(--border); border-radius: 12px; color: var(--t2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all .15s; margin-top: 8px }
-    .btn-cancel:hover { border-color: var(--red); color: var(--red); background: #FFF5F5 }
+    .sum-val {
+      font-weight: 700;
+      color: var(--navy)
+    }
 
-    .tip-item { display: flex; gap: 8px; font-size: 12.5px; color: var(--t2); line-height: 1.55; margin-bottom: 9px; font-weight: 400 }
-    .tip-item:last-child { margin-bottom: 0 }
+    .sum-val.g {
+      color: var(--emerald-dark)
+    }
 
-    .sec-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 10px }
+    .sum-val.a {
+      color: var(--amber)
+    }
 
-    .ticket-top-bar { height: 5px; margin: -22px -24px 20px; background: linear-gradient(90deg, var(--orange), #FFB347, var(--emerald)); border-radius: 24px 24px 0 0 }
+    .sum-val.p {
+      color: var(--orange)
+    }
+
+    .rvis {
+      padding: 10px 0 14px
+    }
+
+    .rstop {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 3px 0;
+      position: relative
+    }
+
+    .rdot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .rdot.f {
+      background: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2)
+    }
+
+    .rdot.t {
+      background: var(--emerald);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2)
+    }
+
+    .rline {
+      position: absolute;
+      left: 4.5px;
+      top: 13px;
+      bottom: -4px;
+      width: 1px;
+      background: var(--border)
+    }
+
+    .rgap {
+      height: 14px
+    }
+
+    .rname {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy)
+    }
+
+    .rsub {
+      font-size: 11px;
+      color: var(--t3)
+    }
+
+    .vstrip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--emerald-light);
+      border: 1px solid rgba(46, 204, 113, 0.25);
+      border-radius: 12px;
+      padding: 11px 13px;
+      margin-top: 4px
+    }
+
+    .vstrip p {
+      font-size: 12px;
+      color: var(--t2);
+      line-height: 1.55
+    }
+
+    .vstrip p strong {
+      color: var(--emerald-dark)
+    }
+
+    .btn-post {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all .22s;
+      box-shadow: var(--shadow-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 14px;
+      letter-spacing: 0.2px
+    }
+
+    .btn-post:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-orange-hover)
+    }
+
+    .btn-cancel {
+      width: 100%;
+      padding: 11px;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--t2);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 8px
+    }
+
+    .btn-cancel:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: #FFF5F5
+    }
+
+    .tip-item {
+      display: flex;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--t2);
+      line-height: 1.55;
+      margin-bottom: 9px;
+      font-weight: 400
+    }
+
+    .tip-item:last-child {
+      margin-bottom: 0
+    }
+
+    .sec-lbl {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--t3);
+      margin-bottom: 10px
+    }
+
+    .ticket-top-bar {
+      height: 5px;
+      margin: -22px -24px 20px;
+      background: linear-gradient(90deg, var(--orange), #FFB347, var(--emerald));
+      border-radius: 24px 24px 0 0
+    }
 
     /* Toast */
-    .toast { position: fixed; bottom: 26px; right: 26px; background: var(--white); border: 1px solid rgba(46, 204, 113, 0.35); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; transform: translateY(70px); opacity: 0; transition: all .4s cubic-bezier(.34, 1.56, .64, 1); z-index: 300; pointer-events: none; max-width: 300px; box-shadow: 0 12px 40px rgba(46, 204, 113, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06) }
-    .toast.show { transform: translateY(0); opacity: 1 }
-    .toast-t { font-weight: 800; font-size: 13px; color: var(--emerald-dark) }
-    .toast-m { font-size: 12px; color: var(--t2); margin-top: 2px }
+    .toast {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      background: var(--white);
+      border: 1px solid rgba(46, 204, 113, 0.35);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(70px);
+      opacity: 0;
+      transition: all .4s cubic-bezier(.34, 1.56, .64, 1);
+      z-index: 300;
+      pointer-events: none;
+      max-width: 300px;
+      box-shadow: 0 12px 40px rgba(46, 204, 113, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06)
+    }
 
-    ::-webkit-scrollbar { width: 5px }
-    ::-webkit-scrollbar-thumb { background: var(--orange-mid); border-radius: 99px }
-    ::-webkit-scrollbar-track { background: var(--bg2) }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1
+    }
+
+    .toast-t {
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--emerald-dark)
+    }
+
+    .toast-m {
+      font-size: 12px;
+      color: var(--t2);
+      margin-top: 2px
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--orange-mid);
+      border-radius: 99px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg2)
+    }
 
     /* Leaflet popup override */
-    .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 24px rgba(26,26,46,.12) !important; font-family: 'Plus Jakarta Sans', sans-serif !important }
-    .leaflet-popup-content { font-size: 12px !important; font-family: 'Plus Jakarta Sans', sans-serif !important }
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px !important;
+      box-shadow: 0 8px 24px rgba(26, 26, 46, .12) !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important
+    }
+
+    .leaflet-popup-content {
+      font-size: 12px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important
+    }
   </style>
 </head>
 
 <body>
 
   <!-- SIDEBAR -->
-  <aside class="sb">
-    <div class="sb-logo">
-      <div class="sb-logo-icon">🚗</div>
-      <div class="sb-logo-text">Ride&nbsp;<em>मित्र</em></div>
+  <div id="sidebar">
+    <div class="logo-box">
+      <div class="logo-icon">🚗</div>
+      Ride <span class="hindi">मित्र</span>
     </div>
-    <a href="post_ride.html" class="sb-post" style="text-decoration:none">＋ &nbsp;Post a Ride</a>
-    <div class="sb-sec">
-      <div class="sb-lbl">Main</div>
-      <a class="sb-item" href="Dashboard.html">📊 Dashboard</a>
-      <a class="sb-item" href="find_ride.html">🔍 Find a Ride</a>
-      <a class="sb-item active" href="post_ride.html">🚗 My Rides</a>
-      <a class="sb-item" href="#">💳 Payments</a>
+
+    <a href="post_ride.html" class="post-btn">＋ &nbsp;Post a Ride</a>
+
+    <div class="nav-section">
+      <div class="section-label" style="margin:0 0 10px 0; padding: 0 2px;">Main</div>
+      <a href="Dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+      <a href="find_ride.html" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
+      <a href="post_ride.html" class="nav-item active"><span class="icon">📅</span> My Rides</a>
+      <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
     </div>
-    <div class="sb-sec">
-      <div class="sb-lbl">Account</div>
-      <a class="sb-item" href="AccountSettings.html">👤 Profile</a>
-      <a class="sb-item" href="#">⭐ My Reviews</a>
-      <a class="sb-item" href="Notification.html">🔔 Notifications</a>
-      <a class="sb-item" href="AccountSettings.html">⚙️ Settings</a>
-      <a class="sb-item" href="login.html">🔐 Logout</a>
+
+    <div class="nav-section">
+      <div class="section-label" style="margin:0 0 10px 0; padding: 0 2px;">Account</div>
+      <a href="Notification.html" class="nav-item"><span class="icon">🔔</span> Notifications</a>
+      <a href="AccountSettings.html" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+      <a href="login.html" class="nav-item"><span class="icon">🔐</span> Logout</a>
     </div>
-    <div class="sb-foot">
-      <div class="user-chip">
-        <div class="av" id="sb-avatar">--</div>
+
+    <div class="user-row">
+      <div class="user-card">
+        <div class="avatar" id="sb-avatar">--</div>
         <div>
-          <div class="u-name" id="sb-name">Loading...</div>
-          <div class="u-role" id="sb-role">Passenger</div>
+          <div id="sb-name" style="font-size:13px; font-weight:700; color:var(--navy)">Loading...</div>
+          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
         </div>
-        <div class="more">···</div>
+        <span style="margin-left:auto; color:var(--muted2); font-size:14px; cursor:pointer;">⋯</span>
       </div>
     </div>
-  </aside>
+  </div>
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div class="breadcrumb">
-        <a href="#">Home</a> / <a href="Dashboard.html">Dashboard</a> / <span>Post a Ride</span>
-      </div>
-      <div class="top-right">
-        <div class="search-box">🔍 <input type="text" placeholder="Search…" /></div>
-        <div class="icon-btn">🔔<span class="ndot"></span></div>
-        <div class="avbtn">
-          <div class="av">JD</div><span>John D.</span>
-        </div>
-      </div>
-    </div>
 
     <!-- PAGE HEADER -->
     <div class="page-header">
@@ -475,9 +1534,12 @@
             <!-- Distance overlay on map -->
             <div class="map-overlay" id="map-dist-overlay">
               <div class="mdo-title">Route Info</div>
-              <div class="mdo-row"><span class="mdo-lbl">Distance</span><span class="mdo-val o" id="mdo-km">—</span></div>
-              <div class="mdo-row"><span class="mdo-lbl">Est. Time</span><span class="mdo-val" id="mdo-time">—</span></div>
-              <div class="mdo-row"><span class="mdo-lbl">Suggested ₹</span><span class="mdo-val" id="mdo-suggest">—</span></div>
+              <div class="mdo-row"><span class="mdo-lbl">Distance</span><span class="mdo-val o" id="mdo-km">—</span>
+              </div>
+              <div class="mdo-row"><span class="mdo-lbl">Est. Time</span><span class="mdo-val" id="mdo-time">—</span>
+              </div>
+              <div class="mdo-row"><span class="mdo-lbl">Suggested ₹</span><span class="mdo-val"
+                  id="mdo-suggest">—</span></div>
             </div>
 
             <!-- Map controls -->
@@ -492,12 +1554,14 @@
           <div class="map-search-row" id="map-search-row" style="display:none">
             <div class="map-inp-wrap" style="position:relative">
               <span class="map-inp-icon">📍</span>
-              <input class="map-search-input" id="map-from-inp" placeholder="Search pickup location…" oninput="suggestGeo(this,'from')" autocomplete="off" />
+              <input class="map-search-input" id="map-from-inp" placeholder="Search pickup location…"
+                oninput="suggestGeo(this,'from')" autocomplete="off" />
               <div class="geo-dropdown" id="dd-from"></div>
             </div>
             <div class="map-inp-wrap" style="position:relative">
               <span class="map-inp-icon">🏁</span>
-              <input class="map-search-input" id="map-to-inp" placeholder="Search destination…" oninput="suggestGeo(this,'to')" autocomplete="off" />
+              <input class="map-search-input" id="map-to-inp" placeholder="Search destination…"
+                oninput="suggestGeo(this,'to')" autocomplete="off" />
               <div class="geo-dropdown" id="dd-to"></div>
             </div>
             <button class="map-geo-btn" onclick="locateMe()" title="Use GPS">🎯</button>
@@ -526,17 +1590,21 @@
           <div class="g2">
             <div class="field">
               <label>Pickup Location</label>
-              <div class="fi"><span class="ico">📍</span><input type="text" id="f-from" placeholder="e.g. Sector 18, Noida" oninput="sync()" /></div>
+              <div class="fi"><span class="ico">📍</span><input type="text" id="f-from"
+                  placeholder="e.g. Sector 18, Noida" oninput="sync()" /></div>
             </div>
             <div class="field">
               <label>Drop-off Location</label>
-              <div class="fi"><span class="ico">🏁</span><input type="text" id="f-to" placeholder="e.g. Connaught Place" oninput="sync()" /></div>
+              <div class="fi"><span class="ico">🏁</span><input type="text" id="f-to" placeholder="e.g. Connaught Place"
+                  oninput="sync()" /></div>
             </div>
           </div>
 
           <div class="field">
-            <label>Stops Along the Way <span style="text-transform:none;font-weight:400;color:var(--t3)">(optional)</span></label>
-            <div class="fi"><span class="ico">🔵</span><input type="text" placeholder="e.g. Lajpat Nagar, INA Market — comma separated" /></div>
+            <label>Stops Along the Way <span
+                style="text-transform:none;font-weight:400;color:var(--t3)">(optional)</span></label>
+            <div class="fi"><span class="ico">🔵</span><input type="text"
+                placeholder="e.g. Lajpat Nagar, INA Market — comma separated" /></div>
           </div>
 
           <div class="g3">
@@ -546,7 +1614,8 @@
             </div>
             <div class="field">
               <label>Departure Time</label>
-              <div class="fi"><span class="ico">🕐</span><input type="time" id="f-time" value="08:00" oninput="sync()" /></div>
+              <div class="fi"><span class="ico">🕐</span><input type="time" id="f-time" value="08:00"
+                  oninput="sync()" /></div>
             </div>
             <div class="field">
               <label>Est. Duration</label>
@@ -630,8 +1699,9 @@
             <input type="range" class="amber-r" id="priceRange" min="50" max="10000" value="250" step="10"
               oninput="document.getElementById('priceLbl').textContent=this.value;syncRange(this);calcEarn()" />
             <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--t3);margin-top:5px">
-              <span>₹50</span><span>₹10000</span></div>
-            
+              <span>₹50</span><span>₹10000</span>
+            </div>
+
           </div>
         </div>
 
@@ -661,7 +1731,8 @@
 
           <div class="field">
             <label>Notes for Passengers</label>
-            <div class="fi no-ico"><textarea placeholder="e.g. Leaving sharp at 8am. Can drop slightly off route if needed."></textarea></div>
+            <div class="fi no-ico"><textarea
+                placeholder="e.g. Leaving sharp at 8am. Can drop slightly off route if needed."></textarea></div>
           </div>
 
           <div class="g2" style="margin-top:12px">
@@ -701,7 +1772,8 @@
             <div class="card-icon b">📋</div>
             <div class="card-title">Ride Summary</div>
           </div>
-          <div style="margin-bottom:4px;margin-left:41px;font-size:12.5px;color:var(--t2)">Live preview of your listing</div>
+          <div style="margin-bottom:4px;margin-left:41px;font-size:12.5px;color:var(--t2)">Live preview of your listing
+          </div>
 
           <div class="rvis">
             <div class="rstop">
@@ -726,10 +1798,14 @@
 
           <div class="sum-row"><span class="sum-lbl">📅 Date & Time</span><span class="sum-val" id="s-dt">—</span></div>
           <div class="sum-row"><span class="sum-lbl">🪑 Seats</span><span class="sum-val p" id="s-seats">3</span></div>
-          <div class="sum-row"><span class="sum-lbl">🚙 Vehicle</span><span class="sum-val" id="s-veh">Sedan</span></div>
-          <div class="sum-row"><span class="sum-lbl">💰 Per Seat</span><span class="sum-val a">₹<span id="s-price">250</span></span></div>
-          <div class="sum-row"><span class="sum-lbl">💸 Max Earn</span><span class="sum-val g">₹<span id="s-earn">750</span></span></div>
-          <div class="sum-row" id="s-dist-row" style="display:none"><span class="sum-lbl">📏 Distance</span><span class="sum-val" id="s-dist">—</span></div>
+          <div class="sum-row"><span class="sum-lbl">🚙 Vehicle</span><span class="sum-val" id="s-veh">Sedan</span>
+          </div>
+          <div class="sum-row"><span class="sum-lbl">💰 Per Seat</span><span class="sum-val a">₹<span
+                id="s-price">250</span></span></div>
+          <div class="sum-row"><span class="sum-lbl">💸 Max Earn</span><span class="sum-val g">₹<span
+                id="s-earn">750</span></span></div>
+          <div class="sum-row" id="s-dist-row" style="display:none"><span class="sum-lbl">📏 Distance</span><span
+              class="sum-val" id="s-dist">—</span></div>
 
           <div class="vstrip">
             <span style="font-size:18px">✅</span>
@@ -768,12 +1844,12 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- <script>
+  <script>
     // ══════════════════════════════════════
     //  STATE
     // ══════════════════════════════════════
     let map, pickupMarker, dropMarker, routeLine;
-    let mapMode = 'click'; 
+    let mapMode = 'click';
     let nextPin = 'pickup';
     let seats = 3;
     const DEFAULT_CENTER = [28.6139, 77.2090];
@@ -782,62 +1858,62 @@
     //  ICONS
     // ══════════════════════════════════════
     function makeIcon(html, size, anchor) {
-        return L.divIcon({ html, className: 'custom-marker', iconSize: size, iconAnchor: anchor });
+      return L.divIcon({ html, className: 'custom-marker', iconSize: size, iconAnchor: anchor });
     }
 
     const pickupIcon = makeIcon(`<div style="width:28px;height:28px;background:#FF8C00;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(255,140,0,0.45)"></div>`, [28, 28], [14, 28]);
-    const dropIcon   = makeIcon(`<div style="width:28px;height:28px;background:#2ECC71;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(46,204,113,0.45)"></div>`, [28, 28], [14, 28]);
+    const dropIcon = makeIcon(`<div style="width:28px;height:28px;background:#2ECC71;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(46,204,113,0.45)"></div>`, [28, 28], [14, 28]);
 
     // ══════════════════════════════════════
     //  MAP INIT
     // ══════════════════════════════════════
     function initMap() {
-        map = L.map('post-map', { zoomControl: false }).setView(DEFAULT_CENTER, 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+      map = L.map('post-map', { zoomControl: false }).setView(DEFAULT_CENTER, 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-        L.control.zoom({ position: 'bottomleft' }).addTo(map);
+      L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-        map.on('click', function (e) {
-            if (mapMode !== 'click') return;
-            // Prevent click if clicking on UI overlays
-            if (e.originalEvent.target.closest('.map-overlay, .map-controls-abs')) return;
+      map.on('click', function (e) {
+        if (mapMode !== 'click') return;
+        // Prevent click if clicking on UI overlays
+        if (e.originalEvent.target.closest('.map-overlay, .map-controls-abs')) return;
 
-            if (nextPin === 'pickup') {
-                setPickupMarker(e.latlng);
-                reverseGeocode(e.latlng, 'pickup');
-                nextPin = 'drop';
-                updateInstruction('drop');
-            } else if (nextPin === 'drop') {
-                setDropMarker(e.latlng);
-                reverseGeocode(e.latlng, 'drop');
-                nextPin = 'done';
-                updateInstruction('done');
-                calculateRoute(); // Show results
-            }
-        });
+        if (nextPin === 'pickup') {
+          setPickupMarker(e.latlng);
+          reverseGeocode(e.latlng, 'pickup');
+          nextPin = 'drop';
+          updateInstruction('drop');
+        } else if (nextPin === 'drop') {
+          setDropMarker(e.latlng);
+          reverseGeocode(e.latlng, 'drop');
+          nextPin = 'done';
+          updateInstruction('done');
+          calculateRoute(); // Show results
+        }
+      });
     }
 
     // ══════════════════════════════════════
     //  MARKER SETTERS
     // ══════════════════════════════════════
     function setPickupMarker(latlng) {
-        if (pickupMarker) map.removeLayer(pickupMarker);
-        pickupMarker = L.marker(latlng, { icon: pickupIcon, draggable: true }).addTo(map);
-        pickupMarker.on('dragend', () => {
-            reverseGeocode(pickupMarker.getLatLng(), 'pickup');
-            calculateRoute();
-        });
+      if (pickupMarker) map.removeLayer(pickupMarker);
+      pickupMarker = L.marker(latlng, { icon: pickupIcon, draggable: true }).addTo(map);
+      pickupMarker.on('dragend', () => {
+        reverseGeocode(pickupMarker.getLatLng(), 'pickup');
+        calculateRoute();
+      });
     }
 
     function setDropMarker(latlng) {
-        if (dropMarker) map.removeLayer(dropMarker);
-        dropMarker = L.marker(latlng, { icon: dropIcon, draggable: true }).addTo(map);
-        dropMarker.on('dragend', () => {
-            reverseGeocode(dropMarker.getLatLng(), 'drop');
-            calculateRoute();
-        });
+      if (dropMarker) map.removeLayer(dropMarker);
+      dropMarker = L.marker(latlng, { icon: dropIcon, draggable: true }).addTo(map);
+      dropMarker.on('dragend', () => {
+        reverseGeocode(dropMarker.getLatLng(), 'drop');
+        calculateRoute();
+      });
     }
 
     // ══════════════════════════════════════
@@ -845,294 +1921,295 @@
     // ══════════════════════════════════════
     let debounceTimer;
     async function suggestGeo(inp, type) {
-        clearTimeout(debounceTimer);
-        const q = inp.value.trim();
-        const dd = document.getElementById(type === 'from' ? 'dd-from' : 'dd-to');
-        if (q.length < 3) { dd.style.display = 'none'; return; }
+      clearTimeout(debounceTimer);
+      const q = inp.value.trim();
+      const dd = document.getElementById(type === 'from' ? 'dd-from' : 'dd-to');
+      if (q.length < 3) { dd.style.display = 'none'; return; }
 
-        debounceTimer = setTimeout(async () => {
-            try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ', India')}&format=json&limit=4`);
-                const data = await r.json();
-                if (!data.length) { dd.style.display = 'none'; return; }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ', India')}&format=json&limit=4`);
+          const data = await r.json();
+          if (!data.length) { dd.style.display = 'none'; return; }
 
-                dd.innerHTML = data.map(item => {
-                    const short = item.display_name.split(',').slice(0, 3).join(',');
-                    // Note: selectGeo parameters: lat, lon, type, name
-                    return `<div class="geo-option" onclick="selectGeo(${item.lat}, ${item.lon}, '${type}', '${short.replace(/'/g, "\\'")}')">
+          dd.innerHTML = data.map(item => {
+            const short = item.display_name.split(',').slice(0, 3).join(',');
+            // Note: selectGeo parameters: lat, lon, type, name
+            return `<div class="geo-option" onclick="selectGeo(${item.lat}, ${item.lon}, '${type}', '${short.replace(/'/g, "\\'")}')">
                         <strong>${item.display_name.split(',')[0]}</strong><br>
-                        <span style="font-size:10px; color:#666">${item.display_name.split(',').slice(1,3).join(',')}</span>
+                        <span style="font-size:10px; color:#666">${item.display_name.split(',').slice(1, 3).join(',')}</span>
                     </div>`;
-                }).join('');
-                dd.style.display = 'block';
-            } catch (e) { console.error("Search error", e); }
-        }, 400);
+          }).join('');
+          dd.style.display = 'block';
+        } catch (e) { console.error("Search error", e); }
+      }, 400);
     }
 
     function selectGeo(lat, lon, type, name) {
-        const latlng = L.latLng(lat, lon);
-        if (type === 'from') {
-            setPickupMarker(latlng);
-            document.getElementById('map-from-inp').value = name;
-            document.getElementById('f-from').value = name;
-            document.getElementById('dd-from').style.display = 'none';
-        } else {
-            setDropMarker(latlng);
-            document.getElementById('map-to-inp').value = name;
-            document.getElementById('f-to').value = name;
-            document.getElementById('dd-to').style.display = 'none';
-        }
+      const latlng = L.latLng(lat, lon);
+      if (type === 'from') {
+        setPickupMarker(latlng);
+        document.getElementById('map-from-inp').value = name;
+        document.getElementById('f-from').value = name;
+        document.getElementById('dd-from').style.display = 'none';
+      } else {
+        setDropMarker(latlng);
+        document.getElementById('map-to-inp').value = name;
+        document.getElementById('f-to').value = name;
+        document.getElementById('dd-to').style.display = 'none';
+      }
 
-        map.setView(latlng, 14);
-        
-        // AUTO-CALCULATE if both exist
-        if (pickupMarker && dropMarker) {
-            calculateRoute();
-            fitRoute();
-        }
-        sync();
+      map.setView(latlng, 14);
+
+      // AUTO-CALCULATE if both exist
+      if (pickupMarker && dropMarker) {
+        calculateRoute();
+        fitRoute();
+      }
+      sync();
     }
 
     // ══════════════════════════════════════
     //  RESULTS & CALCULATION (THE KEY PART)
     // ══════════════════════════════════════
     function calculateRoute() {
-        if (!pickupMarker || !dropMarker) return;
+      if (!pickupMarker || !dropMarker) return;
 
-        const p1 = pickupMarker.getLatLng();
-        const p2 = dropMarker.getLatLng();
+      const p1 = pickupMarker.getLatLng();
+      const p2 = dropMarker.getLatLng();
 
-        // Distance & Price Math
-        const distKm = (p1.distanceTo(p2) / 1000);
-        const mins = Math.round(distKm * 2.5 + 5);
-        const suggest = Math.round(distKm * 8 + 50);
+      // Distance & Price Math
+      const distKm = (p1.distanceTo(p2) / 1000);
+      const mins = Math.round(distKm * 2.5 + 5);
+      const suggest = Math.round(distKm * 8 + 50);
 
-        // 1. Update Floating Box
-        const overlay = document.getElementById('map-dist-overlay');
-        if (overlay) {
-            overlay.style.display = 'block';
-            document.getElementById('mdo-km').textContent = distKm.toFixed(1) + ' km';
-            document.getElementById('mdo-time').textContent = mins + ' min';
-            document.getElementById('mdo-suggest').textContent = '₹' + suggest;
-        }
+      // 1. Update Floating Box
+      const overlay = document.getElementById('map-dist-overlay');
+      if (overlay) {
+        overlay.style.display = 'block';
+        document.getElementById('mdo-km').textContent = distKm.toFixed(1) + ' km';
+        document.getElementById('mdo-time').textContent = mins + ' min';
+        document.getElementById('mdo-suggest').textContent = '₹' + suggest;
+      }
 
-        // 2. Update Bottom Bar
-        const bar = document.getElementById('route-info-bar');
-        if (bar) {
-            bar.style.display = 'flex';
-            document.getElementById('ri-km').textContent = distKm.toFixed(1);
-            document.getElementById('ri-time').textContent = mins;
-            document.getElementById('ri-suggest').textContent = suggest;
-        }
+      // 2. Update Bottom Bar
+      const bar = document.getElementById('route-info-bar');
+      if (bar) {
+        bar.style.display = 'flex';
+        document.getElementById('ri-km').textContent = distKm.toFixed(1);
+        document.getElementById('ri-time').textContent = mins;
+        document.getElementById('ri-suggest').textContent = suggest;
+      }
 
-        // 3. Update Form & Slider
-        const priceRange = document.getElementById('priceRange');
-        if (priceRange) {
-            priceRange.value = suggest;
-            document.getElementById('priceLbl').textContent = suggest;
-            syncRange(priceRange);
-            calcEarn();
-        }
+      // 3. Update Form & Slider
+      const priceRange = document.getElementById('priceRange');
+      if (priceRange) {
+        priceRange.value = suggest;
+        document.getElementById('priceLbl').textContent = suggest;
+        syncRange(priceRange);
+        calcEarn();
+      }
 
-        // 4. Draw Line
-        if (routeLine) map.removeLayer(routeLine);
-        routeLine = L.polyline([p1, p2], { color: '#FF8C00', weight: 3, dashArray: '10,6' }).addTo(map);
-        
-        sync();
+      // 4. Draw Line
+      if (routeLine) map.removeLayer(routeLine);
+      routeLine = L.polyline([p1, p2], { color: '#FF8C00', weight: 3, dashArray: '10,6' }).addTo(map);
+
+      sync();
     }
 
     // ══════════════════════════════════════
     //  HELPERS
     // ══════════════════════════════════════
     function fitRoute() {
-        if (pickupMarker && dropMarker) map.fitBounds([pickupMarker.getLatLng(), dropMarker.getLatLng()], { padding: [50, 50] });
+      if (pickupMarker && dropMarker) map.fitBounds([pickupMarker.getLatLng(), dropMarker.getLatLng()], { padding: [50, 50] });
     }
 
     function sync() {
-    // 1. Sync Locations
-    document.getElementById('s-from').textContent = document.getElementById('f-from').value || '—';
-    document.getElementById('s-to').textContent   = document.getElementById('f-to').value   || '—';
+      // 1. Sync Locations
+      document.getElementById('s-from').textContent = document.getElementById('f-from').value || '—';
+      document.getElementById('s-to').textContent = document.getElementById('f-to').value || '—';
 
-    // 2. Sync Date & Time (The part you need)
-    const dateVal = document.getElementById('f-date').value;
-    const timeVal = document.getElementById('f-time').value;
-    
-    // Combine them for the summary display
-    if (dateVal || timeVal) {
+      // 2. Sync Date & Time (The part you need)
+      const dateVal = document.getElementById('f-date').value;
+      const timeVal = document.getElementById('f-time').value;
+
+      // Combine them for the summary display
+      if (dateVal || timeVal) {
         document.getElementById('s-dt').textContent = `${dateVal} ${timeVal}`.trim();
-    } else {
+      } else {
         document.getElementById('s-dt').textContent = '—';
-    }
+      }
 
-    // 3. Sync Price & Vehicle
-    document.getElementById('s-price').textContent = document.getElementById('priceRange').value;
-    const vType = document.getElementById('f-vtype');
-    if(vType) {
+      // 3. Sync Price & Vehicle
+      document.getElementById('s-price').textContent = document.getElementById('priceRange').value;
+      const vType = document.getElementById('f-vtype');
+      if (vType) {
         document.getElementById('s-veh').textContent = vType.value;
+      }
     }
-}
 
     function syncRange(el) {
-        const val = (el.value - el.min) / (el.max - el.min) * 100;
-        el.style.background = `linear-gradient(to right, #FF8C00 ${val}%, #ddd ${val}%)`;
+      const val = (el.value - el.min) / (el.max - el.min) * 100;
+      el.style.background = `linear-gradient(to right, #FF8C00 ${val}%, #ddd ${val}%)`;
     }
 
     function calcEarn() {
-        const price = parseInt(document.getElementById('priceRange').value);
-        document.getElementById('s-earn').textContent = price * seats;
+      const price = parseInt(document.getElementById('priceRange').value);
+      document.getElementById('s-earn').textContent = price * seats;
     }
 
     function setMapMode(m) {
-        mapMode = m;
-        document.getElementById('btn-click-mode').classList.toggle('active', m === 'click');
-        document.getElementById('btn-search-mode').classList.toggle('active', m === 'search');
-        document.getElementById('map-instruction').style.display = m === 'click' ? 'flex' : 'none';
-        document.getElementById('map-search-row').style.display = m === 'search' ? 'flex' : 'none';
+      mapMode = m;
+      document.getElementById('btn-click-mode').classList.toggle('active', m === 'click');
+      document.getElementById('btn-search-mode').classList.toggle('active', m === 'search');
+      document.getElementById('map-instruction').style.display = m === 'click' ? 'flex' : 'none';
+      document.getElementById('map-search-row').style.display = m === 'search' ? 'flex' : 'none';
     }
 
     function updateInstruction(step) {
-        const el = document.getElementById('instr-text');
-        if (step === 'drop') el.innerHTML = 'Now click for <strong>Drop-off</strong>';
-        else if (step === 'done') el.innerHTML = '✅ Route Set!';
-        else el.innerHTML = 'Click for <strong>Pickup</strong>';
+      const el = document.getElementById('instr-text');
+      if (step === 'drop') el.innerHTML = 'Now click for <strong>Drop-off</strong>';
+      else if (step === 'done') el.innerHTML = '✅ Route Set!';
+      else el.innerHTML = 'Click for <strong>Pickup</strong>';
     }
 
     async function reverseGeocode(latlng, type) {
-        try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`);
-            const d = await r.json();
-            const addr = d.display_name.split(',').slice(0, 2).join(', ');
-            if (type === 'pickup') {
-                document.getElementById('f-from').value = addr;
-                document.getElementById('map-from-inp').value = addr;
-            } else {
-                document.getElementById('f-to').value = addr;
-                document.getElementById('map-to-inp').value = addr;
-            }
-            sync();
-        } catch(e) {}
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`);
+        const d = await r.json();
+        const addr = d.display_name.split(',').slice(0, 2).join(', ');
+        if (type === 'pickup') {
+          document.getElementById('f-from').value = addr;
+          document.getElementById('map-from-inp').value = addr;
+        } else {
+          document.getElementById('f-to').value = addr;
+          document.getElementById('map-to-inp').value = addr;
+        }
+        sync();
+      } catch (e) { }
     }
     function clearAllMarkers() {
-    if (pickupMarker) {
+      if (pickupMarker) {
         map.removeLayer(pickupMarker);
         pickupMarker = null;
-    }
+      }
 
-    if (dropMarker) {
+      if (dropMarker) {
         map.removeLayer(dropMarker);
         dropMarker = null;
-    }
+      }
 
-    if (routeLine) {
+      if (routeLine) {
         map.removeLayer(routeLine);
         routeLine = null;
+      }
+
+      // Reset UI
+      document.getElementById('map-from-inp').value = '';
+      document.getElementById('map-to-inp').value = '';
+      document.getElementById('f-from').value = '';
+      document.getElementById('f-to').value = '';
+
+      document.getElementById('route-info-bar').style.display = 'none';
+      document.getElementById('map-dist-overlay').style.display = 'none';
+
+      nextPin = 'pickup';
+      updateInstruction('pickup');
+
+      sync();
     }
 
-    // Reset UI
-    document.getElementById('map-from-inp').value = '';
-    document.getElementById('map-to-inp').value = '';
-    document.getElementById('f-from').value = '';
-    document.getElementById('f-to').value = '';
+    async function postRide() {
+      const pickup = document.getElementById('f-from').value;
+      const destination = document.getElementById('f-to').value;
+      const date = document.getElementById('f-date').value;
+      const time = document.getElementById('f-time').value;
 
-    document.getElementById('route-info-bar').style.display = 'none';
-    document.getElementById('map-dist-overlay').style.display = 'none';
+      // ✅ NEW VALUES
+      const fare = parseInt(document.getElementById('priceRange').value);
+      const seatsValue = seats; // already defined globally
 
-    nextPin = 'pickup';
-    updateInstruction('pickup');
-
-    sync();
-}
-
-async function postRide() {
-    const pickup = document.getElementById('f-from').value;
-    const destination = document.getElementById('f-to').value;
-    const date = document.getElementById('f-date').value;
-    const time = document.getElementById('f-time').value;
-
-    // ✅ NEW VALUES
-    const fare = parseInt(document.getElementById('priceRange').value);
-    const seatsValue = seats; // already defined globally
-
-    if (!pickup || !destination || !date || !time) {
+      if (!pickup || !destination || !date || !time) {
         alert("Please fill all required fields");
         return;
-    }
+      }
 
-    try {
+      try {
         const token = localStorage.getItem("token");
 
         const res = await fetch("http://localhost:3000/api/v4/rides/post-ride", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token && { "Authorization": `Bearer ${token}` })
-            },
-            body: JSON.stringify({
-                pickup,
-                destination,
-                date,
-                time,
-                fare,        // ✅ ADDED
-                seats: seatsValue // ✅ ADDED
-            })
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
+          body: JSON.stringify({
+            pickup,
+            destination,
+            date,
+            time,
+            fare,        // ✅ ADDED
+            seats: seatsValue // ✅ ADDED
+          })
         });
 
         const data = await res.json();
         console.log("Response:", data);
 
         if (!res.ok) {
-            alert(data.message || "Error posting ride");
-            return;
+          alert(data.message || "Error posting ride");
+          return;
         }
 
         alert("Ride Posted Successfully 🚀");
 
-    } catch (err) {
+      } catch (err) {
         console.error(err);
         alert("Error posting ride");
-    }
-}
-
-    window.onload = () => { 
-    initMap(); 
-    
-    // Set default date to today
-    const dateInput = document.getElementById('f-date');
-    if (!dateInput.value) {
-        dateInput.valueAsDate = new Date();
-    }
-
-    // Add "change" listeners so the summary updates in real-time
-    document.getElementById('f-date').addEventListener('input', sync);
-    document.getElementById('f-time').addEventListener('input', sync);
-    document.getElementById('f-vtype').addEventListener('change', sync);
-
-    sync(); // Run once on load to populate defaults
-    syncRange(document.getElementById('priceRange'));
-};
-</script>
-
-
-<script>
-  // ── Dynamic sidebar user info ──
-  (async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    try {
-      const res = await fetch("http://localhost:3000/api/v4/user/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        const u = data.user;
-        document.getElementById("sb-name").textContent = u.name || "User";
-        document.getElementById("sb-role").textContent = u.role || "Passenger";
-        const initials = u.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-        document.getElementById("sb-avatar").textContent = initials;
       }
-    } catch (e) { /* silent */ }
-  })();
-</script>
+    }
+
+    window.onload = () => {
+      initMap();
+
+      // Set default date to today
+      const dateInput = document.getElementById('f-date');
+      if (!dateInput.value) {
+        dateInput.valueAsDate = new Date();
+      }
+
+      // Add "change" listeners so the summary updates in real-time
+      document.getElementById('f-date').addEventListener('input', sync);
+      document.getElementById('f-time').addEventListener('input', sync);
+      document.getElementById('f-vtype').addEventListener('change', sync);
+
+      sync(); // Run once on load to populate defaults
+      syncRange(document.getElementById('priceRange'));
+    };
+  </script>
+
+
+  <script>
+    // ── Dynamic sidebar user info ──
+    (async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const res = await fetch("http://localhost:3000/api/v4/user/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const u = data.user;
+          document.getElementById("sb-name").textContent = u.name || "User";
+          document.getElementById("sb-role").textContent = u.role || "Passenger";
+          const initials = u.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+          document.getElementById("sb-avatar").textContent = initials;
+        }
+      } catch (e) { /* silent */ }
+    })();
+  </script>
 
 </body>
+
 </html>
