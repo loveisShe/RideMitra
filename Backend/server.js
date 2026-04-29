@@ -41,7 +41,7 @@ app.use(express.static("public"));
 
 // ✅ Routes
 app.use("/api/v4/user", userRoutes);
-app.use("/api/v4/rides", rideRouter);
+app.use("/api/rides", rideRouter);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/notifications", notificationRoutes);
 

@@ -119,12 +119,13 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
 // ================= MY POSTED RIDES =================
 router.get("/my-rides", authMiddleware, async (req, res) => {
-  try {
+    console.log("Logged user:", req.user._id);  // 👈 ADD THIS
+
     const rides = await Ride.find({ userId: req.user._id });
+
+    console.log("Rides found:", rides); // 👈 ADD THIS
+
     res.json(rides);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
 });
 
 // ================= MY BOOKINGS =================

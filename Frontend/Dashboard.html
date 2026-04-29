@@ -977,11 +977,11 @@ async function fetchPostedRides() {
 // ================= BOOKED RIDES =================
 async function fetchBookedRides() {
   try {
-    const res = await fetch("http://localhost:3000/api/bookings/my-bookings", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const res = await fetch("http://localhost:3000/api/rides/my-bookings", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
 
     const data = await res.json();
 
