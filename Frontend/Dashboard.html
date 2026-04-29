@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ride मित्र — My Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap" rel="stylesheet">
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -714,6 +715,11 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+    50%       { box-shadow: 0 0 0 5px rgba(46,204,113,0); }
+  }
+
   /* ── Table enhancements ── */
   th { padding: 0 10px 12px; }
   th:first-child { padding-left: 0; }
@@ -812,8 +818,8 @@
       <div class="breadcrumb">Home / <span>Dashboard</span></div>
     </div>
     <div class="topbar-right">
-      
-      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+      <div id="live-dot" title="Connecting..." style="width:8px;height:8px;border-radius:50%;background:#F39C12;flex-shrink:0;transition:background 0.4s;animation:pulse 2s infinite;"></div>
+      <a href="Notification.html"><div class="notif-btn">🔔<div class="notif-dot"></div></div></a>
       <div style="padding:8px 12px; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:10px; display:flex; gap:10px; align-items:center; box-shadow:var(--card-shadow);">
         <div class="avatar" id="top-avatar" style="width:30px;height:30px;font-size:11px;">--</div>
         <span id="top-name" style="font-size:13px; font-weight:600; color:var(--text);">Loading...</span>
@@ -824,24 +830,19 @@
   <div class="greeting-banner">
     <div class="greeting-bg-blob"></div>
     <div class="greeting-text" style="position:relative;z-index:1;">
-      <div class="hello">Good morning 👋</div>
+      <div class="hello" id="greet-time">Good day 👋</div>
       <h2 id="greet-name">Welcome back! 👋</h2>
-      <p>You have 1 upcoming ride tomorrow. <span style="color:var(--accent); cursor:pointer; font-weight:600;">View details →</span></p>
+      <p id="greet-sub">Loading your rides...</p>
     </div>
     <div class="greeting-stats">
       <div class="greet-stat">
-        <div class="greet-stat-val" style="color:var(--accent);">12</div>
-        <div class="greet-stat-label">Total Rides</div>
+        <div class="greet-stat-val" id="stat-posted" style="color:var(--accent);">—</div>
+        <div class="greet-stat-label">Rides Posted</div>
       </div>
       <div class="greet-divider"></div>
       <div class="greet-stat">
-        <div class="greet-stat-val" style="color:var(--yellow);">4.8 ⭐</div>
-        <div class="greet-stat-label">Your Rating</div>
-      </div>
-      <div class="greet-divider"></div>
-      <div class="greet-stat">
-        <div class="greet-stat-val" style="color:var(--green);">₹2,140</div>
-        <div class="greet-stat-label">Saved</div>
+        <div class="greet-stat-val" id="stat-booked" style="color:var(--green);">—</div>
+        <div class="greet-stat-label">Rides Booked</div>
       </div>
     </div>
   </div>
@@ -1076,10 +1077,41 @@ async function fetchBookedRides() {
   }
 }
 
+// ================= REAL-TIME (Socket.IO) =================
+function connectSocket() {
+  const t = localStorage.getItem("token");
+  if (!t) return;
+
+  const socket = io("http://localhost:3000");
+
+  socket.on("connect", () => {
+    socket.emit("join", t);           // join own room on server
+    const dot = document.getElementById("live-dot");
+    if (dot) { dot.style.background = "#2ECC71"; dot.title = "Live"; }
+  });
+
+  socket.on("disconnect", () => {
+    const dot = document.getElementById("live-dot");
+    if (dot) { dot.style.background = "#E74C3C"; dot.title = "Disconnected"; }
+  });
+
+  // New booking request arrived → refresh posted rides table
+  socket.on("new-notification", () => {
+    fetchPostedRides();
+  });
+
+  // Booking was accepted/rejected → refresh both tables
+  socket.on("booking-updated", () => {
+    fetchPostedRides();
+    fetchBookedRides();
+  });
+}
+
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
   fetchPostedRides();
   fetchBookedRides();
+  connectSocket();
 });
 </script>
 </main>
@@ -1088,6 +1120,16 @@ document.addEventListener("DOMContentLoaded", () => {
   (async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
+
+    // ── Time-based greeting ─────────────────────────────────────
+    const hour = new Date().getHours();
+    const greetWord = hour < 12 ? "Good morning 🌅"
+                    : hour < 17 ? "Good afternoon ☀️"
+                    : "Good evening 🌙";
+    const greetTimeEl = document.getElementById("greet-time");
+    if (greetTimeEl) greetTimeEl.textContent = greetWord;
+
+    // ── User name ───────────────────────────────────────────────
     try {
       const res = await fetch("http://localhost:3000/api/v4/user/me", {
         headers: { Authorization: `Bearer ${token}` }
@@ -1095,14 +1137,46 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (data.success) {
         const u = data.user;
-        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        const initials  = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
         const firstName = u.name ? u.name.split(" ")[0] : "there";
-        document.getElementById("sb-avatar").textContent = initials;
-        document.getElementById("sb-name").textContent = u.name || "User";
-        document.getElementById("sb-role").textContent = u.role || "Passenger";
-        document.getElementById("top-avatar").textContent = initials;
-        document.getElementById("top-name").textContent = u.name || "User";
-        document.getElementById("greet-name").textContent = `Welcome back, ${firstName}! 👋`;
+        document.getElementById("sb-avatar").textContent   = initials;
+        document.getElementById("sb-name").textContent     = u.name || "User";
+        document.getElementById("sb-role").textContent     = u.role || "Passenger";
+        document.getElementById("top-avatar").textContent  = initials;
+        document.getElementById("top-name").textContent    = u.name || "User";
+        document.getElementById("greet-name").textContent  = `Welcome back, ${firstName}! 👋`;
+      }
+    } catch (e) { /* silent */ }
+
+    // ── Ride counts for banner stats ────────────────────────────
+    try {
+      const [postedRes, bookedRes] = await Promise.all([
+        fetch("http://localhost:3000/api/v4/bookings/my-rides", {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch("http://localhost:3000/api/v4/bookings/my-bookings", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+
+      const posted = await postedRes.json();
+      const booked = await bookedRes.json();
+
+      const postedCount = Array.isArray(posted) ? posted.length : 0;
+      const bookedCount = Array.isArray(booked) ? booked.length : 0;
+
+      document.getElementById("stat-posted").textContent = postedCount;
+      document.getElementById("stat-booked").textContent = bookedCount;
+
+      const sub = document.getElementById("greet-sub");
+      if (sub) {
+        if (bookedCount > 0) {
+          sub.innerHTML = `You have <strong>${bookedCount}</strong> ride${bookedCount > 1 ? 's' : ''} booked and <strong>${postedCount}</strong> posted.`;
+        } else if (postedCount > 0) {
+          sub.innerHTML = `You've posted <strong>${postedCount}</strong> ride${postedCount > 1 ? 's' : ''}. Waiting for passengers!`;
+        } else {
+          sub.textContent = "Post or book a ride to get started 🚗";
+        }
       }
     } catch (e) { /* silent */ }
   })();

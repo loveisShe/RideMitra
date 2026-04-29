@@ -80,15 +80,17 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
       await Notification.create({
         userId: booking.passengerId._id,
-        message: "Your booking has been accepted",
+        message: "Your booking has been accepted! 🎉",
         type: "accepted",
         bookingId: booking._id
       });
 
       if (booking.passengerId?._id && global.io) {
         global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
-          message: "Your booking has been accepted"
+          message: "Your booking has been accepted! 🎉"
         });
+        // Tell passenger's Dashboard to refresh
+        global.io.to(booking.passengerId._id.toString()).emit("booking-updated", { status: "accepted" });
       }
 
     } else if (action === "reject") {
@@ -97,15 +99,17 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
       await Notification.create({
         userId: booking.passengerId._id,
-        message: "Your booking has been rejected",
+        message: "Your booking has been rejected.",
         type: "rejected",
         bookingId: booking._id
       });
 
       if (booking.passengerId?._id && global.io) {
         global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
-          message: "Your booking has been rejected"
+          message: "Your booking has been rejected."
         });
+        // Tell passenger's Dashboard to refresh
+        global.io.to(booking.passengerId._id.toString()).emit("booking-updated", { status: "rejected" });
       }
 
     } else {
@@ -113,6 +117,17 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
     }
 
     await booking.save();
+
+    // Auto-mark the driver's "request" notification as read so it never reappears
+    await Notification.findOneAndUpdate(
+      { bookingId: booking._id, userId: req.user._id, type: "request" },
+      { read: true }
+    );
+
+    // Refresh driver's Dashboard too (seat count changed)
+    if (global.io) {
+      global.io.to(req.user._id.toString()).emit("booking-updated", { status: action });
+    }
 
     res.json({ message: "Updated successfully", booking });
 

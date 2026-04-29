@@ -665,10 +665,10 @@ async function loadNotifications() {
   }
 }
 
-// 🔹 ACCEPT / REJECT (WITH TOKEN) — removes card immediately
-async function handle(id, action, cardId) {
+// 🔹 ACCEPT / REJECT — removes card + marks notification as read
+async function handle(bookingId, action, notifId) {
   // Instantly hide the card with a fade-out
-  const card = document.getElementById(`notif-${cardId}`);
+  const card = document.getElementById(`notif-${notifId}`);
   if (card) {
     card.style.transition = "opacity 0.3s, transform 0.3s";
     card.style.opacity = "0";
@@ -677,7 +677,8 @@ async function handle(id, action, cardId) {
   }
 
   try {
-    await fetch(`http://localhost:3000/api/v4/bookings/handle-booking/${id}`, {
+    // Accept or reject the booking
+    await fetch(`http://localhost:3000/api/v4/bookings/handle-booking/${bookingId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -685,6 +686,13 @@ async function handle(id, action, cardId) {
       },
       body: JSON.stringify({ action })
     });
+
+    // Mark this notification as read so it never shows again on refresh
+    await fetch(`http://localhost:3000/api/v4/notifications/mark-read/${notifId}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
   } catch (err) {
     console.error("Handle error:", err);
   }
@@ -697,11 +705,12 @@ async function handle(id, action, cardId) {
         <div class="empty-state">
           <div class="icon">🔔</div>
           <h3>All caught up!</h3>
-          <p>No notifications yet. We'll let you know when something happens.</p>
+          <p>No new notifications. We'll let you know when something happens.</p>
         </div>`;
     }
   }, 350);
 }
+
 
 // initial load
 loadNotifications();
