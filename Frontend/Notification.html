@@ -482,7 +482,7 @@
   <div class="nav-section">
     <div class="nav-label">Main</div>
     <a href="Dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
-    <a href="find_ride.html" class="nav-item"><span class="icon">🗺️</span> Find a Ride <span class="nav-badge">3</span></a>
+    <a href="find_ride.html" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
     <a href="post_ride.html" class="nav-item"><span class="icon">📅</span> My Rides</a>
     <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
   </div>
@@ -578,7 +578,7 @@ socket.on("new-notification", (data) => {
 // 🔹 LOAD NOTIFICATIONS (TOKEN BASED)
 async function loadNotifications() {
   try {
-    const res = await fetch(`http://localhost:3000/api/notifications`, {
+    const res = await fetch(`http://localhost:3000/api/v4/notifications`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -677,7 +677,7 @@ async function handle(id, action, cardId) {
   }
 
   try {
-    await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
+    await fetch(`http://localhost:3000/api/v4/bookings/handle-booking/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

@@ -1,9 +1,15 @@
 import User from "../models/User.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // ✅ Only allow users to update their own profile
+        if (id !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: "Forbidden: You can only update your own profile" });
+        }
+
         let updates = req.body;
 
         if (updates.password) {

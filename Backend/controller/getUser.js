@@ -2,7 +2,7 @@ import User from "../models/User.js";
 
 export const getUserById = async (req, res) => {
     try {
-        const id = req.params.id || req.user.id;
+        const id = req.params.id || req.user._id;  // ✅ Fixed: was req.user.id (undefined)
         const user = await User.findById(id).select("-password");
 
         if (!user) {

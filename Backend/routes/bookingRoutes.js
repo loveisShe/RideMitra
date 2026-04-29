@@ -6,7 +6,7 @@ import User from "../models/User.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
-const io = global.io;
+// global.io is used inline below so it's always read after server.js sets it
 
 // ================= REQUEST BOOKING =================
 router.post("/request-booking", authMiddleware, async (req, res) => {
@@ -34,12 +34,11 @@ router.post("/request-booking", authMiddleware, async (req, res) => {
       userId: ride.userId,
       message: `${requesterName} requested a ride`,
       type: "request",
-      bookingId: booking._id,
-      requesterName
+      bookingId: booking._id
     });
 
-    if (ride.userId && io) {
-      io.to(ride.userId.toString()).emit("new-notification", {
+    if (ride.userId && global.io) {
+      global.io.to(ride.userId.toString()).emit("new-notification", {
         message: `${requesterName} requested a ride`
       });
     }
@@ -63,6 +62,12 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
     const ride = await Ride.findById(booking.rideId);
     if (!ride) return res.status(404).json({ message: "Ride not found" });
 
+    // ✅ Only the driver who posted the ride can accept/reject bookings
+    if (ride.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Forbidden: You are not the driver of this ride" });
+    }
+
+
     if (action === "accept") {
       if (ride.seats < booking.seatsRequested) {
         return res.status(400).json({ message: "Not enough seats" });
@@ -80,8 +85,8 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
         bookingId: booking._id
       });
 
-      if (booking.passengerId?._id && io) {
-        io.to(booking.passengerId._id.toString()).emit("new-notification", {
+      if (booking.passengerId?._id && global.io) {
+        global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
           message: "Your booking has been accepted"
         });
       }
@@ -97,8 +102,8 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
         bookingId: booking._id
       });
 
-      if (booking.passengerId?._id && io) {
-        io.to(booking.passengerId._id.toString()).emit("new-notification", {
+      if (booking.passengerId?._id && global.io) {
+        global.io.to(booking.passengerId._id.toString()).emit("new-notification", {
           message: "Your booking has been rejected"
         });
       }
@@ -119,13 +124,12 @@ router.patch("/handle-booking/:id", authMiddleware, async (req, res) => {
 
 // ================= MY POSTED RIDES =================
 router.get("/my-rides", authMiddleware, async (req, res) => {
-    console.log("Logged user:", req.user._id);  // 👈 ADD THIS
-
-    const rides = await Ride.find({ userId: req.user._id });
-
-    console.log("Rides found:", rides); // 👈 ADD THIS
-
-    res.json(rides);
+    try {
+        const rides = await Ride.find({ userId: req.user._id });
+        res.json(rides);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching rides" });
+    }
 });
 
 // ================= MY BOOKINGS =================

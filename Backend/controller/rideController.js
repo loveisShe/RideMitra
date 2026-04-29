@@ -14,8 +14,15 @@ export const postRide = async (req, res) => {
             amenities
         } = req.body;
 
+        // ✅ Validate required fields before hitting the DB
+        if (!pickup || !destination || !date || !time || !fare || !seats) {
+            return res.status(400).json({
+                message: "Missing required fields: pickup, destination, date, time, fare, seats"
+            });
+        }
+
         const newRide = await Ride.create({
-            userId: req.user._id, 
+            userId: req.user._id,
             pickup,
             destination,
             date,

@@ -1332,9 +1332,11 @@
 
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <div class="nav-item active"><span class="icon">📊</span> Dashboard</div>
+            <a href="Dashboard.html">
+                <div class="nav-item"><span class="icon">📊</span> Dashboard</div>
+            </a>
             <a href="find_ride.html">
-                <div class="nav-item"><span class="icon">🗺️</span> Find a Ride <span class="badge">3</span></div>
+                <div class="nav-item"><span class="icon">🗺️</span> Find a Ride</div>
             </a>
             <a href="post_ride.html">
                 <div class="nav-item"><span class="icon">📅</span> My Rides</div>
@@ -1344,15 +1346,18 @@
 
         <div class="nav-section">
             <div class="nav-label">Account</div>
-            <div class="nav-item"><span class="icon">🔔</span> Notifications</div>
+            <a href="Notification.html">
+                <div class="nav-item"><span class="icon">🔔</span> Notifications</div>
+            </a>
             <a href="AccountSettings.html">
-                <div class="nav-item"><span class="icon">⚙️</span> Settings</div>
+                <div class="nav-item active"><span class="icon">⚙️</span> Settings</div>
             </a>
             <a href="login.html">
-                <div class="nav-item"><span class="icon">🔐</span>Logout</div>
+                <div class="nav-item"><span class="icon">🔐</span> Logout</div>
             </a>
 
         </div>
+
 
         <div class="sidebar-bottom">
             <div class="user-card">
@@ -1501,6 +1506,8 @@
 
         <script>
  let isEditing = false;
+    let currentUserId = null;  // ✅ Store user ID after /me loads
+    const token = localStorage.getItem("token");  // ✅ Get token for Authorization header
     const editBtn = document.getElementById("editBtn");
     const deleteBtn = document.querySelector(".btn-delete");
     const inputs = document.querySelectorAll(".ride-input:not([type='email'])");
@@ -1509,12 +1516,13 @@
         try {
             const response = await fetch('http://localhost:3000/api/v4/user/me', {
                 method: 'GET',
-                credentials: 'include'
+                headers: { Authorization: `Bearer ${token}` }
             });
             const data = await response.json();
 
             if (data.success) {
                 const user = data.user;
+                currentUserId = user._id;  // ✅ Save for update/delete
                 document.querySelector('input[placeholder="Your full name"]').value = user.name || "";
                 document.querySelector('input[type="tel"]').value = user.phone || "";
                 document.querySelector('input[type="email"]').value = user.email || "";
@@ -1545,17 +1553,19 @@
             const cityInput = document.querySelector('input[placeholder="City"]') || document.querySelectorAll('.ride-input')[3];
             
             const updatedData = {
-                fullName: document.querySelector('input[placeholder="Your full name"]').value,
-                phoneNumber: document.querySelector('input[type="tel"]').value,
+                name: document.querySelector('input[placeholder="Your full name"]').value,
+                phone: document.querySelector('input[type="tel"]').value,
                 city: cityInput.value,
                 bio: document.querySelector('textarea').value
             };
 
             try {
-                const response = await fetch('http://localhost:3000/api/v4/user/update-profile', {
+                const response = await fetch(`http://localhost:3000/api/v4/user/update-profile/${currentUserId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
                     body: JSON.stringify(updatedData)
                 });
 
@@ -1567,8 +1577,8 @@
                     inputs.forEach(input => input.disabled = true);
                     editBtn.innerHTML = "✏️ Edit";
                     // Refresh labels
-                    document.querySelector('.ov-name').innerText = updatedData.fullName;
-                    document.querySelectorAll('.user-name').forEach(el => el.innerText = updatedData.fullName);
+                    document.querySelector('.ov-name').innerText = updatedData.name;
+                    document.querySelectorAll('.user-name').forEach(el => el.innerText = updatedData.name);
                 } else {
                     alert("Update failed: " + result.message);
                 }
@@ -1582,9 +1592,9 @@
     deleteBtn.addEventListener("click", async () => {
         if (confirm("Permanently delete your Ride मित्र account?")) {
             try {
-                const response = await fetch('http://localhost:3000/api/v4/user/delete-user', {
+                const response = await fetch(`http://localhost:3000/api/v4/user/delete-user/${currentUserId}`, {
                     method: 'DELETE',
-                    credentials: 'include'
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 const result = await response.json();
                 if (result.success) {

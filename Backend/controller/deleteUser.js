@@ -2,7 +2,13 @@ import User from "../models/User.js";
 
 export const deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
+    const { id } = req.params;
+
+        // ✅ Only allow users to delete their own account
+        if (id !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: "Forbidden: You can only delete your own account" });
+        }
+
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) {

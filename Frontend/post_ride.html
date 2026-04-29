@@ -386,28 +386,28 @@
       <div class="sb-logo-icon">🚗</div>
       <div class="sb-logo-text">Ride&nbsp;<em>मित्र</em></div>
     </div>
-    <button class="sb-post">＋ &nbsp;Post a Ride</button>
+    <a href="post_ride.html" class="sb-post" style="text-decoration:none">＋ &nbsp;Post a Ride</a>
     <div class="sb-sec">
       <div class="sb-lbl">Main</div>
       <a class="sb-item" href="Dashboard.html">📊 Dashboard</a>
-      <a class="sb-item" href="find_ride.html">🔍 Find a Ride <span class="badge">3</span></a>
-      <a class="sb-item active" href="#">🚗 My Rides</a>
+      <a class="sb-item" href="find_ride.html">🔍 Find a Ride</a>
+      <a class="sb-item active" href="post_ride.html">🚗 My Rides</a>
       <a class="sb-item" href="#">💳 Payments</a>
     </div>
     <div class="sb-sec">
       <div class="sb-lbl">Account</div>
-      <a class="sb-item" href="#">👤 Profile</a>
+      <a class="sb-item" href="AccountSettings.html">👤 Profile</a>
       <a class="sb-item" href="#">⭐ My Reviews</a>
-      <a class="sb-item" href="#">🔔 Notifications</a>
-      <a class="sb-item" href="#">⚙️ Settings</a>
+      <a class="sb-item" href="Notification.html">🔔 Notifications</a>
+      <a class="sb-item" href="AccountSettings.html">⚙️ Settings</a>
       <a class="sb-item" href="login.html">🔐 Logout</a>
     </div>
     <div class="sb-foot">
       <div class="user-chip">
-        <div class="av">JD</div>
+        <div class="av" id="sb-avatar">--</div>
         <div>
-          <div class="u-name">John Doe</div>
-          <div class="u-role">Driver</div>
+          <div class="u-name" id="sb-name">Loading...</div>
+          <div class="u-role" id="sb-role">Passenger</div>
         </div>
         <div class="more">···</div>
       </div>
@@ -1110,6 +1110,28 @@ async function postRide() {
     sync(); // Run once on load to populate defaults
     syncRange(document.getElementById('priceRange'));
 };
+</script>
+
+
+<script>
+  // ── Dynamic sidebar user info ──
+  (async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const u = data.user;
+        document.getElementById("sb-name").textContent = u.name || "User";
+        document.getElementById("sb-role").textContent = u.role || "Passenger";
+        const initials = u.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        document.getElementById("sb-avatar").textContent = initials;
+      }
+    } catch (e) { /* silent */ }
+  })();
 </script>
 
 </body>

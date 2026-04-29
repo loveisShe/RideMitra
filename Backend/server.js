@@ -21,14 +21,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // ✅ Middleware
+// ✅ CORS origins from env var (comma-separated) or fallback to localhost
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+  : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500"];
+
 app.use(cors({
-    origin: [
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000", 
-        "http://localhost:5500", 
-        "http://127.0.0.1:5500"
-    ],
-    credentials: true 
+    origin: allowedOrigins,
+    credentials: true
 }));
 
 app.use(express.json());
@@ -41,9 +41,9 @@ app.use(express.static("public"));
 
 // ✅ Routes
 app.use("/api/v4/user", userRoutes);
-app.use("/api/rides", rideRouter);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/notifications", notificationRoutes);
+app.use("/api/v4/rides", rideRouter);
+app.use("/api/v4/bookings", bookingRoutes);
+app.use("/api/v4/notifications", notificationRoutes);
 
 // ✅ Frontend route
 app.get("/", (req, res) => {
@@ -86,12 +86,7 @@ const startServer = async () => {
 
     const io = new Server(server, {
       cors: {
-        origin: [
-          "http://localhost:3000", 
-          "http://127.0.0.1:3000", 
-          "http://localhost:5500", 
-          "http://127.0.0.1:5500"
-        ],
+        origin: allowedOrigins,
         credentials: true
       }
     });
