@@ -3,132 +3,549 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notifications – Ride Mitra</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
+<title>Notifications – Ride मित्र</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #FAFAF8;
-  --white: #fff;
-  --orange: #FF8C00;
-  --navy: #1A1A2E;
-  --muted: #6B7280;
-  --border: #E8E6DF;
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  margin:0;
-  display:flex;
-  font-family:'Plus Jakarta Sans', sans-serif;
-  background:var(--bg);
-}
+  :root {
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --surface2: #F5F3EE;
+    --border: #E8E5DF;
+    --accent: #FF8C00;
+    --green: #2ECC71;
+    --green-light: #E8FAF1;
+    --red: #E74C3C;
+    --red-light: #FEF2F2;
+    --navy: #1A1A2E;
+    --muted: #8A8A9A;
+    --card-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  }
 
-/* SIDEBAR (same as yours) */
-#sidebar {
-  width:240px;
-  background:#fff;
-  border-right:1px solid var(--border);
-  padding:20px;
-}
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    display: flex;
+    min-height: 100vh;
+  }
 
-.logo {
-  font-weight:800;
-  font-size:20px;
-  margin-bottom:20px;
-}
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    box-shadow: 2px 0 24px rgba(0,0,0,0.04);
+  }
 
-.nav-item {
-  display:block;
-  padding:10px;
-  margin-bottom:8px;
-  border-radius:10px;
-  text-decoration:none;
-  color:var(--muted);
-}
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px 32px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--navy);
+    letter-spacing: -0.3px;
+  }
 
-.nav-item.active {
-  background:#FFF3E0;
-  color:var(--orange);
-}
+  .logo .hindi {
+    font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
+    font-weight: 900;
+    color: var(--accent);
+  }
 
-/* MAIN */
-#main {
-  flex:1;
-  padding:30px;
-}
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(255,140,0,0.3);
+    flex-shrink: 0;
+  }
 
-.title {
-  font-size:24px;
-  font-weight:800;
-  margin-bottom:20px;
-}
+  .sidebar-cta { margin: 0 12px 24px; }
 
-/* NOTIFICATION CARD */
-.notification {
-  background:var(--white);
-  border:1px solid var(--border);
-  padding:16px;
-  border-radius:14px;
-  margin-bottom:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 20px rgba(255,140,0,0.35);
+    letter-spacing: 0.3px;
+    text-decoration: none;
+  }
 
-.notification p {
-  margin:0;
-  font-size:14px;
-}
+  .cta-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .cta-btn:active { transform: translateY(0); }
 
-.actions button {
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  cursor:pointer;
-  margin-left:6px;
-}
+  .nav-section { padding: 0 12px; margin-bottom: 24px; }
 
-.accept {
-  background:#2ECC71;
-  color:white;
-}
+  .nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 12px 10px;
+  }
 
-.reject {
-  background:#EF4444;
-  color:white;
-}
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
 
-.status {
-  font-size:12px;
-  color:var(--muted);
-}
+  .nav-item:hover { background: var(--surface2); color: var(--navy); }
+
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(255,140,0,0.12), rgba(255,140,0,0.05));
+    color: var(--accent);
+    border: 1px solid rgba(255,140,0,0.2);
+    font-weight: 600;
+  }
+
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-bottom { margin-top: auto; padding: 0 12px; }
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+  }
+
+  .avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 32px;
+    max-width: calc(100vw - 240px);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .page-title {
+    font-family: 'Rozha One', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--navy);
+    letter-spacing: 0.3px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .breadcrumb a { color: var(--muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb span { color: var(--accent); font-weight: 600; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .notif-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    font-size: 16px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .notif-dot {
+    position: absolute; top: 8px; right: 8px;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 1px solid var(--bg);
+  }
+
+  .user-pill {
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+  }
+
+  .user-pill .av {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+
+  .user-pill span { font-size: 13px; font-weight: 600; color: var(--navy); }
+
+  /* ── NOTIFICATION CARDS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .clear-btn {
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 0;
+  }
+
+  .clear-btn:hover { color: var(--accent); }
+
+  .notification {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .notification::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--accent), #FFB347);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+  }
+
+  .notification.unread {
+    background: #FFFBF5;
+    border-color: rgba(255,140,0,0.2);
+  }
+
+  .notif-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: #FFF3E0;
+  }
+
+  .notif-body { flex: 1; min-width: 0; }
+
+  .notif-message {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .notif-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .notif-type {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: capitalize;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .actions button {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+
+  .accept {
+    background: linear-gradient(135deg, var(--green), #27AE60);
+    color: white;
+    box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+  }
+
+  .accept:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(46,204,113,0.4); }
+
+  .reject {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+  }
+
+  .reject:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239,68,68,0.4); }
+
+  .status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 10px;
+    text-transform: capitalize;
+  }
+
+  .status-badge.accepted {
+    background: var(--green-light);
+    color: #1DAF5F;
+    border: 1px solid rgba(46,204,113,0.25);
+  }
+
+  .status-badge.rejected {
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 72px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, #eee 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 10px;
+    height: 14px;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--card-shadow);
+  }
 </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
-<div id="sidebar">
-  <div class="logo">🚗 Ride मित्र</div>
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🚗</div>
+    Ride <span class="hindi">मित्र</span>
+  </div>
 
-  <a href="Dashboard.html" class="nav-item">📊 Dashboard</a>
-  <a href="find_ride.html" class="nav-item">🗺️ Find a Ride</a>
-  <a href="post_ride.html" class="nav-item">📅 My Rides</a>
-  <a href="#" class="nav-item">💰 Payments</a>
+  <div class="sidebar-cta">
+    <a href="post_ride.html" class="cta-btn">＋ &nbsp;Post a Ride</a>
+  </div>
 
-  <hr>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <a href="Dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+    <a href="find_ride.html" class="nav-item"><span class="icon">🗺️</span> Find a Ride <span class="nav-badge">3</span></a>
+    <a href="post_ride.html" class="nav-item"><span class="icon">📅</span> My Rides</a>
+    <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
+  </div>
 
-  <a href="notifications.html" class="nav-item active">🔔 Notifications</a>
-  <a href="AccountSettings.html" class="nav-item">⚙️ Settings</a>
-  <a href="login.html" class="nav-item">🔐 Logout</a>
-</div>
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a href="Notification.html" class="nav-item active"><span class="icon">🔔</span> Notifications</a>
+    <a href="AccountSettings.html" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+    <a href="login.html" class="nav-item"><span class="icon">🔐</span> Logout</a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">SG</div>
+      <div>
+        <div class="user-name">Shubhi Govil</div>
+        <div class="user-role">Passenger</div>
+      </div>
+      <span style="margin-left:auto; color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
+    </div>
+  </div>
+</aside>
 
 <!-- MAIN -->
-<div id="main">
-  <div class="title">🔔 Notifications</div>
+<div class="main">
 
-  <div id="notifications"></div>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title">Notifications 🔔</div>
+      <div class="breadcrumb">Home / <a href="Dashboard.html">Dashboard</a> / <span>Notifications</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+      <div class="user-pill">
+        <div class="av">SG</div>
+        <span>Shubhi Govil</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS LIST -->
+  <div class="section-header">
+    <div class="section-title">Recent Activity</div>
+    <button class="clear-btn" onclick="loadNotifications()">↻ Refresh</button>
+  </div>
+
+  <div id="notifications">
+    <!-- skeleton loaders while fetching -->
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:60%"></div>
+      <div class="skeleton" style="width:35%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:75%"></div>
+      <div class="skeleton" style="width:40%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:50%"></div>
+      <div class="skeleton" style="width:30%"></div>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -149,8 +566,7 @@ const socket = io("http://localhost:3000");
 // ✅ CONNECT FIRST THEN JOIN (SEND TOKEN)
 socket.on("connect", () => {
   console.log("Socket connected:", socket.id);
-
-  socket.emit("join", token); // 🔥 send token instead of userId
+  socket.emit("join", token);
 });
 
 // ✅ REAL-TIME LISTENER
@@ -164,60 +580,127 @@ async function loadNotifications() {
   try {
     const res = await fetch(`http://localhost:3000/api/notifications`, {
       headers: {
-        Authorization: `Bearer ${token}` // 🔥 send token
+        Authorization: `Bearer ${token}`
       }
     });
 
     const data = await res.json();
-
     console.log("Fetched notifications:", data);
 
     const container = document.getElementById("notifications");
 
     if (!data.length) {
-      container.innerHTML = "<p>No notifications</p>";
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔔</div>
+          <h3>All caught up!</h3>
+          <p>No notifications yet. We'll let you know when something happens.</p>
+        </div>`;
       return;
     }
 
-    container.innerHTML = data.map(n => `
-      <div class="notification">
-        <div>
-          <p>${n.message}</p>
-          <small>From: ${n.requesterName || "Unknown user"}</small>
-          <small>${n.type}</small>
-        </div>
+    console.log("📦 Raw notification fields (first item):", data[0]);
 
+    container.innerHTML = data.map(n => {
+      // Flatten nested objects if backend sends booking/ride/user as sub-objects
+      const booking  = n.booking  || n.bookingDetails || {};
+      const ride     = n.ride     || n.rideDetails    || booking.ride || {};
+      const requester = n.requester || n.user         || booking.user || {};
+
+      const name    = n.requesterName   || n.senderName       || n.userName
+                   || requester.name    || requester.fullName  || requester.username
+                   || "—";
+
+      const seats   = n.seats           || n.seatsRequested    || n.requestedSeats
+                   || booking.seats     || booking.seatsBooked || booking.requestedSeats
+                   || "—";
+
+      const price   = n.totalPrice      || n.price             || n.totalAmount
+                   || booking.totalPrice|| booking.price       || booking.amount
+                   || null;
+
+      const pickup  = n.pickup          || n.from              || n.source
+                   || ride.pickup       || ride.from           || ride.source
+                   || booking.pickup    || null;
+
+      const dropoff = n.dropoff         || n.to                || n.destination
+                   || ride.dropoff      || ride.to             || ride.destination
+                   || booking.dropoff   || null;
+      const isPending = n.type === "request" && n.bookingId && (n.status === "pending" || !n.status);
+
+      return `
+      <div class="notification ${!n.read ? 'unread' : ''}" id="notif-${n.bookingId || n._id}">
+        <div class="notif-icon">${n.type === 'request' ? '🚗' : n.type === 'accepted' ? '✅' : n.type === 'rejected' ? '❌' : '🔔'}</div>
+        <div class="notif-body">
+          <div class="notif-message">${n.message}</div>
+          <div class="notif-meta">
+            <span>👤 <strong>${name}</strong></span>
+            ${pickup && dropoff ? `<span>📍 ${pickup} → ${dropoff}</span>` : ''}
+            <span>💺 ${seats} seat${seats > 1 ? 's' : ''}</span>
+            ${price ? `<span>💰 ₹${price} total</span>` : ''}
+            <span class="notif-type">${n.type}</span>
+          </div>
+        </div>
         ${
-  n.type === "request" && n.bookingId
-  ? (n.status === "pending" || !n.status)
-    ? `<div class="actions">
-        <button class="accept" onclick="handle('${n.bookingId}','accept')">Accept</button>
-        <button class="reject" onclick="handle('${n.bookingId}','reject')">Reject</button>
-       </div>`
-    : `<span class="status">${n.status}</span>`
-  : ""
-}
-      </div>
-    `).join('');
+          isPending
+          ? `<div class="actions">
+              <button class="accept" onclick="handle('${n.bookingId}','accept','${n.bookingId || n._id}')">✓ Accept</button>
+              <button class="reject" onclick="handle('${n.bookingId}','reject','${n.bookingId || n._id}')">✕ Reject</button>
+             </div>`
+          : n.type === "request" && n.bookingId
+            ? `<span class="status-badge ${n.status}">${n.status}</span>`
+            : ""
+        }
+      </div>`;
+    }).join('');
 
   } catch (err) {
     console.error(err);
+    document.getElementById("notifications").innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⚠️</div>
+        <h3>Connection Error</h3>
+        <p>Make sure your server is running on port 3000.</p>
+      </div>`;
   }
 }
 
+// 🔹 ACCEPT / REJECT (WITH TOKEN) — removes card immediately
+async function handle(id, action, cardId) {
+  // Instantly hide the card with a fade-out
+  const card = document.getElementById(`notif-${cardId}`);
+  if (card) {
+    card.style.transition = "opacity 0.3s, transform 0.3s";
+    card.style.opacity = "0";
+    card.style.transform = "translateX(40px)";
+    setTimeout(() => card.remove(), 300);
+  }
 
-// 🔹 ACCEPT / REJECT (WITH TOKEN)
-async function handle(id, action) {
-  await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
-    method: "PATCH",
-    headers: { 
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}` // 🔥 send token
-    },
-    body: JSON.stringify({ action })
-  });
+  try {
+    await fetch(`http://localhost:3000/api/bookings/handle-booking/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ action })
+    });
+  } catch (err) {
+    console.error("Handle error:", err);
+  }
 
-  loadNotifications();
+  // If no notifications left, show empty state
+  setTimeout(() => {
+    const remaining = document.querySelectorAll(".notification");
+    if (remaining.length === 0) {
+      document.getElementById("notifications").innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔔</div>
+          <h3>All caught up!</h3>
+          <p>No notifications yet. We'll let you know when something happens.</p>
+        </div>`;
+    }
+  }, 350);
 }
 
 // initial load
