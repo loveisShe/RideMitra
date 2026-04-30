@@ -1327,18 +1327,18 @@
         </div>
 
         <div class="sidebar-cta">
-            <button class="cta-btn-sidebar"><a href="post_ride.html">＋ &nbsp;Post a Ride</a></button>
+            <button class="cta-btn-sidebar"><a href="/post-ride">＋ &nbsp;Post a Ride</a></button>
         </div>
 
         <div class="nav-section">
             <div class="nav-label">Main</div>
-            <a href="Dashboard.html">
+            <a href="/dashboard">
                 <div class="nav-item"><span class="icon">📊</span> Dashboard</div>
             </a>
-            <a href="find_ride.html">
+            <a href="/find-ride">
                 <div class="nav-item"><span class="icon">🗺️</span> Find a Ride</div>
             </a>
-            <a href="post_ride.html">
+            <a href="/post-ride">
                 <div class="nav-item"><span class="icon">📅</span> My Rides</div>
             </a>
             <div class="nav-item"><span class="icon">💰</span> Payments</div>
@@ -1346,13 +1346,13 @@
 
         <div class="nav-section">
             <div class="nav-label">Account</div>
-            <a href="Notification.html">
+            <a href="/notifications">
                 <div class="nav-item"><span class="icon">🔔</span> Notifications</div>
             </a>
-            <a href="AccountSettings.html">
+            <a href="/account-settings">
                 <div class="nav-item active"><span class="icon">⚙️</span> Settings</div>
             </a>
-            <a href="login.html">
+            <a href="/">
                 <div class="nav-item"><span class="icon">🔐</span> Logout</div>
             </a>
 
@@ -1537,7 +1537,7 @@
                 const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
                 document.querySelectorAll('.avatar, .profile-avatar-xl').forEach(el => el.innerText = initials);
             } else {
-                window.location.href = "login.html";
+                window.location.href = "/";
             }
         } catch (err) {
             console.error("Failed to load profile:", err);
@@ -1598,7 +1598,7 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    window.location.href = "login.html";
+                    window.location.href = "/";
                 }
             } catch (err) {
                 console.error("Delete failed:", err);

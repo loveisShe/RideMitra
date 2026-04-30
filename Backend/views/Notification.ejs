@@ -476,22 +476,22 @@
   </div>
 
   <div class="sidebar-cta">
-    <a href="post_ride.html" class="cta-btn">＋ &nbsp;Post a Ride</a>
+    <a href="/post-ride" class="cta-btn">＋ &nbsp;Post a Ride</a>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Main</div>
-    <a href="Dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
-    <a href="find_ride.html" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
-    <a href="post_ride.html" class="nav-item"><span class="icon">📅</span> My Rides</a>
+    <a href="/dashboard" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+    <a href="/find-ride" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
+    <a href="/post-ride" class="nav-item"><span class="icon">📅</span> My Rides</a>
     <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Account</div>
-    <a href="Notification.html" class="nav-item active"><span class="icon">🔔</span> Notifications</a>
-    <a href="AccountSettings.html" class="nav-item"><span class="icon">⚙️</span> Settings</a>
-    <a href="login.html" class="nav-item"><span class="icon">🔐</span> Logout</a>
+    <a href="/notifications" class="nav-item active"><span class="icon">🔔</span> Notifications</a>
+    <a href="/account-settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+    <a href="/" class="nav-item"><span class="icon">🔐</span> Logout</a>
   </div>
 
   <div class="sidebar-bottom">
@@ -513,7 +513,7 @@
   <div class="topbar">
     <div>
       <div class="page-title">Notifications 🔔</div>
-      <div class="breadcrumb">Home / <a href="Dashboard.html">Dashboard</a> / <span>Notifications</span></div>
+      <div class="breadcrumb">Home / <a href="/dashboard">Dashboard</a> / <span>Notifications</span></div>
     </div>
     <div class="topbar-right">
       <div class="notif-btn">🔔<div class="notif-dot"></div></div>
@@ -556,7 +556,7 @@ const token = localStorage.getItem("token");
 // 🔐 CHECK LOGIN
 if (!token) {
   alert("User not logged in");
-  window.location.href = "login.html";
+  window.location.href = "/";
 }
 
 console.log("TOKEN:", token);

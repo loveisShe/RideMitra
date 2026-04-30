@@ -9,16 +9,19 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-import connectDB from "./database/dbConnection.js";
-import userRoutes from "./routes/userAuthRoute.js";
-import rideRouter from "./routes/rideRoute.js";
-import bookingRoutes from "./routes/bookingRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js";
+import connectDB from "./src/database/dbConnection.js";
+import userRoutes from "./src/routes/userAuthRoute.js";
+import rideRouter from "./src/routes/rideRoute.js";
+import bookingRoutes from "./src/routes/bookingRoutes.js";
+import notificationRoutes from "./src/routes/notificationRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",")
@@ -29,8 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, "../Frontend")));
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 // ================= ROUTES =================
 app.use("/api/v4/user", userRoutes);
@@ -39,10 +41,12 @@ app.use("/api/v4/bookings", bookingRoutes);
 app.use("/api/v4/notifications", notificationRoutes);
 
 // ================= FRONTEND PAGES =================
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../Frontend/login.html")));
-app.get("/find-ride", (req, res) => res.sendFile(path.join(__dirname, "../Frontend/find_ride.html")));
-app.get("/post-ride", (req, res) => res.sendFile(path.join(__dirname, "../Frontend/post_ride.html")));
-app.get("/dashboard", (req, res) => res.sendFile(path.join(__dirname, "../Frontend/Dashboard.html")));
+app.get("/", (req, res) => res.render("login"));
+app.get("/find-ride", (req, res) => res.render("find_ride"));
+app.get("/post-ride", (req, res) => res.render("post_ride"));
+app.get("/dashboard", (req, res) => res.render("Dashboard"));
+app.get("/notifications", (req, res) => res.render("Notification"));
+app.get("/account-settings", (req, res) => res.render("AccountSettings"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
