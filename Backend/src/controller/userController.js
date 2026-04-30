@@ -1,32 +1,4 @@
-import { registerUserService, loginUserService, googleLoginService, getUserService, updateUserService, deleteUserService, generateToken } from "../services/userService.js";
-
-const sendTokenResponse = (user, statusCode, res, message) => {
-    const token = generateToken(user._id);
-
-    res.status(statusCode)
-        .cookie("token", token, {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-            secure: false,
-            sameSite: "Lax",
-            path: "/"
-        })
-        .json({
-            success: true,
-            message,
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                profilePicture: user.profilePicture,
-                phone: user.phone || "",
-                city: user.city || "",
-                bio: user.bio || ""
-            }
-        });
-};
+import { registerUserService, loginUserService, googleLoginService, getUserService, updateUserService, deleteUserService, sendTokenResponse } from "../services/userService.js";
 
 // ================= REGISTER =================
 export const registerUser = async (req, res) => {
