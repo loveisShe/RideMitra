@@ -33,7 +33,7 @@ export const googleLogin = async (req, res) => {
 // ================= GET USER =================
 export const getUserById = async (req, res) => {
     try {
-        const id = req.params.id || req.user._id;
+        const id = req.params.id || req.user.id;
         const user = await getUserService(id);
         res.status(200).json({ success: true, user });
     } catch (err) {
@@ -44,7 +44,12 @@ export const getUserById = async (req, res) => {
 // ================= UPDATE USER =================
 export const updateUser = async (req, res) => {
     try {
-        const user = await updateUserService(req.user._id, req.params.id, { ...req.body });
+        const updates = { ...req.body };
+        if (req.file?.path) {
+            updates.profilePicture = req.file.path;   
+        }
+
+        const user = await updateUserService(req.user.id, req.params.id, updates);
         res.status(200).json({ success: true, message: "Profile updated successfully", user });
     } catch (err) {
         res.status(err.status || 500).json({ success: false, message: err.message });
@@ -54,7 +59,7 @@ export const updateUser = async (req, res) => {
 // ================= DELETE USER =================
 export const deleteUser = async (req, res) => {
     try {
-        await deleteUserService(req.user._id, req.params.id);
+        await deleteUserService(req.user.id, req.params.id);
         res.status(200).json({ success: true, message: "Account deleted successfully" });
     } catch (err) {
         res.status(err.status || 500).json({ success: false, message: err.message });

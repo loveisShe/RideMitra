@@ -4,9 +4,9 @@ import { requestBookingService, handleBookingService, getMyRidesService, getMyRi
 export const requestBooking = async (req, res) => {
     try {
         const booking = await requestBookingService({
-            rideId: req.body.rideId,
+            rideId:         req.body.rideId,
             seatsRequested: req.body.seatsRequested,
-            userId: req.user._id
+            userId:         req.user.id             
         });
         res.json({ message: "Request sent to driver", booking });
     } catch (err) {
@@ -19,8 +19,8 @@ export const handleBooking = async (req, res) => {
     try {
         const booking = await handleBookingService({
             bookingId: req.params.id,
-            action: req.body.action,
-            driverId: req.user._id
+            action:    req.body.action,
+            driverId:  req.user.id                  
         });
         res.json({ message: "Updated successfully", booking });
     } catch (err) {
@@ -28,10 +28,10 @@ export const handleBooking = async (req, res) => {
     }
 };
 
-// ================= MY RIDES =================
+// ================= MY RIDES (as driver) =================
 export const getMyRides = async (req, res) => {
     try {
-        const rides = await getMyRidesService(req.user._id);
+        const rides = await getMyRidesService(req.user.id); // ✅
         res.json(rides);
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
@@ -41,17 +41,17 @@ export const getMyRides = async (req, res) => {
 // ================= MY RIDES WITH PASSENGERS =================
 export const getMyRidesWithPassengers = async (req, res) => {
     try {
-        const rides = await getMyRidesWithPassengersService(req.user._id);
+        const rides = await getMyRidesWithPassengersService(req.user.id); 
         res.json(rides);
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
 };
 
-// ================= MY BOOKINGS =================
+// ================= MY BOOKINGS (as passenger) =================
 export const getMyBookings = async (req, res) => {
     try {
-        const bookings = await getMyBookingsService(req.user._id);
+        const bookings = await getMyBookingsService(req.user.id); 
         res.json(bookings);
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });

@@ -1,18 +1,26 @@
-import Notification from "../models/Notification.js";
+import prisma from "../Lib/prismaClient.js";
 
 // ================= GET NOTIFICATIONS =================
 export const getNotificationsService = async (userId) => {
-    return await Notification
-        .find({ userId, read: false })
-        .sort({ createdAt: -1 });
+    return await prisma.notification.findMany({
+        where:   { userId: parseInt(userId), read: false },
+        orderBy: { createdAt: "desc" },
+        include: { booking: { select: { id: true, status: true } } }
+    });
 };
 
 // ================= MARK ONE AS READ =================
 export const markOneReadService = async (notifId) => {
-    await Notification.findByIdAndUpdate(notifId, { read: true });
+    await prisma.notification.update({
+        where: { id: parseInt(notifId) },
+        data:  { read: true }
+    });
 };
 
 // ================= MARK ALL AS READ =================
 export const markAllReadService = async (userId) => {
-    await Notification.updateMany({ userId, read: false }, { read: true });
+    await prisma.notification.updateMany({
+        where: { userId: parseInt(userId), read: false },
+        data:  { read: true }
+    });
 };

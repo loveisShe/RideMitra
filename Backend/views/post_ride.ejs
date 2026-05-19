@@ -134,8 +134,14 @@
       text-decoration: none;
     }
 
-    .post-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .post-btn:active { transform: translateY(0); }
+    .post-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .post-btn:active {
+      transform: translateY(0);
+    }
 
     .section-label {
       font-size: 10px;
@@ -169,7 +175,10 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    .nav-item:hover { background: #F5F3EE; color: var(--navy); }
+    .nav-item:hover {
+      background: #F5F3EE;
+      color: var(--navy);
+    }
 
     .nav-item.active {
       background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
@@ -178,7 +187,11 @@
       font-weight: 600;
     }
 
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
 
     .user-row {
       margin-top: auto;
@@ -1480,7 +1493,8 @@
         <div class="avatar" id="sb-avatar">--</div>
         <div>
           <div id="sb-name" style="font-size:13px; font-weight:700; color:var(--navy)">Loading...</div>
-          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
+          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">
+            Passenger</div>
         </div>
         <span style="margin-left:auto; color:var(--muted2); font-size:14px; cursor:pointer;">⋯</span>
       </div>
@@ -1620,7 +1634,7 @@
             <div class="field">
               <label>Est. Duration</label>
               <div class="fi"><span class="ico">⏱</span>
-                <select>
+                <select id="f-duration">
                   <option>~30 min</option>
                   <option>~45 min</option>
                   <option selected>~1 hr</option>
@@ -2001,7 +2015,7 @@
         document.getElementById('ri-suggest').textContent = suggest;
       }
 
-      // 3. Update Form & Slider
+      // 3. Update Form Slider
       const priceRange = document.getElementById('priceRange');
       if (priceRange) {
         priceRange.value = suggest;
@@ -2009,6 +2023,9 @@
         syncRange(priceRange);
         calcEarn();
       }
+
+      // 3b. ✅ Auto-update Est. Duration from real calculation
+      updateDurationField(mins);
 
       // 4. Draw Line
       if (routeLine) map.removeLayer(routeLine);
@@ -2056,6 +2073,63 @@
     function calcEarn() {
       const price = parseInt(document.getElementById('priceRange').value);
       document.getElementById('s-earn').textContent = price * seats;
+    }
+
+    // ── Format minutes into readable string ──────────────────────
+    function formatMins(mins) {
+      if (mins < 60) return `~${mins} min`;
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return m > 0 ? `~${h} hr ${m} min` : `~${h} hr`;
+    }
+
+    // ── Auto-select closest duration option OR inject real value ──
+    function updateDurationField(mins) {
+      const sel = document.getElementById('f-duration');
+      if (!sel) return;
+
+      const formatted = formatMins(mins);
+
+      // Check if a matching option exists, else create one
+      let found = false;
+      for (let opt of sel.options) {
+        opt.selected = false;
+        // Match by rough range
+        const v = opt.value;
+        if (mins <= 35 && v === '~30 min') { opt.selected = true; found = true; break; }
+        if (mins <= 52 && v === '~45 min') { opt.selected = true; found = true; break; }
+        if (mins <= 70 && v === '~1 hr') { opt.selected = true; found = true; break; }
+        if (mins <= 100 && v === '~1.5 hrs') { opt.selected = true; found = true; break; }
+        if (mins <= 140 && v === '~2 hrs') { opt.selected = true; found = true; break; }
+        if (mins > 140 && v === '~3+ hrs') { opt.selected = true; found = true; break; }
+      }
+
+      // If no existing option matched perfectly, inject a real-time option
+      if (!found) {
+        // Remove any previously injected dynamic option
+        const existing = sel.querySelector('[data-dynamic]');
+        if (existing) sel.removeChild(existing);
+
+        const opt = document.createElement('option');
+        opt.value = formatted;
+        opt.textContent = formatted;
+        opt.selected = true;
+        opt.dataset.dynamic = '1';
+        sel.insertBefore(opt, sel.firstChild);
+      }
+    }
+
+    // ✅ FIXED: pickSeat was missing — seat buttons were broken
+    function pickSeat(btn, n) {
+      seats = n;
+      // Remove 'on' from all seat buttons
+      document.querySelectorAll('.s-btn').forEach(b => b.classList.remove('on'));
+      // Highlight clicked button
+      btn.classList.add('on');
+      // Update summary panel
+      document.getElementById('s-seats').textContent = n;
+      // Recalculate max earnings
+      calcEarn();
     }
 
     function setMapMode(m) {

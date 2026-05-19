@@ -602,53 +602,35 @@ async function loadNotifications() {
     console.log("📦 Raw notification fields (first item):", data[0]);
 
     container.innerHTML = data.map(n => {
-      // Flatten nested objects if backend sends booking/ride/user as sub-objects
-      const booking  = n.booking  || n.bookingDetails || {};
-      const ride     = n.ride     || n.rideDetails    || booking.ride || {};
-      const requester = n.requester || n.user         || booking.user || {};
+      // Prisma includes booking as n.booking { id, status }
+      const bookingObjId   = n.booking?.id ?? n.bookingId;  // ✅ Prisma: n.booking.id
+      const bookingStatus  = n.booking?.status ?? null;      // ✅ Prisma: n.booking.status
 
-      const name    = n.requesterName   || n.senderName       || n.userName
-                   || requester.name    || requester.fullName  || requester.username
-                   || "—";
+      // Show Accept/Reject ONLY if this is a 'request' notification AND booking is still pending
+      const isPending  = n.type === "request" && bookingStatus === "pending";
+      const isActedOn  = n.type === "request" && bookingStatus && bookingStatus !== "pending";
 
-      const seats   = n.seats           || n.seatsRequested    || n.requestedSeats
-                   || booking.seats     || booking.seatsBooked || booking.requestedSeats
-                   || "—";
-
-      const price   = n.totalPrice      || n.price             || n.totalAmount
-                   || booking.totalPrice|| booking.price       || booking.amount
-                   || null;
-
-      const pickup  = n.pickup          || n.from              || n.source
-                   || ride.pickup       || ride.from           || ride.source
-                   || booking.pickup    || null;
-
-      const dropoff = n.dropoff         || n.to                || n.destination
-                   || ride.dropoff      || ride.to             || ride.destination
-                   || booking.dropoff   || null;
-      const isPending = n.type === "request" && n.bookingId && (n.status === "pending" || !n.status);
+      const iconMap = { request: '🚗', accepted: '✅', rejected: '❌' };
+      const notifIcon = iconMap[n.type] || '🔔';
 
       return `
-      <div class="notification ${!n.read ? 'unread' : ''}" id="notif-${n.bookingId || n._id}">
-        <div class="notif-icon">${n.type === 'request' ? '🚗' : n.type === 'accepted' ? '✅' : n.type === 'rejected' ? '❌' : '🔔'}</div>
+      <div class="notification ${!n.read ? 'unread' : ''}" id="notif-${n.id}">
+        <div class="notif-icon">${notifIcon}</div>
         <div class="notif-body">
           <div class="notif-message">${n.message}</div>
           <div class="notif-meta">
-            <span>👤 <strong>${name}</strong></span>
-            ${pickup && dropoff ? `<span>📍 ${pickup} → ${dropoff}</span>` : ''}
-            <span>💺 ${seats} seat${seats > 1 ? 's' : ''}</span>
-            ${price ? `<span>💰 ₹${price} total</span>` : ''}
             <span class="notif-type">${n.type}</span>
+            <span style="font-size:11px;color:var(--muted)">${timeAgo(n.createdAt)}</span>
           </div>
         </div>
         ${
           isPending
           ? `<div class="actions">
-              <button class="accept" onclick="handle('${n.bookingId}','accept','${n.bookingId || n._id}')">✓ Accept</button>
-              <button class="reject" onclick="handle('${n.bookingId}','reject','${n.bookingId || n._id}')">✕ Reject</button>
+              <button class="accept" onclick="handle(${bookingObjId},'accept',${n.id})">✓ Accept</button>
+              <button class="reject" onclick="handle(${bookingObjId},'reject',${n.id})">✕ Reject</button>
              </div>`
-          : n.type === "request" && n.bookingId
-            ? `<span class="status-badge ${n.status}">${n.status}</span>`
+          : isActedOn
+            ? `<span class="status-badge ${bookingStatus}">${bookingStatus === 'accepted' ? '✅ Accepted' : '❌ Rejected'}</span>`
             : ""
         }
       </div>`;
@@ -665,15 +647,17 @@ async function loadNotifications() {
   }
 }
 
-// 🔹 ACCEPT / REJECT — removes card + marks notification as read
+// 🔹 ACCEPT / REJECT
 async function handle(bookingId, action, notifId) {
-  // Instantly hide the card with a fade-out
+  // Optimistically swap buttons → status badge
   const card = document.getElementById(`notif-${notifId}`);
   if (card) {
-    card.style.transition = "opacity 0.3s, transform 0.3s";
-    card.style.opacity = "0";
-    card.style.transform = "translateX(40px)";
-    setTimeout(() => card.remove(), 300);
+    const actionsEl = card.querySelector(".actions");
+    if (actionsEl) {
+      const label = action === "accept" ? "✅ Accepted" : "❌ Rejected";
+      const cls   = action === "accept" ? "accepted"    : "rejected";
+      actionsEl.outerHTML = `<span class="status-badge ${cls}">${label}</span>`;
+    }
   }
 
   try {
@@ -687,30 +671,49 @@ async function handle(bookingId, action, notifId) {
       body: JSON.stringify({ action })
     });
 
-    // Mark this notification as read so it never shows again on refresh
+    // Mark THIS notification as read using its own _id
     await fetch(`http://localhost:3000/api/v4/notifications/mark-read/${notifId}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` }
     });
 
+    // Fade out the card after a short delay so driver sees the badge
+    setTimeout(() => {
+      if (card) {
+        card.style.transition = "opacity 0.4s, transform 0.4s";
+        card.style.opacity = "0";
+        card.style.transform = "translateX(40px)";
+        setTimeout(() => {
+          card.remove();
+          const remaining = document.querySelectorAll(".notification");
+          if (remaining.length === 0) {
+            document.getElementById("notifications").innerHTML = `
+              <div class="empty-state">
+                <div class="icon">🔔</div>
+                <h3>All caught up!</h3>
+                <p>No new notifications. We'll let you know when something happens.</p>
+              </div>`;
+          }
+        }, 400);
+      }
+    }, 1200);
+
   } catch (err) {
     console.error("Handle error:", err);
+    // On error reload to show true state
+    loadNotifications();
   }
-
-  // If no notifications left, show empty state
-  setTimeout(() => {
-    const remaining = document.querySelectorAll(".notification");
-    if (remaining.length === 0) {
-      document.getElementById("notifications").innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🔔</div>
-          <h3>All caught up!</h3>
-          <p>No new notifications. We'll let you know when something happens.</p>
-        </div>`;
-    }
-  }, 350);
 }
 
+// ── Time-ago helper ──
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60)    return 'just now';
+  if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return new Date(dateStr).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+}
 
 // initial load
 loadNotifications();

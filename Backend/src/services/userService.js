@@ -1,7 +1,6 @@
-import User from "../models/User.js";
+import prisma from "../Lib/prismaClient.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 import fetch from "node-fetch";
 
 export const generateToken = (userId) => {
@@ -10,7 +9,7 @@ export const generateToken = (userId) => {
 
 // ================= SEND TOKEN RESPONSE =================
 export const sendTokenResponse = (user, statusCode, res, message) => {
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
 
     const cookieOptions = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -21,14 +20,14 @@ export const sendTokenResponse = (user, statusCode, res, message) => {
     };
 
     const userPayload = {
-        id:             user._id,
-        name:           user.name,
-        email:          user.email,
-        role:           user.role,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
         profilePicture: user.profilePicture,
-        phone:          user.phone || "",
-        city:           user.city  || "",
-        bio:            user.bio   || ""
+        phone: user.phone || "",
+        city: user.city || "",
+        bio: user.bio || ""
     };
 
     res.status(statusCode)
@@ -36,24 +35,27 @@ export const sendTokenResponse = (user, statusCode, res, message) => {
         .json({ success: true, message, token, user: userPayload });
 };
 
-
 // ================= REGISTER =================
 export const registerUserService = async ({ name, email, password, role }) => {
     if (!name || !email || !password) {
         throw { status: 400, message: "Please provide name, email and password" };
     }
+    if (password.length < 6) {
+        throw { status: 400, message: "Password must be at least 6 characters" };
+    }
 
-    const existing = await User.findOne({ email });
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw { status: 400, message: "User already exists" };
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-        userId: uuidv4(),
-        name,
-        email,
-        password: hashedPassword,
-        role: role || "Passenger"
+    const user = await prisma.user.create({
+        data: {
+            name,
+            email,
+            password: hashedPassword,
+            role: role || "Passenger"
+        }
     });
 
     return user;
@@ -65,10 +67,10 @@ export const loginUserService = async ({ email, password }) => {
         throw { status: 400, message: "Please provide email and password" };
     }
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw { status: 401, message: "Invalid email or password" };
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password || "");
     if (!isMatch) throw { status: 401, message: "Invalid email or password" };
 
     return user;
@@ -84,16 +86,18 @@ export const googleLoginService = async (token) => {
     if (!userData.email) throw { status: 400, message: "Google Authentication failed" };
 
     const { name, email, picture } = userData;
-    let user = await User.findOne({ email });
+
+    let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-        user = await User.create({
-            userId: uuidv4(),
-            name,
-            email,
-            password: "",
-            role: "Passenger",
-            profilePicture: picture
+        user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: "",
+                role: "Passenger",
+                profilePicture: picture
+            }
         });
     }
 
@@ -102,20 +106,24 @@ export const googleLoginService = async (token) => {
 
 // ================= GET USER =================
 export const getUserService = async (id) => {
-    let user = await User.findById(id).select("-password").catch(() => null);
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) throw { status: 400, message: "Invalid user ID" };
 
-    if (!user) {
-        user = await User.findOne({ userId: id }).select("-password");
-    }
+    const user = await prisma.user.findUnique({
+        where: { id: numericId },
+        select: {
+            id: true, name: true, email: true, phone: true,
+            city: true, bio: true, role: true, profilePicture: true, createdAt: true
+        }
+    });
 
     if (!user) throw { status: 404, message: "User not found" };
-
     return user;
 };
 
 // ================= UPDATE USER =================
 export const updateUserService = async (tokenId, urlId, updates) => {
-    if (urlId && urlId.toString() !== tokenId.toString()) {
+    if (urlId && parseInt(urlId) !== parseInt(tokenId)) {
         throw { status: 403, message: "Forbidden: You can only update your own profile" };
     }
 
@@ -128,25 +136,25 @@ export const updateUserService = async (tokenId, urlId, updates) => {
         delete updates.password;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-        tokenId,
-        { $set: updates },
-        { new: true, runValidators: true }
-    ).select("-password");
-
-    if (!updatedUser) throw { status: 404, message: "User not found" };
+    const updatedUser = await prisma.user.update({
+        where: { id: parseInt(tokenId) },
+        data: updates,
+        select: {
+            id: true, name: true, email: true, phone: true,
+            city: true, bio: true, role: true, profilePicture: true
+        }
+    });
 
     return updatedUser;
 };
 
 // ================= DELETE USER =================
 export const deleteUserService = async (tokenId, urlId) => {
-    if (urlId && urlId.toString() !== tokenId.toString()) {
+    if (urlId && parseInt(urlId) !== parseInt(tokenId)) {
         throw { status: 403, message: "Forbidden: You can only delete your own account" };
     }
 
-    const deleted = await User.findByIdAndDelete(tokenId);
+    const deleted = await prisma.user.delete({ where: { id: parseInt(tokenId) } });
     if (!deleted) throw { status: 404, message: "User not found" };
-
     return deleted;
 };

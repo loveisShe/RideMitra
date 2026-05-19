@@ -10,10 +10,12 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 import connectDB from "./src/database/dbConnection.js";
+import prisma from "./src/Lib/prismaClient.js";
 import userRoutes from "./src/routes/userAuthRoute.js";
 import rideRouter from "./src/routes/rideRoute.js";
 import bookingRoutes from "./src/routes/bookingRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
+import chatRoutes from "./src/routes/chatRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,21 +33,21 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================= ROUTES =================
-app.use("/api/v4/user", userRoutes);
-app.use("/api/v4/rides", rideRouter);
-app.use("/api/v4/bookings", bookingRoutes);
+app.use("/api/v4/user",          userRoutes);
+app.use("/api/v4/rides",         rideRouter);
+app.use("/api/v4/bookings",      bookingRoutes);
 app.use("/api/v4/notifications", notificationRoutes);
+app.use("/api/v4/chat",          chatRoutes);
 
 // ================= FRONTEND PAGES =================
-app.get("/", (req, res) => res.render("login"));
-app.get("/find-ride", (req, res) => res.render("find_ride"));
-app.get("/post-ride", (req, res) => res.render("post_ride"));
-app.get("/dashboard", (req, res) => res.render("Dashboard"));
-app.get("/notifications", (req, res) => res.render("Notification"));
+app.get("/",               (req, res) => res.render("login"));
+app.get("/find-ride",      (req, res) => res.render("find_ride"));
+app.get("/post-ride",      (req, res) => res.render("post_ride"));
+app.get("/dashboard",      (req, res) => res.render("Dashboard"));
+app.get("/notifications",  (req, res) => res.render("Notification"));
 app.get("/account-settings", (req, res) => res.render("AccountSettings"));
 
 app.use((err, req, res, next) => {
@@ -77,9 +79,82 @@ const startServer = async () => {
         try {
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
           socket.join(decoded.id.toString());
-          console.log("Joined room:", decoded.id);
+          socket.data.userId = decoded.id.toString();
+          console.log("Joined user room:", decoded.id);
         } catch (err) {
           console.log("Invalid token in socket");
+        }
+      });
+
+      socket.on("join-chat", async ({ bookingId, token }) => {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const userId  = parseInt(decoded.id);
+
+          const booking = await prisma.booking.findUnique({ where: { id: parseInt(bookingId) } });
+          if (!booking) return socket.emit("chat-error", "Booking not found");
+
+          const ride = await prisma.ride.findUnique({ where: { id: booking.rideId } });
+          if (!ride)    return socket.emit("chat-error", "Ride not found");
+
+          if (booking.status !== "accepted" ||
+              ride.status === "completed"   ||
+              ride.status === "cancelled") {
+            return socket.emit("chat-error", "Chat is not available for this booking");
+          }
+
+          const isPassenger = booking.passengerId === userId;
+          const isDriver    = ride.driverId       === userId;
+          if (!isPassenger && !isDriver) {
+            return socket.emit("chat-error", "Not authorised");
+          }
+
+          socket.join(`chat:${bookingId}`);
+          socket.data.chatBookingId = bookingId;
+          console.log(`User ${userId} joined chat room chat:${bookingId}`);
+        } catch (err) {
+          socket.emit("chat-error", "Invalid token");
+        }
+      });
+
+      socket.on("chat-message", async ({ bookingId, token, text }) => {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const userId  = parseInt(decoded.id);
+
+          const booking = await prisma.booking.findUnique({ where: { id: parseInt(bookingId) } });
+          if (!booking) return;
+
+          const ride = await prisma.ride.findUnique({ where: { id: booking.rideId } });
+          if (!ride)    return;
+
+          if (booking.status !== "accepted" ||
+              ride.status === "completed"   ||
+              ride.status === "cancelled") {
+            return socket.emit("chat-error", "Chat is closed — ride has ended");
+          }
+
+          const isPassenger = booking.passengerId === userId;
+          const isDriver    = ride.driverId       === userId;
+          if (!isPassenger && !isDriver) return;
+
+          const trimmed = (text || "").trim().slice(0, 1000);
+          if (!trimmed) return;
+
+          const sender = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+          const msg    = await prisma.message.create({
+            data: { bookingId: parseInt(bookingId), senderId: userId, text: trimmed }
+          });
+
+          io.to(`chat:${bookingId}`).emit("chat-message", {
+            id:        msg.id,
+            bookingId,
+            senderId:  { id: userId, name: sender?.name || "User" },
+            text:      trimmed,
+            createdAt: msg.createdAt
+          });
+        } catch (err) {
+          console.error("chat-message error:", err.message);
         }
       });
     });

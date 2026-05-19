@@ -3,7 +3,7 @@ import { postRideService, getAllRidesService, updateRideSeatsService } from "../
 // ================= POST RIDE =================
 export const postRide = async (req, res) => {
     try {
-        const ride = await postRideService({ ...req.body, userId: req.user._id });
+        const ride = await postRideService({ ...req.body, userId: req.user.id }); 
         res.status(201).json({ message: "Ride posted successfully!", ride });
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });

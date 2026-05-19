@@ -3,7 +3,7 @@ import { getNotificationsService, markOneReadService, markAllReadService } from 
 // ================= GET NOTIFICATIONS =================
 export const getNotifications = async (req, res) => {
     try {
-        const notifications = await getNotificationsService(req.user._id);
+        const notifications = await getNotificationsService(req.user.id); 
         res.json(notifications);
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
@@ -23,7 +23,7 @@ export const markOneRead = async (req, res) => {
 // ================= MARK ALL AS READ =================
 export const markAllRead = async (req, res) => {
     try {
-        await markAllReadService(req.user._id);
+        await markAllReadService(req.user.id); 
         res.json({ success: true });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
