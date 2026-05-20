@@ -52,6 +52,9 @@ app.get("/account-settings", (req, res) => res.render("AccountSettings"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ success: false, message: "File is too large. Max size allowed is 5MB." });
+  }
   res.status(500).send({ error: "Something went wrong!", message: err.message });
 });
 

@@ -1676,6 +1676,15 @@
             fileInput.addEventListener('change', () => {
                 const file = fileInput.files[0];
                 if (!file) return;
+
+                // Client-side file size check (5 MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5 MB
+                if (file.size > maxSize) {
+                    showToast('File size is too large. Max allowed size is 5MB.', 'error');
+                    fileInput.value = '';
+                    return;
+                }
+
                 selectedPhotoFile = file;
 
                 // Show local preview in both avatars immediately
