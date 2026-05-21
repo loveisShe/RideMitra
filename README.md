@@ -1,97 +1,177 @@
-# RideMitra: Complete Project Architecture & Explanation
+<div align="center">
 
-> **RideMitra** is a modern, real-time ride-sharing ecosystem. This document serves as a comprehensive technical explanation of the platform's architecture, data flow, and underlying mechanics.
+# 🚗 Ride मित्र
 
-## 1. High-Level Architecture
-The application follows a client-server architecture, using EJS for server-side rendering and a Node.js/Express REST API. Real-time features are powered by Socket.io, backed by a PostgreSQL database via Prisma ORM.
+**A modern, real-time ride-sharing platform built for India.**
 
-```mermaid
-graph TD
-    Client[Web Browser Client] -->|HTTP Requests| Express[Node.js / Express Server]
-    Client -->|WebSocket| Socket[Socket.io Real-time Server]
-    
-    Express --> Auth[Passport.js / JWT Auth]
-    Express --> Controllers[Business Logic Controllers]
-    Controllers --> Prisma[Prisma ORM]
-    Socket --> Prisma
-    
-    Prisma --> DB[(PostgreSQL Database)]
-    
-    Controllers --> Cloudinary[Cloudinary / Image Storage]
+Share your daily commute, split the fuel cost, and travel smarter — together.
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-ridemitra.onrender.com-orange?style=for-the-badge&logo=render)](https://ridemitra-hymf.onrender.com)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-green?style=for-the-badge&logo=node.js)](https://nodejs.org)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql)](https://postgresql.org)
+[![Prisma](https://img.shields.io/badge/ORM-Prisma-2D3748?style=for-the-badge&logo=prisma)](https://prisma.io)
+
+</div>
+
+---
+
+## ✨ What is RideMitra?
+
+RideMitra is a full-stack ride-sharing web application where **drivers** can post their daily trips and **passengers** can discover, book, and chat with drivers — all in real time.
+
+Think of it as a carpooling app built for college students and daily commuters across Indian cities.
+
+---
+
+## 🌟 Features
+
+- 🔐 **Secure Authentication** — Email/password login with JWT, plus Google OAuth 2.0
+- 🗺️ **Find & Post Rides** — Interactive Leaflet map to set pickup and drop-off points
+- ⏱️ **Smart Duration Estimator** — Auto-calculates estimated travel time from your typed locations
+- 💬 **Real-Time Chat** — Driver and passenger can message each other per booking via WebSockets
+- 🔔 **Live Notifications** — Instant alerts when a booking is accepted, rejected, or updated
+- 📸 **Profile Photos** — Upload and display profile pictures via Cloudinary
+- 🛡️ **Rate Limiting & Helmet** — Brute-force protection and secure HTTP headers out of the box
+- ✅ **Input Validation** — All API payloads validated with Zod before touching the database
+
+---
+
+## 🛠️ Tech Stack
+
+**Backend**
+- [Node.js](https://nodejs.org) + [Express 5](https://expressjs.com) — REST API server
+- [Prisma ORM](https://prisma.io) — Database access layer
+- [PostgreSQL](https://postgresql.org) — Primary relational database
+- [Socket.io](https://socket.io) — Real-time bidirectional communication
+- [JSON Web Tokens](https://jwt.io) — Stateless authentication
+- [Google Auth Library](https://github.com/googleapis/google-auth-library-nodejs) — OAuth 2.0 ID token verification
+- [Zod](https://zod.dev) — Runtime schema validation
+- [Helmet](https://helmetjs.github.io) — HTTP security headers
+- [Cloudinary](https://cloudinary.com) — Image storage & delivery
+- [Bcryptjs](https://github.com/dcodeIO/bcrypt.js) — Password hashing
+
+**Frontend**
+- [EJS](https://ejs.co) — Server-side rendered templates
+- [Leaflet.js](https://leafletjs.com) — Interactive maps
+- [Nominatim (OpenStreetMap)](https://nominatim.org) — Free geocoding API
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- A Cloudinary account (for image uploads)
+- A Google OAuth Client ID
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/loveisShe/RideMitra.git
+cd RideMitra/Backend
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+Create a `.env` file in the `Backend/` folder:
+```env
+DATABASE_URL="postgresql://user:password@host:5432/ridemitra"
+JWT_SECRET="your_jwt_secret"
+GOOGLE_CLIENT_ID="your_google_client_id"
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+CLOUDINARY_API_KEY="your_api_key"
+CLOUDINARY_API_SECRET="your_api_secret"
+NODE_ENV="development"
+PORT=3000
+```
+
+### 4. Run database migrations
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```
+
+### 5. Start the server
+```bash
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📁 Project Structure
+
+```
+Backend/
+├── prisma/
+│   └── schema.prisma        # Database schema (User, Ride, Booking, etc.)
+├── src/
+│   ├── controller/          # Request handlers (bridge between routes & services)
+│   ├── middlewares/         # Auth, validation, rate limiting
+│   ├── routes/              # API route definitions
+│   ├── services/            # Business logic & database operations
+│   └── validators/          # Zod schemas for request validation
+├── views/                   # EJS templates (frontend pages)
+│   ├── find_ride.ejs
+│   ├── post_ride.ejs
+│   ├── Dashboard.ejs
+│   ├── Notification.ejs
+│   └── AccountSettings.ejs
+└── server.js                # App entry point
 ```
 
 ---
 
-## 2. Core Entities & Data Model
+## 🔑 API Overview
 
-The application uses **PostgreSQL** with a highly structured schema. Below is an explanation of the primary entities:
+All protected routes require an `Authorization: Bearer <token>` header.
 
-| Model | Purpose | Key Relationships |
-| :--- | :--- | :--- |
-| **User** | Represents both Drivers and Passengers. Handles authentication, profiles, and roles. | 1:N with Rides, Bookings, Notifications, Messages. |
-| **Ride** | Created by Drivers. Contains trip details like source, destination, fare, and seats. | N:1 with User (Driver), 1:N with Bookings. |
-| **Booking** | Represents a Passenger's request to join a Ride. Contains status tracking. | N:1 with Ride, N:1 with User (Passenger). |
-| **Notification** | Real-time system alerts triggered by booking status changes. | N:1 with User, N:1 with Booking. |
+**Auth & Users** — `/api/v4/user/`
+- `POST /register` — Create a new account
+- `POST /login` — Login with email & password
+- `POST /google-login` — Login with a Google ID token
+- `GET /me` — Get current user profile
+- `PATCH /update-profile` — Update profile details
 
-> [!IMPORTANT]
-> The database was successfully migrated from MongoDB (NoSQL) to PostgreSQL (Relational) to provide stricter data integrity using foreign keys and cascading updates.
+**Rides** — `/api/v4/rides/`
+- `POST /post-ride` — Driver posts a new ride
+- `GET /all-rides` — Search available rides by pickup, destination, date
+- `PATCH /update-seats/:id` — Driver updates available seat count
 
----
+**Bookings** — `/api/v4/bookings/`
+- `POST /request-booking` — Passenger requests a seat
+- `PATCH /handle-booking/:id` — Driver accepts or rejects a booking
+- `GET /my-bookings` — View all your bookings
 
-## 3. Key Workflows
+**Chat** — `/api/v4/chat/`
+- `POST /:bookingId` — Send a message (also emits via Socket.io)
+- `GET /:bookingId` — Fetch message history for a booking
 
-### A. Authentication Flow
-RideMitra uses a dual-authentication strategy to ensure security and convenience:
-1. **Traditional Login:** Email/password hashed with `bcryptjs`. Generates a stateless JWT.
-2. **OAuth 2.0:** Integrated with Google via `passport-google-oauth20` for seamless 1-click onboarding.
-
-### B. The Ride Lifecycle
-```mermaid
-sequenceDiagram
-    participant Driver
-    participant Server
-    participant Passenger
-    
-    Driver->>Server: POST /api/v4/rides/post-ride
-    Server-->>Driver: Ride Created (Status: Pending)
-    
-    Passenger->>Server: GET /api/v4/rides/all-rides
-    Server-->>Passenger: Returns Available Rides
-    
-    Passenger->>Server: POST /api/v4/bookings/request-booking
-    Server-->>Passenger: Booking Requested
-    Server-->>Driver: Socket.io Real-time Alert (New Request)
-    
-    Driver->>Server: PATCH /api/v4/bookings/handle-booking (Accept)
-    Server-->>Driver: Seats Updated
-    Server-->>Passenger: Socket.io Real-time Alert (Accepted!)
-```
-
-### C. Real-Time Communication
-The `Socket.io` integration is crucial for the platform's user experience. Instead of forcing users to refresh pages, the server pushes events:
-- **Notifications:** When a driver accepts/rejects a ride, the passenger receives an instant browser notification.
-- **Messaging:** Passengers and drivers can chat contextually within a specific `Booking` interface using WebSockets.
+**Notifications** — `/api/v4/notifications/`
+- `GET /` — Get all notifications for current user
+- `PATCH /read/:id` — Mark a notification as read
 
 ---
 
-## 4. API Endpoints Overview
+## 🤝 Contributing
 
-> [!TIP]
-> All protected routes expect an `Authorization: Bearer <token>` header, derived from the login response.
-
-| Category | Key Endpoints | Description |
-| :--- | :--- | :--- |
-| **Users** | `POST /api/v4/user/register`<br>`GET /api/v4/user/me` | Handles account creation, profile fetching, and Google OAuth interactions. |
-| **Rides** | `POST /api/v4/rides/post-ride`<br>`GET /api/v4/rides/all-rides` | Allows drivers to publish rides and passengers to query them using filters (pickup, destination, date). |
-| **Bookings** | `POST /api/v4/bookings/request-booking`<br>`PATCH /api/v4/bookings/handle-booking/:id` | The transaction layer where passengers request seats and drivers approve/deny them. |
-| **Views** | `GET /dashboard`<br>`GET /find-ride` | EJS-powered routes that serve dynamic HTML pages directly to the browser. |
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
 
 ---
 
-## 5. Security & Optimizations
+## 📄 License
 
-- **File Uploads:** Profile pictures and assets are uploaded via `multer` and streamed directly to `Cloudinary`, keeping the local server lightweight.
-- **Protection:** 
-  - `helmet` secures Express apps by setting various HTTP headers.
-  - `express-rate-limit` prevents brute-force attacks on sensitive routes like login.
-- **Validation:** Incoming API payloads are strictly validated using `zod` to prevent malformed data from reaching the database.
+This project is open source and available under the [ISC License](LICENSE).
+
+---
+
+<div align="center">
+  Made with ❤️ for daily commuters across India
+  <br/>
+  <strong>Har Safar Ke Liye, Sahi मित्र</strong>
+</div>
