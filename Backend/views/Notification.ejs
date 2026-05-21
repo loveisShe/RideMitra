@@ -628,7 +628,6 @@
     </div>
 
     <div id="notifications">
-      <!-- skeleton loaders while fetching -->
       <div class="skeleton-card">
         <div class="skeleton" style="width:60%"></div>
         <div class="skeleton" style="width:35%"></div>
@@ -650,7 +649,6 @@
   <script>
     const token = localStorage.getItem("token");
 
-    // 🔐 CHECK LOGIN
     if (!token) {
       alert("User not logged in");
       window.location.href = "/";
@@ -658,24 +656,21 @@
 
     console.log("TOKEN:", token);
 
-    const socket = io("http://localhost:3000");
+    const socket = io();
 
-    // ✅ CONNECT FIRST THEN JOIN (SEND TOKEN)
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
       socket.emit("join", token);
     });
 
-    // ✅ REAL-TIME LISTENER
     socket.on("new-notification", (data) => {
       console.log("Realtime:", data);
       loadNotifications();
     });
 
-    // 🔹 LOAD NOTIFICATIONS (TOKEN BASED)
     async function loadNotifications() {
       try {
-        const res = await fetch(`http://localhost:3000/api/v4/notifications`, {
+        const res = await fetch(`/api/v4/notifications`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -758,7 +753,7 @@
 
       try {
         // Accept or reject the booking
-        await fetch(`http://localhost:3000/api/v4/bookings/handle-booking/${bookingId}`, {
+        await fetch(`/api/v4/bookings/handle-booking/${bookingId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -768,7 +763,7 @@
         });
 
         // Mark THIS notification as read using its own _id
-        await fetch(`http://localhost:3000/api/v4/notifications/mark-read/${notifId}`, {
+        await fetch(`/api/v4/notifications/mark-read/${notifId}`, {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -820,7 +815,7 @@
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        const res = await fetch("/api/v4/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

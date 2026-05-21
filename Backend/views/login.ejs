@@ -1909,7 +1909,7 @@
       const email = document.getElementById("signup-email").value;
       const password = document.getElementById("signup-password").value;
 
-      const response = await fetch("http://localhost:3000/api/v4/user/register", {
+      const response = await fetch("/api/v4/user/register", {
         method: "POST", //HTTP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1934,7 +1934,7 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      const response = await fetch('http://localhost:3000/api/v4/user/login', {
+      const response = await fetch('/api/v4/user/login', {
         method: 'POST', //HTTP 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -1974,7 +1974,7 @@
 
     async function handleGoogleAuth(accessToken) {
       try {
-        const res = await fetch("http://localhost:3000/api/v4/user/google-login", {
+        const res = await fetch("/api/v4/user/google-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: accessToken }) // Sending token instead of code

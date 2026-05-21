@@ -1,0 +1,189 @@
+BASE URL : http://localhost:3000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               USER APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Register        : POST   http://localhost:3000/api/v4/user/register
+Login           : POST   http://localhost:3000/api/v4/user/login
+Google Login    : POST   http://localhost:3000/api/v4/user/google-login
+Get My Profile  : GET    http://localhost:3000/api/v4/user/me
+Get User By ID  : GET    http://localhost:3000/api/v4/user/get-user/:id
+Update Profile  : PUT    http://localhost:3000/api/v4/user/update-profile
+Update By ID    : PUT    http://localhost:3000/api/v4/user/update-profile/:id
+Delete Account  : DELETE http://localhost:3000/api/v4/user/delete-user/:id
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               RIDE APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Post a Ride     : POST   http://localhost:3000/api/v4/rides/post-ride
+Get All Rides   : GET    http://localhost:3000/api/v4/rides/all-rides
+Get with Filter : GET    http://localhost:3000/api/v4/rides/all-rides?pickup=Noida&destination=Delhi&date=2025-04-30
+Update Seats    : PATCH  http://localhost:3000/api/v4/rides/update-seats/:id
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+             BOOKING APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Request Booking         : POST   http://localhost:3000/api/v4/bookings/request-booking
+Accept or Reject        : PATCH  http://localhost:3000/api/v4/bookings/handle-booking/:id
+My Posted Rides         : GET    http://localhost:3000/api/v4/bookings/my-rides
+My Rides + Passengers   : GET    http://localhost:3000/api/v4/bookings/my-rides-with-passengers
+My Booked Rides         : GET    http://localhost:3000/api/v4/bookings/my-bookings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           NOTIFICATION APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Get Notifications       : GET    http://localhost:3000/api/v4/notifications
+Mark One as Read        : PATCH  http://localhost:3000/api/v4/notifications/mark-read/:id
+Mark All as Read        : PATCH  http://localhost:3000/api/v4/notifications/mark-all-read
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               PAGES (EJS Views)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Login / Register        : GET    http://localhost:3000/
+Dashboard               : GET    http://localhost:3000/dashboard
+Find a Ride             : GET    http://localhost:3000/find-ride
+Post a Ride             : GET    http://localhost:3000/post-ride
+Notifications           : GET    http://localhost:3000/notifications
+Account Settings        : GET    http://localhost:3000/account-settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         POSTMAN SETUP (Headers)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All protected routes need this header:
+  Key   : Authorization
+  Value : Bearer <paste token from login response>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         SAMPLE REQUEST BODIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Register:
+{
+  "name": "Shally Chauhan",
+  "email": "shally@gmail.com",
+  "password": "123456",
+  "role": "Passenger"
+}
+
+Login:
+{
+  "email": "shally@gmail.com",
+  "password": "123456"
+}
+
+Update Profile:
+{
+  "name": "Shally Chauhan",
+  "phone": "9876543210",
+  "city": "Noida",
+  "bio": "RideMitra user"
+}
+
+Post a Ride:
+{
+  "pickup": "Noida",
+  "destination": "Delhi",
+  "date": "2025-05-01",
+  "time": "08:00 AM",
+  "vehicleType": "Car",
+  "fare": 250,
+  "seats": 3
+}
+
+Request Booking:
+{
+  "rideId": "<paste ride _id here>",
+  "seatsRequested": 2
+}
+
+Handle Booking (Accept or Reject):
+{
+  "action": "accept"
+}
+or
+{
+  "action": "reject"
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RAW SQL QUERIES (PostgreSQL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Query 1: Fetch All Registered Users
+────────────────────────────────────────
+SELECT id, name, email, role, city, "createdAt" 
+FROM "User" 
+ORDER BY "createdAt" DESC;
+
+
+Query 2: Fetch All Drivers
+────────────────────────────────────────
+SELECT id, name, email, role, city 
+FROM "User" 
+WHERE role = 'Driver';
+
+
+Query 3: Find Available Rides (Noida -> Delhi)
+────────────────────────────────────────
+SELECT id, pickup, destination, date, fare, seats 
+FROM "Ride" 
+WHERE pickup ILIKE '%Noida%' 
+  AND destination ILIKE '%Delhi%' 
+  AND seats > 0 
+ORDER BY date ASC;
+
+
+Query 4: Show Bookings with Passenger Info (JOIN)
+────────────────────────────────────────
+SELECT 
+    b.id AS booking_id, 
+    u.name AS passenger_name, 
+    b.status AS booking_status, 
+    b."seatsRequested"
+FROM "Booking" b
+INNER JOIN "User" u ON b."passengerId" = u.id
+WHERE b."rideId" = 1;
+
+
+Query 5: Retrieve Chat History for a Booking
+────────────────────────────────────────
+SELECT 
+    m.id AS message_id, 
+    u.name AS sender_name, 
+    m.text AS message_text, 
+    m."createdAt"
+FROM "Message" m
+INNER JOIN "User" u ON m."senderId" = u.id
+WHERE m."bookingId" = 1
+ORDER BY m."createdAt" ASC;
+
+
+Query 6: Find Most Active Drivers (GROUP BY)
+────────────────────────────────────────
+SELECT 
+    u.id AS driver_id, 
+    u.name AS driver_name, 
+    COUNT(r.id) AS total_rides_posted
+FROM "User" u
+INNER JOIN "Ride" r ON r."driverId" = u.id
+GROUP BY u.id, u.name
+ORDER BY total_rides_posted DESC;
+
+
+Query 7: Total Earnings per Driver (SUM & JOINs)
+────────────────────────────────────────
+SELECT 
+    d.name AS driver_name,
+    SUM(b."seatsRequested" * r.fare) AS total_earnings
+FROM "Booking" b
+INNER JOIN "Ride" r ON b."rideId" = r.id
+INNER JOIN "User" d ON r."driverId" = d.id
+WHERE b.status = 'accepted'
+GROUP BY d.name
+ORDER BY total_earnings DESC;

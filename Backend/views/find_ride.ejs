@@ -1163,7 +1163,7 @@
       container.innerHTML = `<p>Searching...</p>`;
 
       try {
-        let url = `http://localhost:3000/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
+        let url = `/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
         if (dateInput) url += `&date=${dateInput}`;
 
         const response = await fetch(url);
@@ -1202,7 +1202,7 @@
       }
 
       try {
-        const res = await fetch("http://localhost:3000/api/v4/bookings/request-booking", {
+        const res = await fetch("/api/v4/bookings/request-booking", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1291,7 +1291,7 @@
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        const res = await fetch("/api/v4/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

@@ -2211,7 +2211,7 @@
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("http://localhost:3000/api/v4/rides/post-ride", {
+        const res = await fetch("/api/v4/rides/post-ride", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2269,7 +2269,7 @@
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        const res = await fetch("/api/v4/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

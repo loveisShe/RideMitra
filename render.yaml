@@ -4,8 +4,8 @@ services:
     env: node
     region: singapore
     plan: free
-    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
-    startCommand: npm start
+    buildCommand: cd Backend && npm install && npx prisma generate && npx prisma migrate deploy
+    startCommand: cd Backend && npm start
     healthCheckPath: /api/v4/rides
     envVars:
       - key: NODE_ENV
