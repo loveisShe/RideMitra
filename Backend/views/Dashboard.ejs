@@ -1451,7 +1451,7 @@
     </div>
 
     <script>
-      const token = localStorage.getItem("token");
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
 
       function statusBadge(status) {
         const map = {
@@ -1597,7 +1597,7 @@
       let myUserId = null; // populated by /api/v4/user/me — set BEFORE connectSocket()
 
       function connectSocket() {
-        const t = localStorage.getItem("token");
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
         if (!t) return;
 
         // Use a relative origin so the app works on any host/port
@@ -1641,7 +1641,7 @@
         document.getElementById("chatSendBtn").disabled = false;
         document.getElementById("chatOverlay").classList.add("open");
 
-        const t = localStorage.getItem("token");
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
         if (chatSocket) chatSocket.emit("join-chat", { bookingId, token: t });
         loadChatHistory(bookingId);
       }
@@ -1654,7 +1654,7 @@
       async function loadChatHistory(bookingId) {
         try {
           const res = await fetch(`/api/v4/chat/${bookingId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            headers: { Authorization: `Bearer ${( localStorage.getItem("token") || sessionStorage.getItem("token") )}` }
           });
           const data = await res.json();
           const body = document.getElementById("chatBody");
@@ -1719,7 +1719,7 @@
         }
         chatSocket.emit("chat-message", {
           bookingId: activeChatBookingId,
-          token: localStorage.getItem("token"),
+          token: ( localStorage.getItem("token") || sessionStorage.getItem("token") ),
           text
         });
         input.value = "";
@@ -1739,7 +1739,7 @@
 
         // Resolve myUserId BEFORE starting socket so chat bubbles are
         // correctly labelled "mine" vs "theirs" from the very first message.
-        const t = localStorage.getItem("token");
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
         if (t && !myUserId) {
           try {
             const r = await fetch("/api/v4/user/me", {
@@ -1770,7 +1770,7 @@
 
   <script>
     (async () => {
-      const token = localStorage.getItem("token");
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
       if (!token) return;
 
       // ── Time-based greeting ─────────────────────────────────────

@@ -2251,7 +2251,7 @@
       }
 
       try {
-        const token = localStorage.getItem("token");
+        const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
 
         const res = await fetch("/api/v4/rides/post-ride", {
           method: "POST",
@@ -2308,7 +2308,7 @@
   <script>
     // ── Dynamic sidebar user info ──
     (async () => {
-      const token = localStorage.getItem("token");
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
       if (!token) return;
       try {
         const res = await fetch("/api/v4/user/me", {
