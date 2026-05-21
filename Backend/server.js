@@ -27,11 +27,32 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",")
-  : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500"];
+// In production on Render the browser sends the Render URL as the origin.
+// We must allow it, plus localhost for local dev.
+const RENDER_URL = "https://ridemitra-hymf.onrender.com";
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim())
+  : [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      RENDER_URL
+    ];
+
+// Allow requests with no origin (mobile apps, Postman, curl) and listed origins
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow no-origin requests (mobile native, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any *.onrender.com subdomain (covers preview URLs)
+    if (origin.endsWith(".onrender.com")) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  credentials: true
+}));
 // Bug #21 fix: apply helmet security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
@@ -74,7 +95,15 @@ const startServer = async () => {
     });
 
     const io = new Server(server, {
-      cors: { origin: allowedOrigins, credentials: true }
+      cors: {
+        origin: (origin, callback) => {
+          if (!origin) return callback(null, true);
+          if (allowedOrigins.includes(origin)) return callback(null, true);
+          if (origin.endsWith(".onrender.com")) return callback(null, true);
+          callback(new Error(`CORS: origin '${origin}' not allowed`));
+        },
+        credentials: true
+      }
     });
 
     global.io = io;
