@@ -4,6 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Bug #14 fix: explicit url field required for CLI commands (prisma migrate, prisma studio)
+  url      = env("DATABASE_URL")
 }
 
 model User {

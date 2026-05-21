@@ -1587,16 +1587,13 @@
             </div>
         </div>
 
-        <!-- Hidden file input for photo upload -->
         <input type="file" id="photoFileInput" accept="image/*" style="display:none;" />
 
-        <!-- Toast -->
         <div id="toast"></div>
 
         <script>
             let isEditing = false;
             let currentUserId = null;
-            let selectedPhotoFile = null;   // ← holds the chosen image file
 
             const token = localStorage.getItem("token");
             const editBtn = document.getElementById("editBtn");
@@ -1653,7 +1650,6 @@
                         document.querySelector('.ov-name').innerText = user.name;
                         document.querySelectorAll('.user-name').forEach(el => el.innerText = user.name);
 
-                        // Show photo or initials in BOTH avatars
                         if (user.profilePicture) {
                             setAvatarPhoto(user.profilePicture);
                         } else {
@@ -1668,17 +1664,14 @@
                 }
             }
 
-            // ── Change Photo — both buttons trigger file picker ──────
             document.querySelector('.btn-change-photo').addEventListener('click', () => fileInput.click());
             document.querySelector('.change-photo-btn').addEventListener('click', () => fileInput.click());
 
-            // ── When user picks a file — show preview immediately ────
             fileInput.addEventListener('change', () => {
                 const file = fileInput.files[0];
                 if (!file) return;
 
-                // Client-side file size check (5 MB limit)
-                const maxSize = 5 * 1024 * 1024; // 5 MB
+                const maxSize = 5 * 1024 * 1024;
                 if (file.size > maxSize) {
                     showToast('File size is too large. Max allowed size is 5MB.', 'error');
                     fileInput.value = '';
@@ -1687,18 +1680,15 @@
 
                 selectedPhotoFile = file;
 
-                // Show local preview in both avatars immediately
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     setAvatarPhoto(e.target.result);
                 };
                 reader.readAsDataURL(file);
 
-                // Auto-upload to backend
                 uploadPhoto(file);
             });
 
-            // ── Upload photo to backend via FormData ─────────────────
             async function uploadPhoto(file) {
                 const bigAv = document.querySelector('.profile-avatar-xl');
                 bigAv.classList.add('avatar-uploading');
@@ -1715,7 +1705,6 @@
                     const result = await response.json();
                     if (result.success) {
                         showToast('Profile photo updated successfully!', 'success');
-                        // Update both avatars with Cloudinary URL
                         if (result.user && result.user.profilePicture) {
                             setAvatarPhoto(result.user.profilePicture);
                         }
@@ -1731,7 +1720,6 @@
                 }
             }
 
-            // ── Edit / Save profile text fields ──────────────────────
             editBtn.addEventListener("click", async () => {
                 if (!isEditing) {
                     isEditing = true;

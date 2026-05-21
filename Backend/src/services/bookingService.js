@@ -9,6 +9,23 @@ export const requestBookingService = async ({ rideId, seatsRequested, userId }) 
     const ride = await prisma.ride.findUnique({ where: { id: parseInt(rideId) } });
     if (!ride) throw { status: 404, message: "Ride not found" };
 
+    // Bug #7 fix: prevent a driver from booking their own ride
+    if (ride.driverId === parseInt(userId)) {
+        throw { status: 400, message: "You cannot book your own ride" };
+    }
+
+    // Bug #8 fix: prevent duplicate pending/accepted bookings for the same ride
+    const existing = await prisma.booking.findFirst({
+        where: {
+            rideId: parseInt(rideId),
+            passengerId: parseInt(userId),
+            status: { in: ["pending", "accepted"] }
+        }
+    });
+    if (existing) {
+        throw { status: 409, message: "You already have a booking for this ride" };
+    }
+
     const booking = await prisma.booking.create({
         data: {
             rideId: parseInt(rideId),
@@ -57,14 +74,16 @@ export const handleBookingService = async ({ bookingId, action, driverId }) => {
     let newStatus;
 
     if (action === "accept") {
-        if (ride.seats < booking.seatsRequested) {
-            throw { status: 400, message: "Not enough seats" };
+        // Bug #1 fix: atomic decrement with a WHERE guard to prevent race conditions.
+        // If the update matches 0 rows, it means seats were already taken concurrently.
+        try {
+            await prisma.ride.update({
+                where: { id: ride.id, seats: { gte: booking.seatsRequested } },
+                data:  { seats: { decrement: booking.seatsRequested } }
+            });
+        } catch {
+            throw { status: 400, message: "Not enough seats available" };
         }
-
-        await prisma.ride.update({
-            where: { id: ride.id },
-            data: { seats: ride.seats - booking.seatsRequested }
-        });
 
         newStatus = "accepted";
 
@@ -84,6 +103,14 @@ export const handleBookingService = async ({ bookingId, action, driverId }) => {
 
     } else if (action === "reject") {
         newStatus = "rejected";
+
+        // Bug #2 fix: restore seats when a previously-accepted booking is rejected.
+        if (booking.status === "accepted") {
+            await prisma.ride.update({
+                where: { id: ride.id },
+                data:  { seats: { increment: booking.seatsRequested } }
+            });
+        }
 
         await prisma.notification.create({
             data: {

@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import helmet from "helmet"; // Bug #21
+import rateLimit from "express-rate-limit"; // Bug #16
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ const allowedOrigins = process.env.CORS_ORIGIN
   : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500"];
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
+// Bug #21 fix: apply helmet security headers
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

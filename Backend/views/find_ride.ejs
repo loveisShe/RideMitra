@@ -1145,7 +1145,7 @@
 
   <script>
     let rides = [];
-    let filterAC = false, filterVerified = false, maxFare = 2000;
+    let filterAC = false, filterVerified = false, maxFare = 10000; // ✅ FIX: match slider default so rides show without touching the bar
 
     async function fetchRides() {
       const fromInput = document.getElementById('inp-from').value.trim();
@@ -1169,13 +1169,15 @@
         const response = await fetch(url);
         const data = await response.json();
 
+        // ✅ FIX: use correct fields from Prisma API response (id not _id, driver from r.driver)
         rides = data.map(r => ({
-          id: r._id,
-          driver: r.userId ? r.userId.name : "Unknown Driver",
-          avatar: (r.driverName || "S").charAt(0).toUpperCase(),
+          id: r.id,
+          driver: r.driver ? r.driver.name : "Unknown Driver",
+          avatarUrl: r.driver ? r.driver.profilePicture : null,
+          avatarInitial: r.driver ? (r.driver.name || "D").charAt(0).toUpperCase() : "D",
           from: r.pickup,
           to: r.destination,
-          date: r.date,
+          date: r.date ? new Date(r.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—',
           time: r.time,
           seats: r.seats,
           fare: r.fare,
@@ -1237,32 +1239,48 @@
         return;
       }
 
-      container.innerHTML = list.map(r => `
-            <div class="ride-card">
-                <div class="card-top">
-                    <div class="driver-info">
-                        <div class="driver-avatar">${r.avatar}</div>
-                        <div>
-                            <div class="driver-name">${r.driver}</div>
-                            <div class="driver-meta">${r.car}</div>
-                        </div>
-                    </div>
-                    <div class="fare-box">
-                        <div class="fare-amt">₹${r.fare}</div>
-                    </div>
+      // ✅ FIX: render profile picture when available, fallback to initial
+      container.innerHTML = list.map(r => {
+        const avatarHtml = r.avatarUrl
+          ? `<img src="${r.avatarUrl}" alt="${r.driver}" style="width:46px;height:46px;border-radius:14px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.12);display:block;" onerror="this.outerHTML='<div class=\'driver-avatar\' style=\'background:linear-gradient(135deg,#FF8C00,#FF6B00)\'>${r.avatarInitial}</div>'" />`
+          : `<div class="driver-avatar" style="background:linear-gradient(135deg,hsl(${(r.driver.charCodeAt(0)*5)%360},70%,55%),hsl(${(r.driver.charCodeAt(0)*5+40)%360},70%,45%))">${r.avatarInitial}</div>`;
+
+        return `
+          <div class="ride-card">
+            <div class="card-top">
+              <div class="driver-info">
+                ${avatarHtml}
+                <div>
+                  <div class="driver-name">${r.driver}</div>
+                  <div class="driver-meta">${r.car} &nbsp;·&nbsp; ⏰ ${r.time || '—'}</div>
                 </div>
-                <div class="route-row">
-                    <span>${r.from}</span> → <span>${r.to}</span>
-                </div>
-                <div class="meta-row">
-                    <span>📅 ${r.date}</span>
-                    <span>💺 ${r.seats} seats left</span>
-                </div>
-                <div class="card-bottom">
-                    <button class="book-btn" onclick="bookRide('${r.id}')">Book Seat →</button>
-                </div>
+              </div>
+              <div class="fare-box">
+                <div class="fare-amt">₹${r.fare}</div>
+                <div class="fare-lbl">per seat</div>
+              </div>
             </div>
-        `).join('');
+            <div class="route-row">
+              <div class="route-dots">
+                <div class="route-dot" style="background:#FF8C00"></div>
+                <div class="route-line"></div>
+                <div class="route-dot" style="background:#2ECC71"></div>
+              </div>
+              <div class="route-labels">
+                <div class="route-from">📍 ${r.from}</div>
+                <div class="route-to">🏁 ${r.to}</div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-item">📅 ${r.date}</span>
+              <span class="meta-item">💺 <strong style="color:#2ECC71">${r.seats}</strong> seats left</span>
+            </div>
+            <div class="card-bottom">
+              <span class="seats-badge">🚗 ${r.car}</span>
+              <button class="book-btn" onclick="bookRide(${r.id})">Book Seat →</button>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     // UI Helper Functions

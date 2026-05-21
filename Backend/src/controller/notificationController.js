@@ -13,7 +13,8 @@ export const getNotifications = async (req, res) => {
 // ================= MARK ONE AS READ =================
 export const markOneRead = async (req, res) => {
     try {
-        await markOneReadService(req.params.id);
+        // Bug #5 fix: pass req.user.id so only the owner can mark a notification as read
+        await markOneReadService(req.params.id, req.user.id);
         res.json({ success: true });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
