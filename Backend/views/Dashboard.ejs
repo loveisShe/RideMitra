@@ -1,1213 +1,1512 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ride मित्र — My Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap" rel="stylesheet">
-<script src="/socket.io/socket.io.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #FAFAF8;
-    --surface: #FFFFFF;
-    --surface2: #F5F3EE;
-    --border: #E8E5DF;
-    --accent: #FF8C00;
-    --accent2: #E07000;
-    --green: #2ECC71;
-    --red: #E74C3C;
-    --yellow: #F39C12;
-    --text: #1A1A2E;
-    --muted: #8A8A9A;
-    --card-shadow: 0 2px 16px rgba(0,0,0,0.07);
-    --card-shadow-hover: 0 8px 32px rgba(0,0,0,0.11);
-  }
-
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: 240px;
-    min-height: 100vh;
-    background: rgba(255,255,255,0.82);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 28px 0;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 100;
-    box-shadow: 2px 0 24px rgba(0,0,0,0.04);
-  }
-
-  /* UPDATED LOGO STYLE */
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 24px 32px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800;
-    font-size: 20px;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-
-  .logo .hindi {
-    font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
-    font-weight: 900;
-    color: var(--accent);
-  }
-
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 4px 12px rgba(255,140,0,0.3);
-  }
-
-  .nav-section {
-    padding: 0 12px;
-    margin-bottom: 24px;
-  }
-
-  .nav-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-    padding: 0 12px 10px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 500;
-    margin-bottom: 2px;
-    text-decoration: none;
-  }
-
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-
-  .nav-item.active {
-    background: linear-gradient(90deg, rgba(255,140,0,0.12), rgba(255,140,0,0.05));
-    color: var(--accent);
-    border: 1px solid rgba(255,140,0,0.2);
-    font-weight: 600;
-  }
-
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-
-  .badge {
-    margin-left: auto;
-    background: var(--accent);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
-  }
-
-  .sidebar-cta {
-    margin: 0 12px 24px;
-  }
-
-  .cta-btn-sidebar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 14px;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    box-shadow: 0 4px 20px rgba(255,140,0,0.35);
-    letter-spacing: 0.3px;
-  }
-
-  .cta-btn-sidebar:hover { opacity: 0.9; transform: translateY(-1px); }
-  .cta-btn-sidebar:active { transform: translateY(0); }
-
-  .sidebar-bottom {
-    margin-top: auto;
-    padding: 0 12px;
-  }
-
-  .user-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    background: var(--surface2);
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    box-shadow: var(--card-shadow);
-  }
-
-  .avatar {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px;
-    color: #fff;
-  }
-
-  .user-info { flex: 1; }
-  .user-name { font-size: 13px; font-weight: 600; color: var(--text); }
-  .user-role { font-size: 11px; color: var(--muted); }
-
-  /* ── Main ── */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    padding: 32px;
-    max-width: calc(100vw - 240px);
-  }
-
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 36px;
-  }
-
-  .page-title {
-    font-family: 'Rozha One', serif;
-    font-size: 28px;
-    font-weight: 400;
-    color: var(--text);
-    letter-spacing: 0.3px;
-  }
-
-  .breadcrumb {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-    font-weight: 500;
-  }
-
-  .breadcrumb span { color: var(--accent); font-weight: 600; }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 9px 14px;
-    font-size: 13px;
-    color: var(--muted);
-    width: 220px;
-    box-shadow: var(--card-shadow);
-  }
-
-  .notif-btn {
-    width: 40px; height: 40px;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    position: relative;
-    font-size: 16px;
-    box-shadow: var(--card-shadow);
-  }
-
-  .notif-dot {
-    position: absolute; top: 8px; right: 8px;
-    width: 7px; height: 7px;
-    background: var(--red);
-    border-radius: 50%;
-    border: 1px solid var(--bg);
-  }
-
-  /* ── Greeting Banner ── */
-  .greeting-banner {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 28px 32px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.5s ease both;
-    box-shadow: var(--card-shadow);
-  }
-
-  .greeting-banner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, rgba(255,140,0,0.06) 0%, rgba(255,107,0,0.03) 50%, transparent 80%);
-    pointer-events: none;
-  }
-
-  .greeting-bg-blob {
-    position: absolute;
-    right: -60px; top: -60px;
-    width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(255,140,0,0.1), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  .greeting-text .hello {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-
-  .greeting-text h2 {
-    font-family: 'Rozha One', serif;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 6px;
-    color: var(--text);
-    letter-spacing: 0.3px;
-  }
-
-  .greeting-text p {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    font-weight: 400;
-  }
-
-  .greeting-stats {
-    display: flex;
-    gap: 32px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .greet-stat { text-align: center; }
-
-  .greet-stat-val {
-    font-family: 'Rozha One', serif;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 2px;
-  }
-
-  .greet-stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-  }
-
-  .greet-divider {
-    width: 1px;
-    background: var(--border);
-    height: 40px;
-    align-self: center;
-  }
-
-  /* ── Action Cards Grid ── */
-  .action-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .action-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 32px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.22s, box-shadow 0.22s, border-color 0.2s;
-    animation: fadeUp 0.5s ease both;
-    box-shadow: var(--card-shadow);
-  }
-
-  .action-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow-hover); }
-  .action-card.search-card { animation-delay: 0.1s; }
-  .action-card.sell-card  { animation-delay: 0.18s; }
-  .action-card.search-card:hover { border-color: rgba(255,140,0,0.35); }
-  .action-card.sell-card:hover   { border-color: rgba(46,204,113,0.35); }
-
-  .action-card.search-card::before {
-    content: '';
-    position: absolute;
-    right: -40px; bottom: -40px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(255,140,0,0.08), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  .action-card.sell-card::before {
-    content: '';
-    position: absolute;
-    right: -40px; bottom: -40px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(46,204,113,0.08), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  .action-card-icon {
-    width: 52px; height: 52px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .search-card .action-card-icon { background: rgba(255,140,0,0.1); }
-  .sell-card   .action-card-icon { background: rgba(46,204,113,0.1); }
-
-  .action-card-title {
-    font-family: 'Rozha One', serif;
-    font-size: 22px;
-    font-weight: 400;
-    margin-bottom: 6px;
-    color: var(--text);
-    letter-spacing: 0.3px;
-    line-height: 1.4;
-  }
-
-  .action-card-sub {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 24px;
-    font-weight: 400;
-  }
-
-  .search-row {
-    display: flex;
-    gap: 10px;
-    align-items: stretch;
-  }
-
-  .ride-input-wrap {
-    flex: 1;
-    position: relative;
-  }
-
-  .ride-input-wrap .input-icon {
-    position: absolute;
-    left: 13px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: var(--muted);
-    pointer-events: none;
-  }
-
-  .ride-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px 12px 38px;
-    color: var(--text);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .ride-input::placeholder { color: var(--muted); }
-  .ride-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,140,0,0.12); }
-
-  .btn-search {
-    padding: 12px 22px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(255,140,0,0.3);
-  }
-
-  .btn-search:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-search:active { transform: translateY(0); }
-
-  .quick-chips {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-
-  .chip {
-    font-size: 12px;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    padding: 5px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-  }
-
-  .chip:hover { color: var(--accent); border-color: rgba(255,140,0,0.4); background: rgba(255,140,0,0.05); }
-
-  .feature-pills {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-
-  .feature-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .feature-pill-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    flex-shrink: 0;
-  }
-
-  .btn-post {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 13px 28px;
-    border-radius: 14px;
-    border: none;
-    background: linear-gradient(135deg, var(--green), #27AE60);
-    color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    box-shadow: 0 4px 20px rgba(46,204,113,0.3);
-    letter-spacing: 0.3px;
-  }
-
-  .btn-post:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-post:active { transform: translateY(0); }
-
-  /* ── Recent Rides Table ── */
-  .table-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    animation: fadeUp 0.5s ease 0.3s both;
-    box-shadow: var(--card-shadow);
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-  }
-
-  .card-title {
-    font-family: 'Rozha One', serif;
-    font-weight: 400;
-    font-size: 17px;
-    color: var(--text);
-    letter-spacing: 0.2px;
-  }
-
-  .card-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; }
-
-  table { width: 100%; border-collapse: collapse; }
-
-  th {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 700;
-    text-align: left;
-    padding: 0 0 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    border-bottom: 1.5px solid var(--border);
-  }
-
-  td {
-    padding: 12px 0;
-    font-size: 13px;
-    border-bottom: 1px solid rgba(232,229,223,0.7);
-    vertical-align: middle;
-  }
-
-  tr:last-child td { border-bottom: none; }
-
-  .rider-info { display: flex; align-items: center; gap: 10px; }
-
-  .rider-avatar {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-    color: #fff;
-  }
-
-  .rider-name { font-weight: 600; font-size: 13px; color: var(--text); }
-  .rider-id   { font-size: 11px; color: var(--muted); font-weight: 500; }
-
-  .status-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    display: inline-block;
-    letter-spacing: 0.2px;
-  }
-
-  .status-active    { background: rgba(46,204,113,0.1);  color: #27AE60; }
-  .status-pending   { background: rgba(243,156,18,0.12); color: #E67E22; }
-  .status-completed { background: rgba(255,140,0,0.1);   color: var(--accent); }
-  .status-cancelled { background: rgba(231,76,60,0.1);   color: var(--red); }
-
-  .stars { color: var(--yellow); font-size: 11px; letter-spacing: 1px; }
-
-  /* ── Profile Snapshot ── */
-  .profile-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    animation: fadeUp 0.5s ease 0.3s both;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    box-shadow: var(--card-shadow);
-  }
-
-  .profile-avatar-lg {
-    width: 72px; height: 72px;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 22px;
-    margin-bottom: 14px;
-    box-shadow: 0 0 0 5px rgba(255,140,0,0.12), 0 4px 20px rgba(255,140,0,0.2);
-    color: #fff;
-  }
-
-  .profile-name {
-    font-family: 'Rozha One', serif;
-    font-size: 20px;
-    font-weight: 400;
-    margin-bottom: 3px;
-    color: var(--text);
-    letter-spacing: 0.3px;
-  }
-
-  .profile-email { font-size: 12px; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
-
-  .profile-stats {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    background: var(--surface2);
-  }
-
-  .p-stat {
-    flex: 1;
-    padding: 14px 10px;
-    text-align: center;
-    border-right: 1.5px solid var(--border);
-  }
-
-  .p-stat:last-child { border-right: none; }
-
-  .p-stat-val {
-    font-family: 'Rozha One', serif;
-    font-size: 20px;
-    font-weight: 400;
-    margin-bottom: 3px;
-  }
-
-  .p-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-
-  .btn-edit-profile {
-    width: 100%;
-    padding: 11px;
-    border-radius: 12px;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--text);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s, color 0.2s;
-  }
-
-  .btn-edit-profile:hover { border-color: var(--accent); background: rgba(255,140,0,0.05); color: var(--accent); }
-
-  /* ── Layout helpers ── */
-  .bottom-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  a { text-decoration: none; color: inherit; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
-    50%       { box-shadow: 0 0 0 5px rgba(46,204,113,0); }
-  }
-
-  /* ── Table enhancements ── */
-  th { padding: 0 10px 12px; }
-  th:first-child { padding-left: 0; }
-  th:last-child  { padding-right: 0; }
-  td { padding: 11px 10px; }
-  td:first-child { padding-left: 0; }
-  td:last-child  { padding-right: 0; }
-
-  /* Ride group header inside Posted table */
-  .ride-group-header {
-    background: linear-gradient(90deg, rgba(255,140,0,0.06), rgba(255,140,0,0.02));
-    border-top: 1px solid var(--border);
-  }
-  .ride-group-header td {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.4px;
-    padding: 8px 0 6px;
-    border-bottom: none;
-  }
-  .ride-group-header:first-child { border-top: none; }
-
-  /* No-booking placeholder row */
-  .no-booking-row td {
-    font-size: 12px;
-    color: var(--muted);
-    padding: 5px 0 12px;
-    border-bottom: none;
-    font-style: italic;
-  }
-
-  /* Empty state */
-  .table-empty td {
-    text-align: center;
-    padding: 28px 0;
-    color: var(--muted);
-    font-size: 13px;
-    border-bottom: none;
-  }
-
-  /* Route + date stacked cell */
-  .route-cell .route-main { font-weight: 600; font-size: 13px; color: var(--text); }
-  .route-cell .route-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* Fare × seats stacked cell */
-  .fare-cell .fare-main { font-weight: 700; font-size: 13px; color: var(--text); }
-  .fare-cell .fare-seats { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* ── Chat Modal ── */
-  .chat-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-    z-index: 9000;
-    align-items: flex-end;
-    justify-content: flex-end;
-    padding: 32px;
-  }
-  .chat-overlay.open { display: flex; }
-
-  .chat-modal {
-    width: 380px;
-    max-height: 560px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.18);
-    display: flex;
-    flex-direction: column;
-    animation: fadeUp 0.28s ease both;
-    overflow: hidden;
-  }
-
-  .chat-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 18px 20px;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    color: #fff;
-    flex-shrink: 0;
-  }
-
-  .chat-header-info { flex: 1; min-width: 0; }
-  .chat-header-title {
-    font-weight: 700;
-    font-size: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .chat-header-sub { font-size: 11px; opacity: 0.85; margin-top: 1px; }
-
-  .chat-close-btn {
-    width: 30px; height: 30px;
-    background: rgba(255,255,255,0.2);
-    border: none;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.2s;
-  }
-  .chat-close-btn:hover { background: rgba(255,255,255,0.35); }
-
-  .chat-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-height: 200px;
-    max-height: 380px;
-    background: var(--bg);
-  }
-
-  .chat-body::-webkit-scrollbar { width: 4px; }
-  .chat-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-  .chat-msg {
-    max-width: 80%;
-    padding: 9px 13px;
-    border-radius: 18px;
-    font-size: 13px;
-    line-height: 1.5;
-    word-break: break-word;
-  }
-  .chat-msg.mine {
-    align-self: flex-end;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  .chat-msg.theirs {
-    align-self: flex-start;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-bottom-left-radius: 4px;
-  }
-  .chat-msg-meta {
-    font-size: 10px;
-    margin-top: 3px;
-    opacity: 0.7;
-  }
-
-  .chat-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 13px;
-    gap: 6px;
-    padding: 24px 0;
-  }
-
-  .chat-locked {
-    padding: 12px 16px;
-    background: rgba(231,76,60,0.07);
-    border-top: 1px solid rgba(231,76,60,0.15);
-    font-size: 12px;
-    color: var(--red);
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .chat-footer {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-
-  .chat-input {
-    flex: 1;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    padding: 9px 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .chat-input:focus { border-color: var(--accent); }
-  .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .chat-send-btn {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--accent), #FF6B00);
-    border: none;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.2s, transform 0.15s;
-    flex-shrink: 0;
-  }
-  .chat-send-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.05); }
-  .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-contact {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1.5px solid var(--accent);
-    background: rgba(255,140,0,0.08);
-    color: var(--accent);
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-  .btn-contact:hover { background: var(--accent); color: #fff; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ride मित्र — My Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap"
+    rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #FAFAF8;
+      --surface: #FFFFFF;
+      --surface2: #F5F3EE;
+      --border: #E8E5DF;
+      --accent: #FF8C00;
+      --accent2: #E07000;
+      --green: #2ECC71;
+      --red: #E74C3C;
+      --yellow: #F39C12;
+      --text: #1A1A2E;
+      --muted: #8A8A9A;
+      --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+      --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.11);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 2px 0 24px rgba(0, 0, 0, 0.04);
+    }
+
+    /* UPDATED LOGO STYLE */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 24px 32px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .logo .hindi {
+      font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 24px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 0 12px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 2px;
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
+      color: var(--accent);
+      border: 1px solid rgba(255, 140, 0, 0.2);
+      font-weight: 600;
+    }
+
+    .nav-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .sidebar-cta {
+      margin: 0 12px 24px;
+    }
+
+    .cta-btn-sidebar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(255, 140, 0, 0.35);
+      letter-spacing: 0.3px;
+    }
+
+    .cta-btn-sidebar:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .cta-btn-sidebar:active {
+      transform: translateY(0);
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 0 12px;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .user-role {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 32px;
+      max-width: calc(100vw - 240px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .page-title {
+      font-family: 'Rozha One', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .breadcrumb span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      width: 220px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .notif-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      font-size: 16px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 7px;
+      height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 1px solid var(--bg);
+    }
+
+    /* ── Greeting Banner ── */
+    .greeting-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+      box-shadow: var(--card-shadow);
+    }
+
+    .greeting-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 140, 0, 0.06) 0%, rgba(255, 107, 0, 0.03) 50%, transparent 80%);
+      pointer-events: none;
+    }
+
+    .greeting-bg-blob {
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(255, 140, 0, 0.1), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .greeting-text .hello {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .greeting-text h2 {
+      font-family: 'Rozha One', serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 6px;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .greeting-text p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .greeting-stats {
+      display: flex;
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .greet-stat {
+      text-align: center;
+    }
+
+    .greet-stat-val {
+      font-family: 'Rozha One', serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+
+    .greet-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .greet-divider {
+      width: 1px;
+      background: var(--border);
+      height: 40px;
+      align-self: center;
+    }
+
+    /* ── Action Cards Grid ── */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s, box-shadow 0.22s, border-color 0.2s;
+      animation: fadeUp 0.5s ease both;
+      box-shadow: var(--card-shadow);
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .action-card.search-card {
+      animation-delay: 0.1s;
+    }
+
+    .action-card.sell-card {
+      animation-delay: 0.18s;
+    }
+
+    .action-card.search-card:hover {
+      border-color: rgba(255, 140, 0, 0.35);
+    }
+
+    .action-card.sell-card:hover {
+      border-color: rgba(46, 204, 113, 0.35);
+    }
+
+    .action-card.search-card::before {
+      content: '';
+      position: absolute;
+      right: -40px;
+      bottom: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 140, 0, 0.08), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .action-card.sell-card::before {
+      content: '';
+      position: absolute;
+      right: -40px;
+      bottom: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(46, 204, 113, 0.08), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .action-card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .search-card .action-card-icon {
+      background: rgba(255, 140, 0, 0.1);
+    }
+
+    .sell-card .action-card-icon {
+      background: rgba(46, 204, 113, 0.1);
+    }
+
+    .action-card-title {
+      font-family: 'Rozha One', serif;
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 6px;
+      color: var(--text);
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+    }
+
+    .action-card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      font-weight: 400;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .ride-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .ride-input-wrap .input-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .ride-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px 12px 38px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .ride-input::placeholder {
+      color: var(--muted);
+    }
+
+    .ride-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12);
+    }
+
+    .btn-search {
+      padding: 12px 22px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(255, 140, 0, 0.3);
+    }
+
+    .btn-search:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-search:active {
+      transform: translateY(0);
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .chip:hover {
+      color: var(--accent);
+      border-color: rgba(255, 140, 0, 0.4);
+      background: rgba(255, 140, 0, 0.05);
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .feature-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .feature-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    .btn-post {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, var(--green), #27AE60);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3);
+      letter-spacing: 0.3px;
+    }
+
+    .btn-post:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-post:active {
+      transform: translateY(0);
+    }
+
+    /* ── Recent Rides Table ── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      animation: fadeUp 0.5s ease 0.3s both;
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .card-title {
+      font-family: 'Rozha One', serif;
+      font-weight: 400;
+      font-size: 17px;
+      color: var(--text);
+      letter-spacing: 0.2px;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-align: left;
+      padding: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    td {
+      padding: 12px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(232, 229, 223, 0.7);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rider-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rider-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff;
+    }
+
+    .rider-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .rider-id {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      letter-spacing: 0.2px;
+    }
+
+    .status-active {
+      background: rgba(46, 204, 113, 0.1);
+      color: #27AE60;
+    }
+
+    .status-pending {
+      background: rgba(243, 156, 18, 0.12);
+      color: #E67E22;
+    }
+
+    .status-completed {
+      background: rgba(255, 140, 0, 0.1);
+      color: var(--accent);
+    }
+
+    .status-cancelled {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--red);
+    }
+
+    .stars {
+      color: var(--yellow);
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Profile Snapshot ── */
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      animation: fadeUp 0.5s ease 0.3s both;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+    }
+
+    .profile-avatar-lg {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 0 0 5px rgba(255, 140, 0, 0.12), 0 4px 20px rgba(255, 140, 0, 0.2);
+      color: #fff;
+    }
+
+    .profile-name {
+      font-family: 'Rozha One', serif;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 3px;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .profile-email {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 0;
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: var(--surface2);
+    }
+
+    .p-stat {
+      flex: 1;
+      padding: 14px 10px;
+      text-align: center;
+      border-right: 1.5px solid var(--border);
+    }
+
+    .p-stat:last-child {
+      border-right: none;
+    }
+
+    .p-stat-val {
+      font-family: 'Rozha One', serif;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 3px;
+    }
+
+    .p-stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .btn-edit-profile {
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+
+    .btn-edit-profile:hover {
+      border-color: var(--accent);
+      background: rgba(255, 140, 0, 0.05);
+      color: var(--accent);
+    }
+
+    /* ── Layout helpers ── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(46, 204, 113, 0);
+      }
+    }
+
+    /* ── Table enhancements ── */
+    th {
+      padding: 0 10px 12px;
+    }
+
+    th:first-child {
+      padding-left: 0;
+    }
+
+    th:last-child {
+      padding-right: 0;
+    }
+
+    td {
+      padding: 11px 10px;
+    }
+
+    td:first-child {
+      padding-left: 0;
+    }
+
+    td:last-child {
+      padding-right: 0;
+    }
+
+    /* Ride group header inside Posted table */
+    .ride-group-header {
+      background: linear-gradient(90deg, rgba(255, 140, 0, 0.06), rgba(255, 140, 0, 0.02));
+      border-top: 1px solid var(--border);
+    }
+
+    .ride-group-header td {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.4px;
+      padding: 8px 0 6px;
+      border-bottom: none;
+    }
+
+    .ride-group-header:first-child {
+      border-top: none;
+    }
+
+    /* No-booking placeholder row */
+    .no-booking-row td {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 5px 0 12px;
+      border-bottom: none;
+      font-style: italic;
+    }
+
+    /* Empty state */
+    .table-empty td {
+      text-align: center;
+      padding: 28px 0;
+      color: var(--muted);
+      font-size: 13px;
+      border-bottom: none;
+    }
+
+    /* Route + date stacked cell */
+    .route-cell .route-main {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .route-cell .route-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Fare × seats stacked cell */
+    .fare-cell .fare-main {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .fare-cell .fare-seats {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Chat Modal ── */
+    .chat-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+      z-index: 9000;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 32px;
+    }
+
+    .chat-overlay.open {
+      display: flex;
+    }
+
+    .chat-modal {
+      width: 380px;
+      max-height: 560px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      animation: fadeUp 0.28s ease both;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chat-header-title {
+      font-weight: 700;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-header-sub {
+      font-size: 11px;
+      opacity: 0.85;
+      margin-top: 1px;
+    }
+
+    .chat-close-btn {
+      width: 30px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .chat-close-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 200px;
+      max-height: 380px;
+      background: var(--bg);
+    }
+
+    .chat-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .chat-msg {
+      max-width: 80%;
+      padding: 9px 13px;
+      border-radius: 18px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .chat-msg.mine {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-msg.theirs {
+      align-self: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-msg-meta {
+      font-size: 10px;
+      margin-top: 3px;
+      opacity: 0.7;
+    }
+
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+      gap: 6px;
+      padding: 24px 0;
+    }
+
+    .chat-locked {
+      padding: 12px 16px;
+      background: rgba(231, 76, 60, 0.07);
+      border-top: 1px solid rgba(231, 76, 60, 0.15);
+      font-size: 12px;
+      color: var(--red);
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .chat-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 9px 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent);
+    }
+
+    .chat-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .chat-send-btn {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent), #FF6B00);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+
+    .chat-send-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
+
+    .chat-send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-contact {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1.5px solid var(--accent);
+      background: rgba(255, 140, 0, 0.08);
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn-contact:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ── Chat Modal ─────────────────────────────────────────────────────── -->
-<div class="chat-overlay" id="chatOverlay">
-  <div class="chat-modal" id="chatModal">
-    <div class="chat-header">
-      <div style="width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">💬</div>
-      <div class="chat-header-info">
-        <div class="chat-header-title" id="chatTitle">Chat</div>
-        <div class="chat-header-sub" id="chatSub">Active Ride</div>
-      </div>
-      <button class="chat-close-btn" onclick="closeChat()">✕</button>
-    </div>
-    <div class="chat-body" id="chatBody">
-      <div class="chat-empty">💬 <span>Loading messages…</span></div>
-    </div>
-    <div id="chatLocked" class="chat-locked" style="display:none;">🔒 Chat is closed — the ride has ended.</div>
-    <div class="chat-footer" id="chatFooter">
-      <input class="chat-input" id="chatInput" placeholder="Type a message…" maxlength="1000" />
-      <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">➤</button>
-    </div>
-  </div>
-</div>
-
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">🚗</div>
-    Ride <span class="hindi">मित्र</span>
-  </div>
-
-  <div class="sidebar-cta">
-    <button class="cta-btn-sidebar"><a href="/post-ride">＋ &nbsp;Post a Ride</a></button>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Main</div>
-    <div class="nav-item active"><span class="icon">📊</span> Dashboard</div>
-    <a href="/find-ride"><div class="nav-item"><span class="icon">🗺️</span> Find a Ride</div></a>
-    <a href="/post-ride"><div class="nav-item"><span class="icon">📅</span> My Rides</div></a>
-    <div class="nav-item"><span class="icon">💰</span> Payments</div>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Account</div>
-    <a href="/notifications"><div class="nav-item"><span class="icon">🔔</span> Notifications</div></a>
-    <a href="/account-settings"><div class="nav-item"><span class="icon">⚙️</span> Settings</div></a>
-    <a href="/"><div class="nav-item"><span class="icon">🔐</span>Logout</div></a>
-
-  </div>
-
-  <div class="sidebar-bottom">
-    <div class="user-card">
-      <div class="avatar" id="sb-avatar">--</div>
-      <div class="user-info">
-        <div class="user-name" id="sb-name">Loading...</div>
-        <div class="user-role" id="sb-role">Passenger</div>
-      </div>
-      <span style="color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
-    </div>
-  </div>
-</aside>
-
-<main class="main">
-
-  <div class="topbar">
-    <div>
-      <div class="page-title">Dashboard</div>
-      <div class="breadcrumb">Home / <span>Dashboard</span></div>
-    </div>
-    <div class="topbar-right">
-      <div id="live-dot" title="Connecting..." style="width:8px;height:8px;border-radius:50%;background:#F39C12;flex-shrink:0;transition:background 0.4s;animation:pulse 2s infinite;"></div>
-      <a href="/notifications"><div class="notif-btn">🔔<div class="notif-dot"></div></div></a>
-      <div style="padding:8px 12px; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:10px; display:flex; gap:10px; align-items:center; box-shadow:var(--card-shadow);">
-        <div class="avatar" id="top-avatar" style="width:30px;height:30px;font-size:11px;">--</div>
-        <span id="top-name" style="font-size:13px; font-weight:600; color:var(--text);">Loading...</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="greeting-banner">
-    <div class="greeting-bg-blob"></div>
-    <div class="greeting-text" style="position:relative;z-index:1;">
-      <div class="hello" id="greet-time">Good day 👋</div>
-      <h2 id="greet-name">Welcome back! 👋</h2>
-      <p id="greet-sub">Loading your rides...</p>
-    </div>
-    <div class="greeting-stats">
-      <div class="greet-stat">
-        <div class="greet-stat-val" id="stat-posted" style="color:var(--accent);">—</div>
-        <div class="greet-stat-label">Rides Posted</div>
-      </div>
-      <div class="greet-divider"></div>
-      <div class="greet-stat">
-        <div class="greet-stat-val" id="stat-booked" style="color:var(--green);">—</div>
-        <div class="greet-stat-label">Rides Booked</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="action-grid">
-
-    <div class="action-card search-card">
-      <div class="action-card-icon">🔍</div>
-      <div class="action-card-title">Find Your<span style="font-family: 'Rozha One'; color: #FF8C00;"> सारथी</span></div>
-      <div class="action-card-sub">Find affordable shared rides near you. Enter your destination and we'll match you with drivers heading the same way.</div>
-
-      <div class="search-row">
-        <div class="ride-input-wrap">
-          <span class="input-icon">📍</span>
-          <input class="ride-input" type="text" placeholder="Where are you going?" />
+  <!-- ── Chat Modal ─────────────────────────────────────────────────────── -->
+  <div class="chat-overlay" id="chatOverlay">
+    <div class="chat-modal" id="chatModal">
+      <div class="chat-header">
+        <div
+          style="width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+          💬</div>
+        <div class="chat-header-info">
+          <div class="chat-header-title" id="chatTitle">Chat</div>
+          <div class="chat-header-sub" id="chatSub">Active Ride</div>
         </div>
-        <a href="/find-ride">
-          <button class="btn-search">Search →</button>
+        <button class="chat-close-btn" onclick="closeChat()">✕</button>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="chat-empty">💬 <span>Loading messages…</span></div>
+      </div>
+      <div id="chatLocked" class="chat-locked" style="display:none;">🔒 Chat is closed — the ride has ended.</div>
+      <div class="chat-footer" id="chatFooter">
+        <input class="chat-input" id="chatInput" placeholder="Type a message…" maxlength="1000" />
+        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      Ride <span class="hindi">मित्र</span>
+    </div>
+
+    <div class="sidebar-cta">
+      <button class="cta-btn-sidebar"><a href="/post-ride">＋ &nbsp;Post a Ride</a></button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active"><span class="icon">📊</span> Dashboard</div>
+      <a href="/find-ride">
+        <div class="nav-item"><span class="icon">🗺️</span> Find a Ride</div>
+      </a>
+      <a href="/post-ride">
+        <div class="nav-item"><span class="icon">📅</span> My Rides</div>
+      </a>
+      <div class="nav-item"><span class="icon">💰</span> Payments</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Account</div>
+      <a href="/notifications">
+        <div class="nav-item"><span class="icon">🔔</span> Notifications</div>
+      </a>
+      <a href="/account-settings">
+        <div class="nav-item"><span class="icon">⚙️</span> Settings</div>
+      </a>
+      <a href="/">
+        <div class="nav-item"><span class="icon">🔐</span>Logout</div>
+      </a>
+
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="avatar" id="sb-avatar">--</div>
+        <div class="user-info">
+          <div class="user-name" id="sb-name">Loading...</div>
+          <div class="user-role" id="sb-role">Passenger</div>
+        </div>
+        <span style="color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="breadcrumb">Home / <span>Dashboard</span></div>
+      </div>
+      <div class="topbar-right">
+        <div id="live-dot" title="Connecting..."
+          style="width:8px;height:8px;border-radius:50%;background:#F39C12;flex-shrink:0;transition:background 0.4s;animation:pulse 2s infinite;">
+        </div>
+        <a href="/notifications">
+          <div class="notif-btn">🔔<div class="notif-dot"></div>
+          </div>
+        </a>
+        <div
+          style="padding:8px 12px; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:10px; display:flex; gap:10px; align-items:center; box-shadow:var(--card-shadow);">
+          <div class="avatar" id="top-avatar" style="width:30px;height:30px;font-size:11px;">--</div>
+          <span id="top-name" style="font-size:13px; font-weight:600; color:var(--text);">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="greeting-banner">
+      <div class="greeting-bg-blob"></div>
+      <div class="greeting-text" style="position:relative;z-index:1;">
+        <div class="hello" id="greet-time">Good day 👋</div>
+        <h2 id="greet-name">Welcome back! 👋</h2>
+        <p id="greet-sub">Loading your rides...</p>
+      </div>
+      <div class="greeting-stats">
+        <div class="greet-stat">
+          <div class="greet-stat-val" id="stat-posted" style="color:var(--accent);">—</div>
+          <div class="greet-stat-label">Rides Posted</div>
+        </div>
+        <div class="greet-divider"></div>
+        <div class="greet-stat">
+          <div class="greet-stat-val" id="stat-booked" style="color:var(--green);">—</div>
+          <div class="greet-stat-label">Rides Booked</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-grid">
+
+      <div class="action-card search-card">
+        <div class="action-card-icon">🔍</div>
+        <div class="action-card-title">Find Your<span style="font-family: 'Rozha One'; color: #FF8C00;"> सारथी</span>
+        </div>
+        <div class="action-card-sub">Find affordable shared rides near you. Enter your destination and we'll match you
+          with drivers heading the same way.</div>
+
+        <div class="search-row">
+          <div class="ride-input-wrap">
+            <span class="input-icon">📍</span>
+            <input class="ride-input" type="text" placeholder="Where are you going?" />
+          </div>
+          <a href="/find-ride">
+            <button class="btn-search">Search →</button>
+          </a>
+        </div>
+
+        <div class="quick-chips">
+          <span style="font-size:11px; color:var(--muted); align-self:center; font-weight:600;">Popular:</span>
+          <div class="chip">🏢 Gurgaon</div>
+          <div class="chip">✈️ IGI Airport</div>
+          <div class="chip">🏛️ Connaught Place</div>
+          <div class="chip">🏥 AIIMS</div>
+        </div>
+      </div>
+
+      <div class="action-card sell-card">
+        <div class="action-card-icon">🚙</div>
+        <div class="action-card-title">Drive with Us</div>
+        <div class="action-card-sub">Share your empty seats and split the fuel cost. Post your route and let passengers
+          find you — it's that simple.</div>
+
+        <div class="feature-pills">
+          <div class="feature-pill">
+            <div class="feature-pill-dot"></div>
+            <span>Earn money on your daily commute</span>
+          </div>
+          <div class="feature-pill">
+            <div class="feature-pill-dot"></div>
+            <span>Set your own price and schedule</span>
+          </div>
+          <div class="feature-pill">
+            <div class="feature-pill-dot"></div>
+            <span>Verified passengers only</span>
+          </div>
+        </div>
+
+        <a href="/post-ride">
+          <button class="btn-post">🚗 &nbsp; Post a Ride</button>
         </a>
       </div>
 
-      <div class="quick-chips">
-        <span style="font-size:11px; color:var(--muted); align-self:center; font-weight:600;">Popular:</span>
-        <div class="chip">🏢 Gurgaon</div>
-        <div class="chip">✈️ IGI Airport</div>
-        <div class="chip">🏛️ Connaught Place</div>
-        <div class="chip">🏥 AIIMS</div>
-      </div>
     </div>
 
-    <div class="action-card sell-card">
-      <div class="action-card-icon">🚙</div>
-      <div class="action-card-title">Drive with Us</div>
-      <div class="action-card-sub">Share your empty seats and split the fuel cost. Post your route and let passengers find you — it's that simple.</div>
+    <div class="bottom-row">
 
-      <div class="feature-pills">
-        <div class="feature-pill">
-          <div class="feature-pill-dot"></div>
-          <span>Earn money on your daily commute</span>
+      <!-- LEFT: Posted Rides -->
+      <div class="table-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Rides Posted</div>
+            <div class="card-sub">Your created rides</div>
+          </div>
         </div>
-        <div class="feature-pill">
-          <div class="feature-pill-dot"></div>
-          <span>Set your own price and schedule</span>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Passenger</th>
+              <th>Route</th>
+              <th>Fare/Seat</th>
+              <th>Seats</th>
+              <th>Status</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody id="postedRidesTable"></tbody>
+        </table>
+      </div>
+
+      <!-- RIGHT: Booked Rides -->
+      <div class="table-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Rides Booked</div>
+            <div class="card-sub">Your bookings</div>
+          </div>
         </div>
-        <div class="feature-pill">
-          <div class="feature-pill-dot"></div>
-          <span>Verified passengers only</span>
-        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Driver</th>
+              <th>Route</th>
+              <th>Fare &amp; Seats</th>
+              <th>Status</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody id="bookedRidesTable"></tbody>
+        </table>
       </div>
 
-      <a href="/post-ride">
-        <button class="btn-post">🚗 &nbsp; Post a Ride</button>
-      </a>
     </div>
 
-  </div>
+    <script>
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
 
-  <div class="bottom-row">
+      function statusBadge(status) {
+        const map = {
+          accepted: { cls: "status-active", label: "✅ Accepted" },
+          rejected: { cls: "status-cancelled", label: "❌ Rejected" },
+          pending: { cls: "status-pending", label: "⏳ Pending" }
+        };
+        const s = map[status] || { cls: "status-pending", label: status || "Pending" };
+        return `<span class="status-badge ${s.cls}">${s.label}</span>`;
+      }
 
-  <!-- LEFT: Posted Rides -->
-  <div class="table-card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Rides Posted</div>
-        <div class="card-sub">Your created rides</div>
-      </div>
-    </div>
+      function fmtDate(d) {
+        if (!d) return "—";
+        return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      }
 
-    <table>
-      <thead>
-        <tr>
-                <th>Passenger</th>
-          <th>Route</th>
-          <th>Fare/Seat</th>
-          <th>Seats</th>
-          <th>Status</th>
-          <th>Contact</th>
-        </tr>
-      </thead>
-      <tbody id="postedRidesTable"></tbody>
-    </table>
-  </div>
+      // ================= POSTED RIDES (driver view) =================
+      async function fetchPostedRides() {
+        try {
+          const res = await fetch("/api/v4/bookings/my-rides-with-passengers", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const rides = await res.json();
+          const tbody = document.getElementById("postedRidesTable");
+          tbody.innerHTML = "";
 
-  <!-- RIGHT: Booked Rides -->
-  <div class="table-card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">Rides Booked</div>
-        <div class="card-sub">Your bookings</div>
-      </div>
-    </div>
+          if (!Array.isArray(rides) || !rides.length) {
+            tbody.innerHTML = `<tr class="table-empty"><td colspan="5">No rides posted yet — share your journey! 🚀</td></tr>`;
+            return;
+          }
 
-    <table>
-      <thead>
-        <tr>
-                <th>Driver</th>
-          <th>Route</th>
-          <th>Fare &amp; Seats</th>
-          <th>Status</th>
-          <th>Contact</th>
-        </tr>
-      </thead>
-      <tbody id="bookedRidesTable"></tbody>
-    </table>
-  </div>
+          rides.forEach(ride => {
+            const from = ride.pickup || '—';
+            const to = ride.destination || '—';
+            const fare = ride.fare != null ? ride.fare : '—';
+            const seats = ride.seats != null ? ride.seats : '—';
+            const rideEnd = ride.rideStatus === "completed" || ride.rideStatus === "cancelled";
 
-</div>
-
-  <script>
-const token = localStorage.getItem("token");
-
-function statusBadge(status) {
-  const map = {
-    accepted: { cls: "status-active",    label: "✅ Accepted" },
-    rejected: { cls: "status-cancelled", label: "❌ Rejected" },
-    pending:  { cls: "status-pending",   label: "⏳ Pending"  }
-  };
-  const s = map[status] || { cls: "status-pending", label: status || "Pending" };
-  return `<span class="status-badge ${s.cls}">${s.label}</span>`;
-}
-
-function fmtDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-}
-
-// ================= POSTED RIDES (driver view) =================
-async function fetchPostedRides() {
-  try {
-    const res = await fetch("/api/v4/bookings/my-rides-with-passengers", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const rides = await res.json();
-    const tbody = document.getElementById("postedRidesTable");
-    tbody.innerHTML = "";
-
-    if (!Array.isArray(rides) || !rides.length) {
-      tbody.innerHTML = `<tr class="table-empty"><td colspan="5">No rides posted yet — share your journey! 🚀</td></tr>`;
-      return;
-    }
-
-    rides.forEach(ride => {
-      const from    = ride.pickup      || '—';
-      const to      = ride.destination || '—';
-      const fare    = ride.fare        != null ? ride.fare : '—';
-      const seats   = ride.seats       != null ? ride.seats : '—';
-      const rideEnd = ride.rideStatus === "completed" || ride.rideStatus === "cancelled";
-
-      tbody.innerHTML += `
+            tbody.innerHTML += `
         <tr class="ride-group-header">
           <td colspan="6">📍 ${from} → ${to} &nbsp;·&nbsp; ${fmtDate(ride.date)} &nbsp;·&nbsp; ₹${fare}/seat &nbsp;·&nbsp; ${seats} seats total</td>
         </tr>`;
 
-      if (!ride.bookings || !ride.bookings.length) {
-        tbody.innerHTML += `<tr class="no-booking-row"><td colspan="6">No booking requests yet</td></tr>`;
-      } else {
-        ride.bookings.forEach(b => {
-          const name    = b.passengerName || 'Passenger';
-          const initial = name.charAt(0).toUpperCase();
-          const seatNum = b.seatsRequested || 1;
-          const canChat = b.status === 'accepted' && !rideEnd;
-          const contactBtn = canChat
-            ? `<button class="btn-contact" onclick="openChat('${b.bookingId}','${name}','${from} → ${to}')">💬 Chat</button>`
-            : '';
-          tbody.innerHTML += `
+            if (!ride.bookings || !ride.bookings.length) {
+              tbody.innerHTML += `<tr class="no-booking-row"><td colspan="6">No booking requests yet</td></tr>`;
+            } else {
+              ride.bookings.forEach(b => {
+                const name = b.passengerName || 'Passenger';
+                const initial = name.charAt(0).toUpperCase();
+                const seatNum = b.seatsRequested || 1;
+                const canChat = b.status === 'accepted' && !rideEnd;
+                const contactBtn = canChat
+                  ? `<button class="btn-contact" onclick="openChat('${b.bookingId}','${name}','${from} → ${to}')">💬 Chat</button>`
+                  : '';
+                tbody.innerHTML += `
             <tr>
               <td>
                 <div class="rider-info">
@@ -1221,43 +1520,43 @@ async function fetchPostedRides() {
               <td>${statusBadge(b.status)}</td>
               <td>${contactBtn}</td>
             </tr>`;
-        });
+              });
+            }
+          });
+
+        } catch (err) {
+          console.error("Posted rides error:", err);
+          document.getElementById("postedRidesTable").innerHTML =
+            `<tr class="table-empty"><td colspan="5">Could not load rides. Is the server running?</td></tr>`;
+        }
       }
-    });
 
-  } catch (err) {
-    console.error("Posted rides error:", err);
-    document.getElementById("postedRidesTable").innerHTML =
-      `<tr class="table-empty"><td colspan="5">Could not load rides. Is the server running?</td></tr>`;
-  }
-}
+      // ================= BOOKED RIDES (passenger view) =================
+      async function fetchBookedRides() {
+        try {
+          const res = await fetch("/api/v4/bookings/my-bookings", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          const tbody = document.getElementById("bookedRidesTable");
+          tbody.innerHTML = "";
 
-// ================= BOOKED RIDES (passenger view) =================
-async function fetchBookedRides() {
-  try {
-    const res = await fetch("/api/v4/bookings/my-bookings", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
-    const tbody = document.getElementById("bookedRidesTable");
-    tbody.innerHTML = "";
+          if (!Array.isArray(data) || !data.length) {
+            tbody.innerHTML = `<tr class="table-empty"><td colspan="4">No bookings yet — find a ride to get started 🚗</td></tr>`;
+            return;
+          }
 
-    if (!Array.isArray(data) || !data.length) {
-      tbody.innerHTML = `<tr class="table-empty"><td colspan="4">No bookings yet — find a ride to get started 🚗</td></tr>`;
-      return;
-    }
-
-    data.forEach(b => {
-      const driver  = b.driverName || 'Driver';
-      const initial = driver.charAt(0).toUpperCase();
-      const seats   = b.seatsRequested || 1;
-      const rideEnd = b.rideStatus === 'completed' || b.rideStatus === 'cancelled';
-      const canChat = b.status === 'accepted' && !rideEnd;
-      const route   = `${b.pickup || '—'} → ${b.destination || '—'}`;
-      const contactBtn = canChat
-        ? `<button class="btn-contact" onclick="openChat('${b.bookingId}','${driver}','${route}')">💬 Chat</button>`
-        : '';
-      tbody.innerHTML += `
+          data.forEach(b => {
+            const driver = b.driverName || 'Driver';
+            const initial = driver.charAt(0).toUpperCase();
+            const seats = b.seatsRequested || 1;
+            const rideEnd = b.rideStatus === 'completed' || b.rideStatus === 'cancelled';
+            const canChat = b.status === 'accepted' && !rideEnd;
+            const route = `${b.pickup || '—'} → ${b.destination || '—'}`;
+            const contactBtn = canChat
+              ? `<button class="btn-contact" onclick="openChat('${b.bookingId}','${driver}','${route}')">💬 Chat</button>`
+              : '';
+            tbody.innerHTML += `
         <tr>
           <td>
             <div class="rider-info">
@@ -1283,259 +1582,260 @@ async function fetchBookedRides() {
           <td>${statusBadge(b.status)}</td>
           <td>${contactBtn}</td>
         </tr>`;
-    });
+          });
 
-  } catch (err) {
-    console.error("Booked rides error:", err);
-    document.getElementById("bookedRidesTable").innerHTML =
-      `<tr class="table-empty"><td colspan="4">Could not load bookings. Is the server running?</td></tr>`;
-  }
-}
+        } catch (err) {
+          console.error("Booked rides error:", err);
+          document.getElementById("bookedRidesTable").innerHTML =
+            `<tr class="table-empty"><td colspan="4">Could not load bookings. Is the server running?</td></tr>`;
+        }
+      }
 
-// ================= REAL-TIME (Socket.IO) =================
-let chatSocket = null;
-let activeChatBookingId = null;
-let myUserId = null; // populated by /api/v4/user/me — set BEFORE connectSocket()
+      // ================= REAL-TIME (Socket.IO) =================
+      let chatSocket = null;
+      let activeChatBookingId = null;
+      let myUserId = null; // populated by /api/v4/user/me — set BEFORE connectSocket()
 
-function connectSocket() {
-  const t = localStorage.getItem("token");
-  if (!t) return;
+      function connectSocket() {
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+        if (!t) return;
 
-  // Use a relative origin so the app works on any host/port
-  chatSocket = io(window.location.origin);
+        // Use a relative origin so the app works on any host/port
+        chatSocket = io(window.location.origin);
 
-  chatSocket.on("connect", () => {
-    chatSocket.emit("join", t);
-    const dot = document.getElementById("live-dot");
-    if (dot) { dot.style.background = "#2ECC71"; dot.title = "Live"; }
-  });
+        chatSocket.on("connect", () => {
+          chatSocket.emit("join", t);
+          const dot = document.getElementById("live-dot");
+          if (dot) { dot.style.background = "#2ECC71"; dot.title = "Live"; }
+        });
 
-  chatSocket.on("disconnect", () => {
-    const dot = document.getElementById("live-dot");
-    if (dot) { dot.style.background = "#E74C3C"; dot.title = "Disconnected"; }
-  });
+        chatSocket.on("disconnect", () => {
+          const dot = document.getElementById("live-dot");
+          if (dot) { dot.style.background = "#E74C3C"; dot.title = "Disconnected"; }
+        });
 
-  // New booking request → refresh posted rides table
-  chatSocket.on("new-notification", () => { fetchPostedRides(); });
+        // New booking request → refresh posted rides table
+        chatSocket.on("new-notification", () => { fetchPostedRides(); });
 
-  // Booking accepted/rejected → refresh both tables
-  chatSocket.on("booking-updated", () => { fetchPostedRides(); fetchBookedRides(); });
+        // Booking accepted/rejected → refresh both tables
+        chatSocket.on("booking-updated", () => { fetchPostedRides(); fetchBookedRides(); });
 
-  // ── Chat events ──
-  chatSocket.on("chat-message", (msg) => {
-    if (msg.bookingId !== activeChatBookingId) return;
-    appendChatMessage(msg);
-  });
+        // ── Chat events ──
+        chatSocket.on("chat-message", (msg) => {
+          if (msg.bookingId !== activeChatBookingId) return;
+          appendChatMessage(msg);
+        });
 
-  chatSocket.on("chat-error", (errMsg) => { lockChat(errMsg); });
-}
+        chatSocket.on("chat-error", (errMsg) => { lockChat(errMsg); });
+      }
 
-// ================= CHAT HELPERS =================
-function openChat(bookingId, otherName, route) {
-  activeChatBookingId = bookingId;
-  document.getElementById("chatTitle").textContent = `Chat with ${otherName}`;
-  document.getElementById("chatSub").textContent   = route;
-  document.getElementById("chatBody").innerHTML    = '<div class="chat-empty">💬 <span>Loading…</span></div>';
-  document.getElementById("chatLocked").style.display = "none";
-  document.getElementById("chatFooter").style.display = "flex";
-  document.getElementById("chatInput").disabled    = false;
-  document.getElementById("chatSendBtn").disabled  = false;
-  document.getElementById("chatOverlay").classList.add("open");
+      // ================= CHAT HELPERS =================
+      function openChat(bookingId, otherName, route) {
+        activeChatBookingId = bookingId;
+        document.getElementById("chatTitle").textContent = `Chat with ${otherName}`;
+        document.getElementById("chatSub").textContent = route;
+        document.getElementById("chatBody").innerHTML = '<div class="chat-empty">💬 <span>Loading…</span></div>';
+        document.getElementById("chatLocked").style.display = "none";
+        document.getElementById("chatFooter").style.display = "flex";
+        document.getElementById("chatInput").disabled = false;
+        document.getElementById("chatSendBtn").disabled = false;
+        document.getElementById("chatOverlay").classList.add("open");
 
-  const t = localStorage.getItem("token");
-  if (chatSocket) chatSocket.emit("join-chat", { bookingId, token: t });
-  loadChatHistory(bookingId);
-}
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+        if (chatSocket) chatSocket.emit("join-chat", { bookingId, token: t });
+        loadChatHistory(bookingId);
+      }
 
-function closeChat() {
-  document.getElementById("chatOverlay").classList.remove("open");
-  activeChatBookingId = null;
-}
+      function closeChat() {
+        document.getElementById("chatOverlay").classList.remove("open");
+        activeChatBookingId = null;
+      }
 
-async function loadChatHistory(bookingId) {
-  try {
-    const res  = await fetch(`/api/v4/chat/${bookingId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    });
-    const data = await res.json();
-    const body = document.getElementById("chatBody");
-    body.innerHTML = "";
+      async function loadChatHistory(bookingId) {
+        try {
+          const res = await fetch(`/api/v4/chat/${bookingId}`, {
+            headers: { Authorization: `Bearer ${( localStorage.getItem("token") || sessionStorage.getItem("token") )}` }
+          });
+          const data = await res.json();
+          const body = document.getElementById("chatBody");
+          body.innerHTML = "";
 
-    // Render history first (so messages are visible even for ended rides)
-    if (!data.messages || !data.messages.length) {
-      body.innerHTML = '<div class="chat-empty">💬 <span>No messages yet — say hello!</span></div>';
-    } else {
-      data.messages.forEach(msg => appendChatMessage(msg, true));
-      scrollChatToBottom();
-    }
+          // Render history first (so messages are visible even for ended rides)
+          if (!data.messages || !data.messages.length) {
+            body.innerHTML = '<div class="chat-empty">💬 <span>No messages yet — say hello!</span></div>';
+          } else {
+            data.messages.forEach(msg => appendChatMessage(msg, true));
+            scrollChatToBottom();
+          }
 
-    // Lock the footer AFTER rendering — chat inactive means ride ended
-    if (!data.isChatActive) lockChat("Chat is closed — the ride has ended.");
-  } catch (e) { console.error("loadChatHistory:", e); }
-}
+          // Lock the footer AFTER rendering — chat inactive means ride ended
+          if (!data.isChatActive) lockChat("Chat is closed — the ride has ended.");
+        } catch (e) { console.error("loadChatHistory:", e); }
+      }
 
-function appendChatMessage(msg, suppressScroll = false) {
-  const body    = document.getElementById("chatBody");
-  const isEmpty = body.querySelector(".chat-empty");
-  if (isEmpty) isEmpty.remove();
+      function appendChatMessage(msg, suppressScroll = false) {
+        const body = document.getElementById("chatBody");
+        const isEmpty = body.querySelector(".chat-empty");
+        if (isEmpty) isEmpty.remove();
 
-  const isMe = msg.senderId?._id === myUserId || msg.senderId === myUserId;
-  const name = msg.senderId?.name || "";
-  const time = msg.createdAt
-    ? new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
-    : "";
+        const isMe = msg.senderId?._id === myUserId || msg.senderId === myUserId;
+        const name = msg.senderId?.name || "";
+        const time = msg.createdAt
+          ? new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+          : "";
 
-  const el = document.createElement("div");
-  el.className = `chat-msg ${isMe ? "mine" : "theirs"}`;
-  el.innerHTML = `
+        const el = document.createElement("div");
+        el.className = `chat-msg ${isMe ? "mine" : "theirs"}`;
+        el.innerHTML = `
     <div>${escapeHtml(msg.text)}</div>
     <div class="chat-msg-meta">${isMe ? "You" : escapeHtml(name)} · ${time}</div>
   `;
-  body.appendChild(el);
-  if (!suppressScroll) scrollChatToBottom();
-}
-
-function lockChat(reason) {
-  const locked = document.getElementById("chatLocked");
-  const footer = document.getElementById("chatFooter");
-  locked.textContent = `🔒 ${reason || "Chat is closed."}`;
-  locked.style.display = "block";
-  footer.style.display = "none";
-}
-
-function scrollChatToBottom() {
-  const body = document.getElementById("chatBody");
-  body.scrollTop = body.scrollHeight;
-}
-
-function sendChatMessage() {
-  const input = document.getElementById("chatInput");
-  const text  = input.value.trim();
-  // Guard: socket must exist AND be connected
-  if (!text || !activeChatBookingId || !chatSocket || !chatSocket.connected) {
-    if (chatSocket && !chatSocket.connected) {
-      console.warn("Socket disconnected — message not sent.");
-    }
-    return;
-  }
-  chatSocket.emit("chat-message", {
-    bookingId: activeChatBookingId,
-    token: localStorage.getItem("token"),
-    text
-  });
-  input.value = "";
-  input.focus();
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-// ================= INIT =================
-document.addEventListener("DOMContentLoaded", async () => {
-  fetchPostedRides();
-  fetchBookedRides();
-
-  // Resolve myUserId BEFORE starting socket so chat bubbles are
-  // correctly labelled "mine" vs "theirs" from the very first message.
-  const t = localStorage.getItem("token");
-  if (t && !myUserId) {
-    try {
-      const r = await fetch("/api/v4/user/me", {
-        headers: { Authorization: `Bearer ${t}` }
-      });
-      const d = await r.json();
-      if (d.success && d.user?._id) myUserId = d.user._id;
-    } catch (_) { /* non-critical */ }
-  }
-
-  connectSocket();
-
-  // Enter key to send
-  const chatInput = document.getElementById("chatInput");
-  if (chatInput) {
-    chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-    });
-  }
-
-  // Click overlay to close
-  document.getElementById("chatOverlay").addEventListener("click", (e) => {
-    if (e.target === document.getElementById("chatOverlay")) closeChat();
-  });
-});
-</script>
-</main>
-
-<script>
-  (async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    // ── Time-based greeting ─────────────────────────────────────
-    const hour = new Date().getHours();
-    const greetWord = hour < 12 ? "Good morning 🌅"
-                    : hour < 17 ? "Good afternoon ☀️"
-                    : "Good evening 🌙";
-    const greetTimeEl = document.getElementById("greet-time");
-    if (greetTimeEl) greetTimeEl.textContent = greetWord;
-
-    // ── User name ───────────────────────────────────────────────
-    try {
-      const res = await fetch("/api/v4/user/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        const u = data.user;
-        const initials  = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-        const firstName = u.name ? u.name.split(" ")[0] : "there";
-        document.getElementById("sb-avatar").textContent   = initials;
-        document.getElementById("sb-name").textContent     = u.name || "User";
-        document.getElementById("sb-role").textContent     = u.role || "Passenger";
-        document.getElementById("top-avatar").textContent  = initials;
-        document.getElementById("top-name").textContent    = u.name || "User";
-        document.getElementById("greet-name").textContent  = `Welcome back, ${firstName}! 👋`;
-        // expose userId for chat bubble identification
-        myUserId = u._id;
+        body.appendChild(el);
+        if (!suppressScroll) scrollChatToBottom();
       }
-    } catch (e) { /* silent */ }
 
-    // ── Ride counts for banner stats ────────────────────────────
-    try {
-      const [postedRes, bookedRes] = await Promise.all([
-        fetch("/api/v4/bookings/my-rides", {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch("/api/v4/bookings/my-bookings", {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ]);
+      function lockChat(reason) {
+        const locked = document.getElementById("chatLocked");
+        const footer = document.getElementById("chatFooter");
+        locked.textContent = `🔒 ${reason || "Chat is closed."}`;
+        locked.style.display = "block";
+        footer.style.display = "none";
+      }
 
-      const posted = await postedRes.json();
-      const booked = await bookedRes.json();
+      function scrollChatToBottom() {
+        const body = document.getElementById("chatBody");
+        body.scrollTop = body.scrollHeight;
+      }
 
-      const postedCount = Array.isArray(posted) ? posted.length : 0;
-      const bookedCount = Array.isArray(booked) ? booked.length : 0;
-
-      document.getElementById("stat-posted").textContent = postedCount;
-      document.getElementById("stat-booked").textContent = bookedCount;
-
-      const sub = document.getElementById("greet-sub");
-      if (sub) {
-        if (bookedCount > 0) {
-          sub.innerHTML = `You have <strong>${bookedCount}</strong> ride${bookedCount > 1 ? 's' : ''} booked and <strong>${postedCount}</strong> posted.`;
-        } else if (postedCount > 0) {
-          sub.innerHTML = `You've posted <strong>${postedCount}</strong> ride${postedCount > 1 ? 's' : ''}. Waiting for passengers!`;
-        } else {
-          sub.textContent = "Post or book a ride to get started 🚗";
+      function sendChatMessage() {
+        const input = document.getElementById("chatInput");
+        const text = input.value.trim();
+        // Guard: socket must exist AND be connected
+        if (!text || !activeChatBookingId || !chatSocket || !chatSocket.connected) {
+          if (chatSocket && !chatSocket.connected) {
+            console.warn("Socket disconnected — message not sent.");
+          }
+          return;
         }
+        chatSocket.emit("chat-message", {
+          bookingId: activeChatBookingId,
+          token: ( localStorage.getItem("token") || sessionStorage.getItem("token") ),
+          text
+        });
+        input.value = "";
+        input.focus();
       }
-    } catch (e) { /* silent */ }
-  })();
-</script>
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+      // ================= INIT =================
+      document.addEventListener("DOMContentLoaded", async () => {
+        fetchPostedRides();
+        fetchBookedRides();
+
+        // Resolve myUserId BEFORE starting socket so chat bubbles are
+        // correctly labelled "mine" vs "theirs" from the very first message.
+        const t = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+        if (t && !myUserId) {
+          try {
+            const r = await fetch("/api/v4/user/me", {
+              headers: { Authorization: `Bearer ${t}` }
+            });
+            const d = await r.json();
+            if (d.success && d.user?._id) myUserId = d.user._id;
+          } catch (_) { /* non-critical */ }
+        }
+
+        connectSocket();
+
+        // Enter key to send
+        const chatInput = document.getElementById("chatInput");
+        if (chatInput) {
+          chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+          });
+        }
+
+        // Click overlay to close
+        document.getElementById("chatOverlay").addEventListener("click", (e) => {
+          if (e.target === document.getElementById("chatOverlay")) closeChat();
+        });
+      });
+    </script>
+  </main>
+
+  <script>
+    (async () => {
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+      if (!token) return;
+
+      // ── Time-based greeting ─────────────────────────────────────
+      const hour = new Date().getHours();
+      const greetWord = hour < 12 ? "Good morning 🌅"
+        : hour < 17 ? "Good afternoon ☀️"
+          : "Good evening 🌙";
+      const greetTimeEl = document.getElementById("greet-time");
+      if (greetTimeEl) greetTimeEl.textContent = greetWord;
+
+      // ── User name ───────────────────────────────────────────────
+      try {
+        const res = await fetch("/api/v4/user/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const u = data.user;
+          const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+          const firstName = u.name ? u.name.split(" ")[0] : "there";
+          document.getElementById("sb-avatar").textContent = initials;
+          document.getElementById("sb-name").textContent = u.name || "User";
+          document.getElementById("sb-role").textContent = u.role || "Passenger";
+          document.getElementById("top-avatar").textContent = initials;
+          document.getElementById("top-name").textContent = u.name || "User";
+          document.getElementById("greet-name").textContent = `Welcome back, ${firstName}! 👋`;
+          // expose userId for chat bubble identification
+          myUserId = u._id;
+        }
+      } catch (e) { /* silent */ }
+
+      // ── Ride counts for banner stats ────────────────────────────
+      try {
+        const [postedRes, bookedRes] = await Promise.all([
+          fetch("/api/v4/bookings/my-rides", {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch("/api/v4/bookings/my-bookings", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        const posted = await postedRes.json();
+        const booked = await bookedRes.json();
+
+        const postedCount = Array.isArray(posted) ? posted.length : 0;
+        const bookedCount = Array.isArray(booked) ? booked.length : 0;
+
+        document.getElementById("stat-posted").textContent = postedCount;
+        document.getElementById("stat-booked").textContent = bookedCount;
+
+        const sub = document.getElementById("greet-sub");
+        if (sub) {
+          if (bookedCount > 0) {
+            sub.innerHTML = `You have <strong>${bookedCount}</strong> ride${bookedCount > 1 ? 's' : ''} booked and <strong>${postedCount}</strong> posted.`;
+          } else if (postedCount > 0) {
+            sub.innerHTML = `You've posted <strong>${postedCount}</strong> ride${postedCount > 1 ? 's' : ''}. Waiting for passengers!`;
+          } else {
+            sub.textContent = "Post or book a ride to get started 🚗";
+          }
+        }
+      } catch (e) { /* silent */ }
+    })();
+  </script>
 
 </body>
+
 </html>

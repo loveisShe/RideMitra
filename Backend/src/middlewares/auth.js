@@ -1,19 +1,13 @@
-import jwt from "jsonwebtoken";
-
-export const protect = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "No token" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded; // 🔥 THIS LINE IS IMPORTANT
-
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
+/**
+ * DEPRECATED — DO NOT USE
+ *
+ * Bug #13 fix: this middleware only verified the JWT payload but did NOT perform
+ * a database lookup. A deleted user's token would still pass this check.
+ *
+ * Use `authMiddleware` from `./authMiddleware.js` instead — it verifies the token
+ * AND confirms the user still exists in the database.
+ */
+throw new Error(
+  "[auth.js] This file is intentionally disabled. " +
+  "Import authMiddleware from './authMiddleware.js' instead."
+);

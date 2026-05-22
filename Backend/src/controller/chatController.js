@@ -5,7 +5,7 @@ export const getMessages = async (req, res) => {
     try {
         const data = await getMessagesService({
             bookingId:   req.params.bookingId,
-            requesterId: req.user.id               // ✅ Prisma integer id
+            requesterId: req.user.id               
         });
         res.json(data);
     } catch (err) {
@@ -18,7 +18,7 @@ export const sendMessage = async (req, res) => {
     try {
         const message = await sendMessageService({
             bookingId: req.params.bookingId,
-            senderId:  req.user.id,                // ✅ Prisma integer id
+            senderId:  req.user.id,              
             text:      req.body.text
         });
         res.json({ message });

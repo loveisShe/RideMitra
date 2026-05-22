@@ -1898,6 +1898,12 @@
 
     /* — Authentication Logic — */
 
+    // Safari-safe token storage: falls back to sessionStorage if localStorage is blocked
+    function saveToken(token) {
+      try { localStorage.setItem("token", token); } catch(e) {}
+      try { sessionStorage.setItem("token", token); } catch(e) {}
+    }
+
     async function handleSignup(event) {
       event.preventDefault();
 
@@ -1909,22 +1915,18 @@
       const email = document.getElementById("signup-email").value;
       const password = document.getElementById("signup-password").value;
 
-      const response = await fetch("http://localhost:3000/api/v4/user/register", {
-        method: "POST", //HTTP
+      const response = await fetch("/api/v4/user/register", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role: "Passenger"
-        })
+        credentials: "include",
+        body: JSON.stringify({ name, email, password, role: "Passenger" })
       });
 
       const result = await response.json();
       alert(result.message);
 
       if (response.ok) {
-        localStorage.setItem("token", result.token);
+        saveToken(result.token);
         window.location.href = '/dashboard';
       }
     }
@@ -1934,63 +1936,60 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
-      const response = await fetch('http://localhost:3000/api/v4/user/login', {
-        method: 'POST', //HTTP 
+      const response = await fetch('/api/v4/user/login', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", result.token);
+        saveToken(result.token);
         window.location.href = "/dashboard";
       } else {
         alert(result.message);
       }
     }
 
-    let tokenClient;
-
+    // Use Google Identity Services ID token flow (works on Safari, required by backend)
     window.onload = function () {
-      // 1. Initialize the Token Client
-      tokenClient = google.accounts.oauth2.initTokenClient({
+      google.accounts.id.initialize({
         client_id: '173008253506-rk60rbs422nng2hvuis23addl1378k84.apps.googleusercontent.com',
-        scope: 'openid email profile',
         callback: (response) => {
-          if (response.access_token) {
-            // Send the access_token to your backend
-            handleGoogleAuth(response.access_token);
-          }
+          // response.credential is the ID token — what the backend verifies
+          handleGoogleAuth(response.credential);
         },
+        ux_mode: 'popup'
       });
 
-      // 2. Attach to all Google buttons (Sign In and Sign Up)
-      const googleBtns = document.querySelectorAll('.btn-google');
-      googleBtns.forEach(btn => {
-        btn.onclick = () => tokenClient.requestAccessToken();
+      // Render the button into each .btn-google container
+      document.querySelectorAll('.btn-google').forEach(btn => {
+        btn.onclick = () => google.accounts.id.prompt();
       });
     };
 
-    async function handleGoogleAuth(accessToken) {
+    async function handleGoogleAuth(idToken) {
       try {
-        const res = await fetch("http://localhost:3000/api/v4/user/google-login", {
+        const res = await fetch("/api/v4/user/google-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: accessToken }) // Sending token instead of code
+          credentials: "include",
+          body: JSON.stringify({ token: idToken })
         });
 
         const result = await res.json();
         if (res.ok) {
-          localStorage.setItem("token", result.token);
+          saveToken(result.token);
           window.location.href = "/dashboard";
         } else {
-          alert(result.message || "Auth Failed");
+          alert(result.message || "Google login failed. Please try email login.");
         }
       } catch (err) {
-        console.error("Login Error:", err);
+        console.error("Google Login Error:", err);
+        alert("Google login failed. Please try email login.");
       }
-
     }
   </script>
 </body>

@@ -22,13 +22,28 @@ export const sendMessageService = async ({ bookingId, senderId, text }) => {
         throw { status: 403, message: "You are not part of this booking" };
     }
 
-    return await prisma.message.create({
+    const saved = await prisma.message.create({
         data: {
             bookingId: parseInt(bookingId),
             senderId:  parseInt(senderId),
             text:      text.trim().slice(0, 1000)
-        }
+        },
+        include: { sender: { select: { id: true, name: true } } }
     });
+
+    // Bug #17 fix: emit the message to the Socket.IO room so real-time clients
+    // receive messages sent through the REST fallback endpoint as well.
+    if (global.io) {
+        global.io.to(`chat:${bookingId}`).emit("chat-message", {
+            id:        saved.id,
+            bookingId: parseInt(bookingId),
+            senderId:  { id: saved.sender.id, name: saved.sender.name },
+            text:      saved.text,
+            createdAt: saved.createdAt
+        });
+    }
+
+    return saved;
 };
 
 // ================= GET MESSAGES =================

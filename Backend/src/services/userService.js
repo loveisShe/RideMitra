@@ -1,7 +1,9 @@
 import prisma from "../Lib/prismaClient.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import fetch from "node-fetch";
+import { OAuth2Client } from "google-auth-library";
+
+const googleOAuthClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -14,20 +16,21 @@ export const sendTokenResponse = (user, statusCode, res, message) => {
     const cookieOptions = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: false,
-        sameSite: "Lax",
+        // Bug #3 fix: only send cookie over HTTPS in production
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
         path: "/"
     };
 
     const userPayload = {
-        id:             user.id,
-        name:           user.name,
-        email:          user.email,
-        role:           user.role,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
         profilePicture: user.profilePicture,
-        phone:          user.phone || "",
-        city:           user.city  || "",
-        bio:            user.bio   || ""
+        phone: user.phone || "",
+        city: user.city || "",
+        bio: user.bio || ""
     };
 
     res.status(statusCode)
@@ -80,12 +83,23 @@ export const loginUserService = async ({ email, password }) => {
 export const googleLoginService = async (token) => {
     if (!token) throw { status: 400, message: "No Google token provided" };
 
-    const googleRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
-    const userData = await googleRes.json();
+    // Bug #4 fix: verify the ID token via google-auth-library to ensure it was
+    // issued by Google for *this* app's client ID, not any arbitrary access token.
+    let name, email, picture;
+    try {
+        const ticket = await googleOAuthClient.verifyIdToken({
+            idToken:  token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+        const payload = ticket.getPayload();
+        name    = payload.name;
+        email   = payload.email;
+        picture = payload.picture;
+    } catch {
+        throw { status: 401, message: "Google Authentication failed: invalid or expired token" };
+    }
 
-    if (!userData.email) throw { status: 400, message: "Google Authentication failed" };
-
-    const { name, email, picture } = userData;
+    if (!email) throw { status: 400, message: "Google Authentication failed" };
 
     let user = await prisma.user.findUnique({ where: { email } });
 
@@ -154,7 +168,14 @@ export const deleteUserService = async (tokenId, urlId) => {
         throw { status: 403, message: "Forbidden: You can only delete your own account" };
     }
 
-    const deleted = await prisma.user.delete({ where: { id: parseInt(tokenId) } });
-    if (!deleted) throw { status: 404, message: "User not found" };
-    return deleted;
+    // Bug #11 fix: prisma.delete never returns null — it throws P2025 when not found.
+    // The previous `if (!deleted)` check was dead code and the 404 was never sent.
+    try {
+        return await prisma.user.delete({ where: { id: parseInt(tokenId) } });
+    } catch (err) {
+        if (err.code === "P2025") {
+            throw { status: 404, message: "User not found" };
+        }
+        throw err;
+    }
 };

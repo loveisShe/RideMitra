@@ -136,8 +136,14 @@
       transition: opacity 0.2s, transform 0.15s;
     }
 
-    .post-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .post-btn:active { transform: translateY(0); }
+    .post-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .post-btn:active {
+      transform: translateY(0);
+    }
 
     .section-label {
       font-size: 10px;
@@ -171,7 +177,10 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    .nav-item:hover { background: #F5F3EE; color: var(--navy); }
+    .nav-item:hover {
+      background: #F5F3EE;
+      color: var(--navy);
+    }
 
     .nav-item.active {
       background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
@@ -180,7 +189,11 @@
       font-weight: 600;
     }
 
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
 
     .nav-badge {
       margin-left: auto;
@@ -645,8 +658,13 @@
       padding-right: 20px;
     }
 
-    .ride-card .card-top { padding-top: 18px; }
-    .ride-card .card-bottom { padding-bottom: 18px; }
+    .ride-card .card-top {
+      padding-top: 18px;
+    }
+
+    .ride-card .card-bottom {
+      padding-bottom: 18px;
+    }
 
     .card-top {
       display: flex;
@@ -689,7 +707,9 @@
       margin-top: 2px;
     }
 
-    .stars { color: #F59E0B; }
+    .stars {
+      color: #F59E0B;
+    }
 
     .fare-box {
       text-align: right;
@@ -819,12 +839,41 @@
       letter-spacing: 0.2px;
     }
 
-    .tag-verified { background: var(--emerald-light); color: #1DAF5F; border: 1px solid rgba(46, 204, 113, 0.25); }
-    .tag-ac { background: #EFF9FF; color: #0EA5E9; border: 1px solid rgba(14, 165, 233, 0.2); }
-    .tag-music { background: #FAF5FF; color: #9333EA; border: 1px solid rgba(147, 51, 234, 0.2); }
-    .tag-women { background: #FFF0F6; color: #EC4899; border: 1px solid rgba(236, 72, 153, 0.2); }
-    .tag-pets { background: #FFFBEB; color: #D97706; border: 1px solid rgba(217, 119, 6, 0.2); }
-    .tag-nosmoking { background: #FFF5F5; color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .tag-verified {
+      background: var(--emerald-light);
+      color: #1DAF5F;
+      border: 1px solid rgba(46, 204, 113, 0.25);
+    }
+
+    .tag-ac {
+      background: #EFF9FF;
+      color: #0EA5E9;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .tag-music {
+      background: #FAF5FF;
+      color: #9333EA;
+      border: 1px solid rgba(147, 51, 234, 0.2);
+    }
+
+    .tag-women {
+      background: #FFF0F6;
+      color: #EC4899;
+      border: 1px solid rgba(236, 72, 153, 0.2);
+    }
+
+    .tag-pets {
+      background: #FFFBEB;
+      color: #D97706;
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .tag-nosmoking {
+      background: #FFF5F5;
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
 
     .card-bottom {
       display: flex;
@@ -842,7 +891,10 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    .seats-badge span { color: var(--emerald); font-weight: 700; }
+    .seats-badge span {
+      color: var(--emerald);
+      font-weight: 700;
+    }
 
     .book-btn {
       background: linear-gradient(135deg, var(--orange), #FF6B00);
@@ -859,8 +911,17 @@
       letter-spacing: 0.2px;
     }
 
-    .book-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255, 140, 0, 0.36); }
-    .book-btn.booked { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+    .book-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(255, 140, 0, 0.36);
+    }
+
+    .book-btn.booked {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
 
     /* ── TOAST ── */
     #toast {
@@ -882,11 +943,20 @@
       animation: slideUp .3s ease;
     }
 
-    #toast.show { display: flex; }
+    #toast.show {
+      display: flex;
+    }
 
     @keyframes slideUp {
-      from { transform: translateY(16px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(16px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     .empty-state {
@@ -894,9 +964,23 @@
       padding: 60px 20px;
     }
 
-    .empty-state .icon { font-size: 44px; margin-bottom: 14px; }
-    .empty-state h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--navy); }
-    .empty-state p { font-size: 13px; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; }
+    .empty-state .icon {
+      font-size: 44px;
+      margin-bottom: 14px;
+    }
+
+    .empty-state h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--navy);
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
   </style>
 </head>
 
@@ -933,7 +1017,8 @@
         <div class="avatar" id="sb-avatar">--</div>
         <div>
           <div id="sb-name" style="font-size:13px; font-weight:700; color:var(--navy)">Loading...</div>
-          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
+          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">
+            Passenger</div>
         </div>
         <span style="margin-left:auto; color:var(--muted2); font-size:14px; cursor:pointer;">⋯</span>
       </div>
@@ -947,38 +1032,38 @@
 
     <!-- Search Card -->
     <div class="search-card">
-  <div class="search-row">
-    <div class="input-wrap">
-      <span class="input-icon">📍</span>
-      <input class="search-input" id="inp-from" placeholder="From — pickup location" />
+      <div class="search-row">
+        <div class="input-wrap">
+          <span class="input-icon">📍</span>
+          <input class="search-input" id="inp-from" placeholder="From — pickup location" />
+        </div>
+        <div class="swap-btn" onclick="swapLocations()">⇄</div>
+        <div class="input-wrap">
+          <span class="input-icon">🏁</span>
+          <input class="search-input" id="inp-to" placeholder="To — destination" />
+        </div>
+        <div class="input-wrap" style="flex:0 0 148px">
+          <span class="input-icon">📅</span>
+          <input class="search-input" type="date" id="inp-date" style="padding-left:34px" />
+        </div>
+        <select class="seats-select" id="inp-seats">
+          <option value="1">1 seat</option>
+          <option value="2">2 seats</option>
+          <option value="3">3 seats</option>
+          <option value="4">4 seats</option>
+        </select>
+        <button class="search-btn" onclick="fetchRides()">Search →</button>
+      </div>
+
+      <div class="popular-row">
+        <span class="popular-label">Popular:</span>
+        <span class="chip" onclick="setDest('Gurgaon')">📍 Gurgaon</span>
+        <span class="chip" onclick="setDest('IGI Airport')">✈️ IGI Airport</span>
+        <span class="chip" onclick="setDest('Connaught Place')">📍 Connaught Place</span>
+        <span class="chip" onclick="setDest('AIIMS')">🏥 AIIMS</span>
+        <span class="chip" onclick="setDest('Noida Sector 18')">📍 Noida Sector 18</span>
+      </div>
     </div>
-    <div class="swap-btn" onclick="swapLocations()">⇄</div>
-    <div class="input-wrap">
-      <span class="input-icon">🏁</span>
-      <input class="search-input" id="inp-to" placeholder="To — destination" />
-    </div>
-    <div class="input-wrap" style="flex:0 0 148px">
-      <span class="input-icon">📅</span>
-      <input class="search-input" type="date" id="inp-date" style="padding-left:34px" />
-    </div>
-    <select class="seats-select" id="inp-seats">
-      <option value="1">1 seat</option>
-      <option value="2">2 seats</option>
-      <option value="3">3 seats</option>
-      <option value="4">4 seats</option>
-    </select>
-    <button class="search-btn" onclick="fetchRides()">Search →</button>
-  </div>
-  
-  <div class="popular-row">
-    <span class="popular-label">Popular:</span>
-    <span class="chip" onclick="setDest('Gurgaon')">📍 Gurgaon</span>
-    <span class="chip" onclick="setDest('IGI Airport')">✈️ IGI Airport</span>
-    <span class="chip" onclick="setDest('Connaught Place')">📍 Connaught Place</span>
-    <span class="chip" onclick="setDest('AIIMS')">🏥 AIIMS</span>
-    <span class="chip" onclick="setDest('Noida Sector 18')">📍 Noida Sector 18</span>
-  </div>
-</div>
 
     <!-- Results -->
     <div class="results-layout">
@@ -1036,7 +1121,7 @@
       <!-- Rides -->
       <div class="rides-list">
         <div class="results-header">
-          <div class="results-count"><span id="ride-count"></span>  Ride Found</div>
+          <div class="results-count"><span id="ride-count"></span> Ride Found</div>
           <select class="sort-select" onchange="setSort(this.value)">
             <option value="recommended">Recommended</option>
             <option value="fare">Lowest Fare</option>
@@ -1058,168 +1143,187 @@
     </div>
   </div>
 
-<script>
+  <script>
     let rides = [];
-    let filterAC = false, filterVerified = false, maxFare = 10000;  // ✅ matches slider max
+    let filterAC = false, filterVerified = false, maxFare = 10000; // ✅ FIX: match slider default so rides show without touching the bar
 
     async function fetchRides() {
-    const fromInput = document.getElementById('inp-from').value.trim();
-    const toInput = document.getElementById('inp-to').value.trim();
-    const dateInput = document.getElementById('inp-date').value; 
-    const container = document.getElementById('rides-container');
+      const fromInput = document.getElementById('inp-from').value.trim();
+      const toInput = document.getElementById('inp-to').value.trim();
+      const dateInput = document.getElementById('inp-date').value;
+      const container = document.getElementById('rides-container');
 
-    // ✅ STOP if empty
-    if (!fromInput || !toInput || !dateInput) {
+      // ✅ STOP if empty
+      if (!fromInput || !toInput || !dateInput) {
         container.innerHTML = `<h3>Please enter Date </h3>`;
         document.getElementById('ride-count').textContent = 0;
         return;
-    }
+      }
 
-    container.innerHTML = `<p>Searching...</p>`;
+      container.innerHTML = `<p>Searching...</p>`;
 
-    try {
-        let url = `http://localhost:3000/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
+      try {
+        let url = `/api/v4/rides/all-rides?pickup=${encodeURIComponent(fromInput)}&destination=${encodeURIComponent(toInput)}`;
         if (dateInput) url += `&date=${dateInput}`;
 
         const response = await fetch(url);
         const data = await response.json();
 
+        // ✅ FIX: use correct fields from Prisma API response (id not _id, driver from r.driver)
         rides = data.map(r => ({
-            id: r.id,                                              // ✅ Prisma integer id
-            driver: r.driver ? r.driver.name : "Unknown Driver",   // ✅ Prisma relation
-            avatar: (r.driver?.name || "?").charAt(0).toUpperCase(),
-            from: r.pickup,
-            to: r.destination,
-            date: new Date(r.date).toLocaleDateString('en-IN'),
-            time: r.time,
-            seats: r.seats,
-            fare: r.fare,
-            car: r.vehicleType || "Sedan"
+          id: r.id,
+          driver: r.driver ? r.driver.name : "Unknown Driver",
+          avatarUrl: r.driver ? r.driver.profilePicture : null,
+          avatarInitial: r.driver ? (r.driver.name || "D").charAt(0).toUpperCase() : "D",
+          from: r.pickup,
+          to: r.destination,
+          date: r.date ? new Date(r.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—',
+          time: r.time,
+          seats: r.seats,
+          fare: r.fare,
+          car: r.vehicleType || "Sedan"
         }));
 
         renderRides();
 
-    } catch (error) {
+      } catch (error) {
         console.error("Fetch Error:", error);
         container.innerHTML = `<p>Error connecting to server.</p>`;
+      }
     }
-}
     async function bookRide(rideId) {
-  const token = localStorage.getItem("token");
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
 
-  const seatsRequested = 1;
+      const seatsRequested = 1;
 
-  console.log("Sending booking:", rideId, seatsRequested);
+      console.log("Sending booking:", rideId, seatsRequested);
 
-  if (!rideId) {
-    alert("Ride ID missing");
-    return;
-  }
+      if (!rideId) {
+        alert("Ride ID missing");
+        return;
+      }
 
-  try {
-    const res = await fetch("http://localhost:3000/api/v4/bookings/request-booking", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        rideId: rideId,
-        seatsRequested: seatsRequested
-      })
-    });
+      try {
+        const res = await fetch("/api/v4/bookings/request-booking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            rideId: rideId,
+            seatsRequested: seatsRequested
+          })
+        });
 
-    const data = await res.json();
-    console.log("Response:", data);
+        const data = await res.json();
+        console.log("Response:", data);
 
-    alert("Request Sent ✅");
+        alert("Request Sent ✅");
 
-  } catch (err) {
-    console.error("Booking error:", err);
-  }
-}
+      } catch (err) {
+        console.error("Booking error:", err);
+      }
+    }
 
     // FIX: Added missing bookRide function to resolve ReferenceError
-    
+
 
     function renderRides() {
-        const container = document.getElementById('rides-container');
-        let list = rides.filter(r => r.fare <= maxFare);
-         document.getElementById('ride-count').textContent = list.length;
+      const container = document.getElementById('rides-container');
+      let list = rides.filter(r => r.fare <= maxFare);
+      document.getElementById('ride-count').textContent = list.length;
 
-        if (list.length === 0) {
-            container.innerHTML = `<h3>No rides found.</h3>`;
-            return;
-        }
+      if (list.length === 0) {
+        container.innerHTML = `<h3>No rides found.</h3>`;
+        return;
+      }
 
-        container.innerHTML = list.map(r => `
-            <div class="ride-card">
-                <div class="card-top">
-                    <div class="driver-info">
-                        <div class="driver-avatar">${r.avatar}</div>
-                        <div>
-                            <div class="driver-name">${r.driver}</div>
-                            <div class="driver-meta">${r.car}</div>
-                        </div>
-                    </div>
-                    <div class="fare-box">
-                        <div class="fare-amt">₹${r.fare}</div>
-                    </div>
+      // ✅ FIX: render profile picture when available, fallback to initial
+      container.innerHTML = list.map(r => {
+        const avatarHtml = r.avatarUrl
+          ? `<img src="${r.avatarUrl}" alt="${r.driver}" style="width:46px;height:46px;border-radius:14px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.12);display:block;" onerror="this.outerHTML='<div class=\'driver-avatar\' style=\'background:linear-gradient(135deg,#FF8C00,#FF6B00)\'>${r.avatarInitial}</div>'" />`
+          : `<div class="driver-avatar" style="background:linear-gradient(135deg,hsl(${(r.driver.charCodeAt(0)*5)%360},70%,55%),hsl(${(r.driver.charCodeAt(0)*5+40)%360},70%,45%))">${r.avatarInitial}</div>`;
+
+        return `
+          <div class="ride-card">
+            <div class="card-top">
+              <div class="driver-info">
+                ${avatarHtml}
+                <div>
+                  <div class="driver-name">${r.driver}</div>
+                  <div class="driver-meta">${r.car} &nbsp;·&nbsp; ⏰ ${r.time || '—'}</div>
                 </div>
-                <div class="route-row">
-                    <span>${r.from}</span> → <span>${r.to}</span>
-                </div>
-                <div class="meta-row">
-                    <span>📅 ${r.date}</span>
-                    <span>💺 ${r.seats} seats left</span>
-                </div>
-                <div class="card-bottom">
-                    <button class="book-btn" onclick="bookRide('${r.id}')">Book Seat →</button>
-                </div>
+              </div>
+              <div class="fare-box">
+                <div class="fare-amt">₹${r.fare}</div>
+                <div class="fare-lbl">per seat</div>
+              </div>
             </div>
-        `).join('');
+            <div class="route-row">
+              <div class="route-dots">
+                <div class="route-dot" style="background:#FF8C00"></div>
+                <div class="route-line"></div>
+                <div class="route-dot" style="background:#2ECC71"></div>
+              </div>
+              <div class="route-labels">
+                <div class="route-from">📍 ${r.from}</div>
+                <div class="route-to">🏁 ${r.to}</div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-item">📅 ${r.date}</span>
+              <span class="meta-item">💺 <strong style="color:#2ECC71">${r.seats}</strong> seats left</span>
+            </div>
+            <div class="card-bottom">
+              <span class="seats-badge">🚗 ${r.car}</span>
+              <button class="book-btn" onclick="bookRide(${r.id})">Book Seat →</button>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     // UI Helper Functions
     function swapLocations() {
-        const f = document.getElementById('inp-from');
-        const t = document.getElementById('inp-to');
-        [f.value, t.value] = [t.value, f.value];
+      const f = document.getElementById('inp-from');
+      const t = document.getElementById('inp-to');
+      [f.value, t.value] = [t.value, f.value];
     }
 
     function updateFare(val) {
-        maxFare = parseInt(val);
-        document.getElementById('fare-display').textContent = `₹${val}`;
-        renderRides();
+      maxFare = parseInt(val);
+      document.getElementById('fare-display').textContent = `₹${val}`;
+      renderRides();
     }
     window.onload = () => {
-    document.getElementById('rides-container').innerHTML = `<h3>Search for rides to begin</h3>`;
-    document.getElementById('ride-count').textContent = 0;
-};
+      document.getElementById('rides-container').innerHTML = `<h3>Search for rides to begin</h3>`;
+      document.getElementById('ride-count').textContent = 0;
+    };
 
-// ✅ SET MIN DATE (today)
-const today = new Date().toISOString().split("T")[0];
-document.getElementById("inp-date").setAttribute("min", today);
-</script>
-<script>
-  (async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    try {
-      const res = await fetch("http://localhost:3000/api/v4/user/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        const u = data.user;
-        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-        document.getElementById("sb-avatar").textContent = initials;
-        document.getElementById("sb-name").textContent = u.name || "User";
-        document.getElementById("sb-role").textContent = u.role || "Passenger";
-      }
-    } catch (e) { /* silent */ }
-  })();
-</script>
+    // ✅ SET MIN DATE (today)
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("inp-date").setAttribute("min", today);
+  </script>
+  <script>
+    (async () => {
+      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+      if (!token) return;
+      try {
+        const res = await fetch("/api/v4/user/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const u = data.user;
+          const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+          document.getElementById("sb-avatar").textContent = initials;
+          document.getElementById("sb-name").textContent = u.name || "User";
+          document.getElementById("sb-role").textContent = u.role || "Passenger";
+        }
+      } catch (e) { /* silent */ }
+    })();
+  </script>
 
 </body>
+
 </html>
