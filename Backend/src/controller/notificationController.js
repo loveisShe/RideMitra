@@ -3,7 +3,7 @@ import { getNotificationsService, markOneReadService, markAllReadService } from 
 // ================= GET NOTIFICATIONS =================
 export const getNotifications = async (req, res) => {
     try {
-        const notifications = await getNotificationsService(req.user.id); 
+        const notifications = await getNotificationsService(req.user.id); // ✅ Prisma integer id
         res.json(notifications);
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
@@ -13,8 +13,7 @@ export const getNotifications = async (req, res) => {
 // ================= MARK ONE AS READ =================
 export const markOneRead = async (req, res) => {
     try {
-        // Bug #5 fix: pass req.user.id so only the owner can mark a notification as read
-        await markOneReadService(req.params.id, req.user.id);
+        await markOneReadService(req.params.id);
         res.json({ success: true });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });
@@ -24,7 +23,7 @@ export const markOneRead = async (req, res) => {
 // ================= MARK ALL AS READ =================
 export const markAllRead = async (req, res) => {
     try {
-        await markAllReadService(req.user.id); 
+        await markAllReadService(req.user.id); // ✅ Prisma integer id
         res.json({ success: true });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message });

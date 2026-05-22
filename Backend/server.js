@@ -6,8 +6,6 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import helmet from "helmet"; // Bug #21
-import rateLimit from "express-rate-limit"; // Bug #16
 
 dotenv.config();
 
@@ -27,34 +25,11 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// In production on Render the browser sends the Render URL as the origin.
-// We must allow it, plus localhost for local dev.
-const RENDER_URL = "https://ridemitra-hymf.onrender.com";
-
 const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim())
-  : [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:5500",
-      "http://127.0.0.1:5500",
-      RENDER_URL
-    ];
+  ? process.env.CORS_ORIGIN.split(",")
+  : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500"];
 
-// Allow requests with no origin (mobile apps, Postman, curl) and listed origins
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow no-origin requests (mobile native, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    // Allow any *.onrender.com subdomain (covers preview URLs)
-    if (origin.endsWith(".onrender.com")) return callback(null, true);
-    callback(new Error(`CORS: origin '${origin}' not allowed`));
-  },
-  credentials: true
-}));
-// Bug #21 fix: apply helmet security headers
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -77,9 +52,6 @@ app.get("/account-settings", (req, res) => res.render("AccountSettings"));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(400).json({ success: false, message: "File is too large. Max size allowed is 5MB." });
-  }
   res.status(500).send({ error: "Something went wrong!", message: err.message });
 });
 
@@ -95,15 +67,7 @@ const startServer = async () => {
     });
 
     const io = new Server(server, {
-      cors: {
-        origin: (origin, callback) => {
-          if (!origin) return callback(null, true);
-          if (allowedOrigins.includes(origin)) return callback(null, true);
-          if (origin.endsWith(".onrender.com")) return callback(null, true);
-          callback(new Error(`CORS: origin '${origin}' not allowed`));
-        },
-        credentials: true
-      }
+      cors: { origin: allowedOrigins, credentials: true }
     });
 
     global.io = io;

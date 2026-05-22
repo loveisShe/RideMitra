@@ -1,711 +1,619 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notifications – Ride मित्र</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap"
-    rel="stylesheet">
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #FAFAF8;
-      --surface: #FFFFFF;
-      --surface2: #F5F3EE;
-      --border: #E8E5DF;
-      --accent: #FF8C00;
-      --green: #2ECC71;
-      --green-light: #E8FAF1;
-      --red: #E74C3C;
-      --red-light: #FEF2F2;
-      --navy: #1A1A2E;
-      --muted: #8A8A9A;
-      --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
-      color: var(--navy);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ── SIDEBAR ── */
-    .sidebar {
-      width: 240px;
-      min-height: 100vh;
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 28px 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 100;
-      box-shadow: 2px 0 24px rgba(0, 0, 0, 0.04);
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 24px 32px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      color: var(--navy);
-      letter-spacing: -0.3px;
-    }
-
-    .logo .hindi {
-      font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
-      font-weight: 900;
-      color: var(--accent);
-    }
-
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), #FF6B00);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
-      flex-shrink: 0;
-    }
-
-    .sidebar-cta {
-      margin: 0 12px 24px;
-    }
-
-    .cta-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), #FF6B00);
-      color: #fff;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-      box-shadow: 0 4px 20px rgba(255, 140, 0, 0.35);
-      letter-spacing: 0.3px;
-      text-decoration: none;
-    }
-
-    .cta-btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .cta-btn:active {
-      transform: translateY(0);
-    }
-
-    .nav-section {
-      padding: 0 12px;
-      margin-bottom: 24px;
-    }
-
-    .nav-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      padding: 0 12px 10px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 500;
-      margin-bottom: 2px;
-      text-decoration: none;
-    }
-
-    .nav-item:hover {
-      background: var(--surface2);
-      color: var(--navy);
-    }
-
-    .nav-item.active {
-      background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
-      color: var(--accent);
-      border: 1px solid rgba(255, 140, 0, 0.2);
-      font-weight: 600;
-    }
-
-    .nav-item .icon {
-      font-size: 16px;
-      width: 20px;
-      text-align: center;
-    }
-
-    .nav-badge {
-      margin-left: auto;
-      background: var(--accent);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 20px;
-    }
-
-    .sidebar-bottom {
-      margin-top: auto;
-      padding: 0 12px;
-    }
-
-    .user-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: var(--surface2);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: var(--card-shadow);
-      cursor: pointer;
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), #FF6B00);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 13px;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .user-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--navy);
-    }
-
-    .user-role {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* ── MAIN ── */
-    .main {
-      margin-left: 240px;
-      flex: 1;
-      padding: 32px;
-      max-width: calc(100vw - 240px);
-    }
-
-    /* ── TOPBAR ── */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 36px;
-    }
-
-    .page-title {
-      font-family: 'Rozha One', serif;
-      font-size: 28px;
-      font-weight: 400;
-      color: var(--navy);
-      letter-spacing: 0.3px;
-    }
-
-    .breadcrumb {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-      font-weight: 500;
-    }
-
-    .breadcrumb a {
-      color: var(--muted);
-      text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-      color: var(--accent);
-    }
-
-    .breadcrumb span {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .notif-btn {
-      width: 40px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      font-size: 16px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .notif-dot {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 7px;
-      height: 7px;
-      background: var(--accent);
-      border-radius: 50%;
-      border: 1px solid var(--bg);
-    }
-
-    .user-pill {
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      box-shadow: var(--card-shadow);
-      cursor: pointer;
-    }
-
-    .user-pill .av {
-      width: 30px;
-      height: 30px;
-      background: linear-gradient(135deg, var(--accent), #FF6B00);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .user-pill span {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--navy);
-    }
-
-    /* ── NOTIFICATION CARDS ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-
-    .section-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--navy);
-    }
-
-    .clear-btn {
-      font-size: 12px;
-      color: var(--muted);
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 500;
-      transition: color 0.2s;
-      padding: 0;
-    }
-
-    .clear-btn:hover {
-      color: var(--accent);
-    }
-
-    .notification {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px 20px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      box-shadow: var(--card-shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .notification::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(180deg, var(--accent), #FFB347);
-      border-radius: 4px 0 0 4px;
-    }
-
-    .notification:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
-    }
-
-    .notification.unread {
-      background: #FFFBF5;
-      border-color: rgba(255, 140, 0, 0.2);
-    }
-
-    .notif-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      background: #FFF3E0;
-    }
-
-    .notif-body {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .notif-message {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--navy);
-      margin-bottom: 4px;
-      line-height: 1.4;
-    }
-
-    .notif-meta {
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .notif-type {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: capitalize;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .actions button {
-      border: none;
-      padding: 8px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      transition: all 0.2s;
-      letter-spacing: 0.2px;
-    }
-
-    .accept {
-      background: linear-gradient(135deg, var(--green), #27AE60);
-      color: white;
-      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
-    }
-
-    .accept:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(46, 204, 113, 0.4);
-    }
-
-    .reject {
-      background: linear-gradient(135deg, #EF4444, #DC2626);
-      color: white;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .reject:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-    }
-
-    .status-badge {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 10px;
-      text-transform: capitalize;
-    }
-
-    .status-badge.accepted {
-      background: var(--green-light);
-      color: #1DAF5F;
-      border: 1px solid rgba(46, 204, 113, 0.25);
-    }
-
-    .status-badge.rejected {
-      background: var(--red-light);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center;
-      padding: 72px 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .empty-state .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    .empty-state h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 8px;
-    }
-
-    .empty-state p {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    /* ── LOADING SKELETON ── */
-    .skeleton {
-      background: linear-gradient(90deg, var(--surface2) 25%, #eee 50%, var(--surface2) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 10px;
-      height: 14px;
-      margin-bottom: 8px;
-    }
-
-    @keyframes shimmer {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -200% 0;
-      }
-    }
-
-    .skeleton-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px 20px;
-      margin-bottom: 12px;
-      box-shadow: var(--card-shadow);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications – Ride मित्र</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --surface2: #F5F3EE;
+    --border: #E8E5DF;
+    --accent: #FF8C00;
+    --green: #2ECC71;
+    --green-light: #E8FAF1;
+    --red: #E74C3C;
+    --red-light: #FEF2F2;
+    --navy: #1A1A2E;
+    --muted: #8A8A9A;
+    --card-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    box-shadow: 2px 0 24px rgba(0,0,0,0.04);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px 32px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--navy);
+    letter-spacing: -0.3px;
+  }
+
+  .logo .hindi {
+    font-family: 'Rozha One', 'Noto Sans Devanagari', serif;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(255,140,0,0.3);
+    flex-shrink: 0;
+  }
+
+  .sidebar-cta { margin: 0 12px 24px; }
+
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 20px rgba(255,140,0,0.35);
+    letter-spacing: 0.3px;
+    text-decoration: none;
+  }
+
+  .cta-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .cta-btn:active { transform: translateY(0); }
+
+  .nav-section { padding: 0 12px; margin-bottom: 24px; }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 12px 10px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--navy); }
+
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(255,140,0,0.12), rgba(255,140,0,0.05));
+    color: var(--accent);
+    border: 1px solid rgba(255,140,0,0.2);
+    font-weight: 600;
+  }
+
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-bottom { margin-top: auto; padding: 0 12px; }
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+  }
+
+  .avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 32px;
+    max-width: calc(100vw - 240px);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .page-title {
+    font-family: 'Rozha One', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--navy);
+    letter-spacing: 0.3px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .breadcrumb a { color: var(--muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb span { color: var(--accent); font-weight: 600; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .notif-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    font-size: 16px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .notif-dot {
+    position: absolute; top: 8px; right: 8px;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 1px solid var(--bg);
+  }
+
+  .user-pill {
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+  }
+
+  .user-pill .av {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), #FF6B00);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+
+  .user-pill span { font-size: 13px; font-weight: 600; color: var(--navy); }
+
+  /* ── NOTIFICATION CARDS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .clear-btn {
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 0;
+  }
+
+  .clear-btn:hover { color: var(--accent); }
+
+  .notification {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .notification::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--accent), #FFB347);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+  }
+
+  .notification.unread {
+    background: #FFFBF5;
+    border-color: rgba(255,140,0,0.2);
+  }
+
+  .notif-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: #FFF3E0;
+  }
+
+  .notif-body { flex: 1; min-width: 0; }
+
+  .notif-message {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .notif-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .notif-type {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: capitalize;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .actions button {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+
+  .accept {
+    background: linear-gradient(135deg, var(--green), #27AE60);
+    color: white;
+    box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+  }
+
+  .accept:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(46,204,113,0.4); }
+
+  .reject {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+  }
+
+  .reject:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239,68,68,0.4); }
+
+  .status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 10px;
+    text-transform: capitalize;
+  }
+
+  .status-badge.accepted {
+    background: var(--green-light);
+    color: #1DAF5F;
+    border: 1px solid rgba(46,204,113,0.25);
+  }
+
+  .status-badge.rejected {
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 72px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, #eee 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 10px;
+    height: 14px;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--card-shadow);
+  }
+</style>
 </head>
 
 <body>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">🚗</div>
-      Ride <span class="hindi">मित्र</span>
-    </div>
-
-    <div class="sidebar-cta">
-      <a href="/post-ride" class="cta-btn">＋ &nbsp;Post a Ride</a>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Main</div>
-      <a href="/dashboard" class="nav-item"><span class="icon">📊</span> Dashboard</a>
-      <a href="/find-ride" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
-      <a href="/post-ride" class="nav-item"><span class="icon">📅</span> My Rides</a>
-      <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Account</div>
-      <a href="/notifications" class="nav-item active"><span class="icon">🔔</span> Notifications</a>
-      <a href="/account-settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
-      <a href="/" class="nav-item"><span class="icon">🔐</span> Logout</a>
-    </div>
-
-    <div class="sidebar-bottom">
-      <div class="user-card">
-        <div class="avatar" id="sb-avatar">--</div>
-        <div>
-          <div class="user-name" id="sb-name">Loading...</div>
-          <div class="user-role" id="sb-role">Passenger</div>
-        </div>
-        <span style="margin-left:auto; color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div>
-        <div class="page-title">Notifications 🔔</div>
-        <div class="breadcrumb">Home / <a href="/dashboard">Dashboard</a> / <span>Notifications</span></div>
-      </div>
-      <div class="topbar-right">
-        <div class="notif-btn">🔔<div class="notif-dot"></div>
-        </div>
-        <div class="user-pill">
-          <div class="av" id="top-avatar">--</div>
-          <span id="top-name">Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTIFICATIONS LIST -->
-    <div class="section-header">
-      <div class="section-title">Recent Activity</div>
-      <button class="clear-btn" onclick="loadNotifications()">↻ Refresh</button>
-    </div>
-
-    <div id="notifications">
-      <div class="skeleton-card">
-        <div class="skeleton" style="width:60%"></div>
-        <div class="skeleton" style="width:35%"></div>
-      </div>
-      <div class="skeleton-card">
-        <div class="skeleton" style="width:75%"></div>
-        <div class="skeleton" style="width:40%"></div>
-      </div>
-      <div class="skeleton-card">
-        <div class="skeleton" style="width:50%"></div>
-        <div class="skeleton" style="width:30%"></div>
-      </div>
-    </div>
-
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🚗</div>
+    Ride <span class="hindi">मित्र</span>
   </div>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <div class="sidebar-cta">
+    <a href="/post-ride" class="cta-btn">＋ &nbsp;Post a Ride</a>
+  </div>
 
-  <script>
-    const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <a href="/dashboard" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+    <a href="/find-ride" class="nav-item"><span class="icon">🗺️</span> Find a Ride</a>
+    <a href="/post-ride" class="nav-item"><span class="icon">📅</span> My Rides</a>
+    <a href="#" class="nav-item"><span class="icon">💰</span> Payments</a>
+  </div>
 
-    if (!token) {
-      alert("User not logged in");
-      window.location.href = "/";
-    }
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a href="/notifications" class="nav-item active"><span class="icon">🔔</span> Notifications</a>
+    <a href="/account-settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+    <a href="/" class="nav-item"><span class="icon">🔐</span> Logout</a>
+  </div>
 
-    console.log("TOKEN:", token);
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar" id="sb-avatar">--</div>
+      <div>
+        <div class="user-name" id="sb-name">Loading...</div>
+        <div class="user-role" id="sb-role">Passenger</div>
+      </div>
+      <span style="margin-left:auto; color:var(--muted); font-size:14px; cursor:pointer;">⋯</span>
+    </div>
+  </div>
+</aside>
 
-    const socket = io();
+<!-- MAIN -->
+<div class="main">
 
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-      socket.emit("join", token);
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title">Notifications 🔔</div>
+      <div class="breadcrumb">Home / <a href="/dashboard">Dashboard</a> / <span>Notifications</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+      <div class="user-pill">
+        <div class="av" id="top-avatar">--</div>
+        <span id="top-name">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS LIST -->
+  <div class="section-header">
+    <div class="section-title">Recent Activity</div>
+    <button class="clear-btn" onclick="loadNotifications()">↻ Refresh</button>
+  </div>
+
+  <div id="notifications">
+    <!-- skeleton loaders while fetching -->
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:60%"></div>
+      <div class="skeleton" style="width:35%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:75%"></div>
+      <div class="skeleton" style="width:40%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:50%"></div>
+      <div class="skeleton" style="width:30%"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+const token = localStorage.getItem("token");
+
+// 🔐 CHECK LOGIN
+if (!token) {
+  alert("User not logged in");
+  window.location.href = "/";
+}
+
+console.log("TOKEN:", token);
+
+const socket = io("http://localhost:3000");
+
+// ✅ CONNECT FIRST THEN JOIN (SEND TOKEN)
+socket.on("connect", () => {
+  console.log("Socket connected:", socket.id);
+  socket.emit("join", token);
+});
+
+// ✅ REAL-TIME LISTENER
+socket.on("new-notification", (data) => {
+  console.log("Realtime:", data);
+  loadNotifications();
+});
+
+// 🔹 LOAD NOTIFICATIONS (TOKEN BASED)
+async function loadNotifications() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/v4/notifications`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
-    socket.on("new-notification", (data) => {
-      console.log("Realtime:", data);
-      loadNotifications();
-    });
+    const data = await res.json();
+    console.log("Fetched notifications:", data);
 
-    async function loadNotifications() {
-      try {
-        const res = await fetch(`/api/v4/notifications`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+    const container = document.getElementById("notifications");
 
-        const data = await res.json();
-        console.log("Fetched notifications:", data);
-
-        const container = document.getElementById("notifications");
-
-        if (!data.length) {
-          container.innerHTML = `
+    if (!data.length) {
+      container.innerHTML = `
         <div class="empty-state">
           <div class="icon">🔔</div>
           <h3>All caught up!</h3>
           <p>No notifications yet. We'll let you know when something happens.</p>
         </div>`;
-          return;
-        }
+      return;
+    }
 
-        console.log("📦 Raw notification fields (first item):", data[0]);
+    console.log("📦 Raw notification fields (first item):", data[0]);
 
-        container.innerHTML = data.map(n => {
-          // Prisma includes booking as n.booking { id, status }
-          const bookingObjId = n.booking?.id ?? n.bookingId;  // ✅ Prisma: n.booking.id
-          const bookingStatus = n.booking?.status ?? null;      // ✅ Prisma: n.booking.status
+    container.innerHTML = data.map(n => {
+      // Prisma includes booking as n.booking { id, status }
+      const bookingObjId   = n.booking?.id ?? n.bookingId;  // ✅ Prisma: n.booking.id
+      const bookingStatus  = n.booking?.status ?? null;      // ✅ Prisma: n.booking.status
 
-          // Show Accept/Reject ONLY if this is a 'request' notification AND booking is still pending
-          const isPending = n.type === "request" && bookingStatus === "pending";
-          const isActedOn = n.type === "request" && bookingStatus && bookingStatus !== "pending";
+      // Show Accept/Reject ONLY if this is a 'request' notification AND booking is still pending
+      const isPending  = n.type === "request" && bookingStatus === "pending";
+      const isActedOn  = n.type === "request" && bookingStatus && bookingStatus !== "pending";
 
-          const iconMap = { request: '🚗', accepted: '✅', rejected: '❌' };
-          const notifIcon = iconMap[n.type] || '🔔';
+      const iconMap = { request: '🚗', accepted: '✅', rejected: '❌' };
+      const notifIcon = iconMap[n.type] || '🔔';
 
-          return `
+      return `
       <div class="notification ${!n.read ? 'unread' : ''}" id="notif-${n.id}">
         <div class="notif-icon">${notifIcon}</div>
         <div class="notif-body">
@@ -715,123 +623,123 @@
             <span style="font-size:11px;color:var(--muted)">${timeAgo(n.createdAt)}</span>
           </div>
         </div>
-        ${isPending
-              ? `<div class="actions">
+        ${
+          isPending
+          ? `<div class="actions">
               <button class="accept" onclick="handle(${bookingObjId},'accept',${n.id})">✓ Accept</button>
               <button class="reject" onclick="handle(${bookingObjId},'reject',${n.id})">✕ Reject</button>
              </div>`
-              : isActedOn
-                ? `<span class="status-badge ${bookingStatus}">${bookingStatus === 'accepted' ? '✅ Accepted' : '❌ Rejected'}</span>`
-                : ""
-            }
+          : isActedOn
+            ? `<span class="status-badge ${bookingStatus}">${bookingStatus === 'accepted' ? '✅ Accepted' : '❌ Rejected'}</span>`
+            : ""
+        }
       </div>`;
-        }).join('');
+    }).join('');
 
-      } catch (err) {
-        console.error(err);
-        document.getElementById("notifications").innerHTML = `
+  } catch (err) {
+    console.error(err);
+    document.getElementById("notifications").innerHTML = `
       <div class="empty-state">
         <div class="icon">⚠️</div>
         <h3>Connection Error</h3>
         <p>Make sure your server is running on port 3000.</p>
       </div>`;
-      }
+  }
+}
+
+// 🔹 ACCEPT / REJECT
+async function handle(bookingId, action, notifId) {
+  // Optimistically swap buttons → status badge
+  const card = document.getElementById(`notif-${notifId}`);
+  if (card) {
+    const actionsEl = card.querySelector(".actions");
+    if (actionsEl) {
+      const label = action === "accept" ? "✅ Accepted" : "❌ Rejected";
+      const cls   = action === "accept" ? "accepted"    : "rejected";
+      actionsEl.outerHTML = `<span class="status-badge ${cls}">${label}</span>`;
     }
+  }
 
-    // 🔹 ACCEPT / REJECT
-    async function handle(bookingId, action, notifId) {
-      // Optimistically swap buttons → status badge
-      const card = document.getElementById(`notif-${notifId}`);
+  try {
+    // Accept or reject the booking
+    await fetch(`http://localhost:3000/api/v4/bookings/handle-booking/${bookingId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ action })
+    });
+
+    // Mark THIS notification as read using its own _id
+    await fetch(`http://localhost:3000/api/v4/notifications/mark-read/${notifId}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // Fade out the card after a short delay so driver sees the badge
+    setTimeout(() => {
       if (card) {
-        const actionsEl = card.querySelector(".actions");
-        if (actionsEl) {
-          const label = action === "accept" ? "✅ Accepted" : "❌ Rejected";
-          const cls = action === "accept" ? "accepted" : "rejected";
-          actionsEl.outerHTML = `<span class="status-badge ${cls}">${label}</span>`;
-        }
-      }
-
-      try {
-        // Accept or reject the booking
-        await fetch(`/api/v4/bookings/handle-booking/${bookingId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ action })
-        });
-
-        // Mark THIS notification as read using its own _id
-        await fetch(`/api/v4/notifications/mark-read/${notifId}`, {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        // Fade out the card after a short delay so driver sees the badge
+        card.style.transition = "opacity 0.4s, transform 0.4s";
+        card.style.opacity = "0";
+        card.style.transform = "translateX(40px)";
         setTimeout(() => {
-          if (card) {
-            card.style.transition = "opacity 0.4s, transform 0.4s";
-            card.style.opacity = "0";
-            card.style.transform = "translateX(40px)";
-            setTimeout(() => {
-              card.remove();
-              const remaining = document.querySelectorAll(".notification");
-              if (remaining.length === 0) {
-                document.getElementById("notifications").innerHTML = `
+          card.remove();
+          const remaining = document.querySelectorAll(".notification");
+          if (remaining.length === 0) {
+            document.getElementById("notifications").innerHTML = `
               <div class="empty-state">
                 <div class="icon">🔔</div>
                 <h3>All caught up!</h3>
                 <p>No new notifications. We'll let you know when something happens.</p>
               </div>`;
-              }
-            }, 400);
           }
-        }, 1200);
-
-      } catch (err) {
-        console.error("Handle error:", err);
-        // On error reload to show true state
-        loadNotifications();
+        }, 400);
       }
-    }
+    }, 1200);
 
-    // ── Time-ago helper ──
-    function timeAgo(dateStr) {
-      if (!dateStr) return '';
-      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-      if (diff < 60) return 'just now';
-      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-      return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    }
-
-    // initial load
+  } catch (err) {
+    console.error("Handle error:", err);
+    // On error reload to show true state
     loadNotifications();
-  </script>
+  }
+}
 
-  <script>
-    (async () => {
-      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
-      if (!token) return;
-      try {
-        const res = await fetch("/api/v4/user/me", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) {
-          const u = data.user;
-          const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-          document.getElementById("sb-avatar").textContent = initials;
-          document.getElementById("sb-name").textContent = u.name || "User";
-          document.getElementById("sb-role").textContent = u.role || "Passenger";
-          document.getElementById("top-avatar").textContent = initials;
-          document.getElementById("top-name").textContent = u.name || "User";
-        }
-      } catch (e) { /* silent */ }
-    })();
-  </script>
+// ── Time-ago helper ──
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60)    return 'just now';
+  if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return new Date(dateStr).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+}
+
+// initial load
+loadNotifications();
+</script>
+
+<script>
+  (async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:3000/api/v4/user/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const u = data.user;
+        const initials = (u.name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        document.getElementById("sb-avatar").textContent = initials;
+        document.getElementById("sb-name").textContent = u.name || "User";
+        document.getElementById("sb-role").textContent = u.role || "Passenger";
+        document.getElementById("top-avatar").textContent = initials;
+        document.getElementById("top-name").textContent = u.name || "User";
+      }
+    } catch (e) { /* silent */ }
+  })();
+</script>
 
 </body>
-
 </html>

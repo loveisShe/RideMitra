@@ -4,7 +4,7 @@ import multer from "multer";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
+    api_key:    process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
@@ -12,16 +12,16 @@ cloudinary.config({
 const profileStorage = new CloudinaryStorage({
     cloudinary,
     params: {
-        folder: "ridemitra/profiles",
+        folder:         "ridemitra/profiles",
         allowed_formats: ["jpg", "jpeg", "png", "webp"],
         transformation: [{ width: 400, height: 400, crop: "fill", gravity: "face" }]
     }
 });
 
-// ── Multer instance with 5 MB limit ─────────────────────────
+// ── Multer instance with 2 MB limit ─────────────────────────
 export const uploadProfilePic = multer({
     storage: profileStorage,
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits:  { fileSize: 2 * 1024 * 1024 }        // 2 MB
 });
 
 export default cloudinary;

@@ -44,9 +44,10 @@ export const getUserById = async (req, res) => {
 // ================= UPDATE USER =================
 export const updateUser = async (req, res) => {
     try {
+        // If a file was uploaded via Cloudinary, attach the URL to the update
         const updates = { ...req.body };
         if (req.file?.path) {
-            updates.profilePicture = req.file.path;   
+            updates.profilePicture = req.file.path;   // Cloudinary secure URL
         }
 
         const user = await updateUserService(req.user.id, req.params.id, updates);

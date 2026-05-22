@@ -10,10 +10,9 @@ export const getNotificationsService = async (userId) => {
 };
 
 // ================= MARK ONE AS READ =================
-// Bug #5 fix: userId is required to ensure a user can only mark their own notifications
-export const markOneReadService = async (notifId, userId) => {
-    await prisma.notification.updateMany({
-        where: { id: parseInt(notifId), userId: parseInt(userId) },
+export const markOneReadService = async (notifId) => {
+    await prisma.notification.update({
+        where: { id: parseInt(notifId) },
         data:  { read: true }
     });
 };

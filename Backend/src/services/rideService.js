@@ -25,18 +25,9 @@ export const postRideService = async ({ pickup, destination, date, time, vehicle
 export const getAllRidesService = async ({ pickup, destination, date }) => {
     const where = {};
 
-    // Bug #9 fix: only return active (pending) rides
-    where.status = "pending";
-
     if (pickup)      where.pickup      = { contains: pickup,      mode: "insensitive" };
     if (destination) where.destination = { contains: destination, mode: "insensitive" };
-
-    if (date) {
-        where.date = { gte: new Date(date), lt: new Date(new Date(date).getTime() + 86400000) };
-    } else {
-        // Bug #10 fix: default to today and future dates when no date is provided
-        where.date = { gte: new Date() };
-    }
+    if (date)        where.date        = { gte: new Date(date), lt: new Date(new Date(date).getTime() + 86400000) };
 
     return await prisma.ride.findMany({
         where,
@@ -46,15 +37,9 @@ export const getAllRidesService = async ({ pickup, destination, date }) => {
 };
 
 // ================= UPDATE SEATS =================
-// Bug #6 fix: requires callerId so we can verify the caller owns the ride
-export const updateRideSeatsService = async (rideId, bookedSeats = 1, callerId) => {
+export const updateRideSeatsService = async (rideId, bookedSeats = 1) => {
     const ride = await prisma.ride.findUnique({ where: { id: parseInt(rideId) } });
     if (!ride) throw { status: 404, message: "Ride not found" };
-
-    // Ownership check: only the driver of the ride can adjust its seats directly
-    if (ride.driverId !== parseInt(callerId)) {
-        throw { status: 403, message: "Forbidden: You are not the driver of this ride" };
-    }
 
     if (ride.seats < bookedSeats) {
         throw { status: 400, message: "Not enough seats available" };

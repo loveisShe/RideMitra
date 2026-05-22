@@ -134,14 +134,8 @@
       text-decoration: none;
     }
 
-    .post-btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .post-btn:active {
-      transform: translateY(0);
-    }
+    .post-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .post-btn:active { transform: translateY(0); }
 
     .section-label {
       font-size: 10px;
@@ -175,10 +169,7 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    .nav-item:hover {
-      background: #F5F3EE;
-      color: var(--navy);
-    }
+    .nav-item:hover { background: #F5F3EE; color: var(--navy); }
 
     .nav-item.active {
       background: linear-gradient(90deg, rgba(255, 140, 0, 0.12), rgba(255, 140, 0, 0.05));
@@ -187,11 +178,7 @@
       font-weight: 600;
     }
 
-    .nav-item .icon {
-      font-size: 16px;
-      width: 20px;
-      text-align: center;
-    }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
 
     .user-row {
       margin-top: auto;
@@ -1493,8 +1480,7 @@
         <div class="avatar" id="sb-avatar">--</div>
         <div>
           <div id="sb-name" style="font-size:13px; font-weight:700; color:var(--navy)">Loading...</div>
-          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">
-            Passenger</div>
+          <div id="sb-role" style="font-size:11px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif">Passenger</div>
         </div>
         <span style="margin-left:auto; color:var(--muted2); font-size:14px; cursor:pointer;">⋯</span>
       </div>
@@ -1605,12 +1591,12 @@
             <div class="field">
               <label>Pickup Location</label>
               <div class="fi"><span class="ico">📍</span><input type="text" id="f-from"
-                  placeholder="e.g. Sector 18, Noida" oninput="sync();scheduleEstimate()" /></div>
+                  placeholder="e.g. Sector 18, Noida" oninput="sync()" /></div>
             </div>
             <div class="field">
               <label>Drop-off Location</label>
               <div class="fi"><span class="ico">🏁</span><input type="text" id="f-to" placeholder="e.g. Connaught Place"
-                  oninput="sync();scheduleEstimate()" /></div>
+                  oninput="sync()" /></div>
             </div>
           </div>
 
@@ -1633,16 +1619,16 @@
             </div>
             <div class="field">
               <label>Est. Duration</label>
-              <!-- Auto-estimated from pickup + drop fields -->
-              <div class="fi" style="position:relative">
-                <span class="ico" id="dur-ico">⏱</span>
-                <input type="text" id="f-duration" placeholder="Auto-estimated…" readonly
-                  style="cursor:default;background:var(--bg2)" />
-                <button type="button" id="dur-estimate-btn" onclick="estimateDurationFromText()"
-                  title="Re-estimate duration"
-                  style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--orange-light);border:1.5px solid var(--orange-mid);border-radius:8px;padding:3px 9px;font-size:11px;font-weight:700;color:var(--orange);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">↻ Estimate</button>
+              <div class="fi"><span class="ico">⏱</span>
+                <select id="f-duration">
+                  <option>~30 min</option>
+                  <option>~45 min</option>
+                  <option selected>~1 hr</option>
+                  <option>~1.5 hrs</option>
+                  <option>~2 hrs</option>
+                  <option>~3+ hrs</option>
+                </select>
               </div>
-              <p class="hint" id="dur-hint">Auto-fills when you enter both locations</p>
             </div>
           </div>
         </div>
@@ -2083,81 +2069,40 @@
       return m > 0 ? `~${h} hr ${m} min` : `~${h} hr`;
     }
 
-    // ── Auto-estimate duration from typed from/to text ────────────
-    // Uses Nominatim geocoding → straight-line distance → ~35 km/h road-speed factor
-    let _durDebounce;
-    async function estimateDurationFromText() {
-      const fromVal = (document.getElementById('f-from').value || '').trim();
-      const toVal   = (document.getElementById('f-to').value   || '').trim();
-
-      if (fromVal.length < 3 || toVal.length < 3) return;
-
-      const durInp  = document.getElementById('f-duration');
-      const durHint = document.getElementById('dur-hint');
-      const durIco  = document.getElementById('dur-ico');
-
-      // Show spinner state
-      durInp.value       = '';
-      durInp.placeholder = 'Estimating…';
-      if (durHint) durHint.textContent = 'Geocoding locations…';
-      if (durIco)  durIco.textContent  = '⏳';
-
-      try {
-        const [fromRes, toRes] = await Promise.all([
-          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fromVal + ', India')}&format=json&limit=1`).then(r => r.json()),
-          fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(toVal   + ', India')}&format=json&limit=1`).then(r => r.json())
-        ]);
-
-        if (!fromRes.length || !toRes.length) {
-          durInp.placeholder = 'Could not estimate';
-          if (durHint) durHint.textContent = 'Enter more specific locations';
-          if (durIco)  durIco.textContent  = '⚠️';
-          return;
-        }
-
-        const lat1 = parseFloat(fromRes[0].lat), lon1 = parseFloat(fromRes[0].lon);
-        const lat2 = parseFloat(toRes[0].lat),   lon2 = parseFloat(toRes[0].lon);
-
-        // Haversine straight-line distance (km)
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 +
-                  Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-                  Math.sin(dLon/2)**2;
-        const distKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // Apply 1.4x road-to-straight-line factor, then ~35 km/h avg speed
-        const roadKm = distKm * 1.4;
-        const mins   = Math.round((roadKm / 35) * 60);
-        const label  = formatMins(mins);
-
-        durInp.value       = label;
-        durInp.placeholder = 'Auto-estimated…';
-        if (durHint) durHint.textContent = `≈ ${roadKm.toFixed(1)} km road distance estimated`;
-        if (durIco)  durIco.textContent  = '⏱';
-
-        // Also update the map route info if markers aren't placed yet
-        updateDurationField(mins);
-
-      } catch (err) {
-        durInp.placeholder = 'Estimation failed';
-        if (durHint) durHint.textContent = 'Check your internet connection';
-        if (durIco)  durIco.textContent  = '❌';
-      }
-    }
-
-    // ── Debounced auto-estimate on text change ───────────────────
-    function scheduleEstimate() {
-      clearTimeout(_durDebounce);
-      _durDebounce = setTimeout(estimateDurationFromText, 800);
-    }
-
     // ── Auto-select closest duration option OR inject real value ──
     function updateDurationField(mins) {
-      const inp = document.getElementById('f-duration');
-      if (!inp) return;
-      inp.value = formatMins(mins);
+      const sel = document.getElementById('f-duration');
+      if (!sel) return;
+
+      const formatted = formatMins(mins);
+
+      // Check if a matching option exists, else create one
+      let found = false;
+      for (let opt of sel.options) {
+        opt.selected = false;
+        // Match by rough range
+        const v = opt.value;
+        if (mins <= 35  && v === '~30 min')  { opt.selected = true; found = true; break; }
+        if (mins <= 52  && v === '~45 min')  { opt.selected = true; found = true; break; }
+        if (mins <= 70  && v === '~1 hr')    { opt.selected = true; found = true; break; }
+        if (mins <= 100 && v === '~1.5 hrs') { opt.selected = true; found = true; break; }
+        if (mins <= 140 && v === '~2 hrs')   { opt.selected = true; found = true; break; }
+        if (mins > 140  && v === '~3+ hrs')  { opt.selected = true; found = true; break; }
+      }
+
+      // If no existing option matched perfectly, inject a real-time option
+      if (!found) {
+        // Remove any previously injected dynamic option
+        const existing = sel.querySelector('[data-dynamic]');
+        if (existing) sel.removeChild(existing);
+
+        const opt = document.createElement('option');
+        opt.value = formatted;
+        opt.textContent = formatted;
+        opt.selected = true;
+        opt.dataset.dynamic = '1';
+        sel.insertBefore(opt, sel.firstChild);
+      }
     }
 
     // ✅ FIXED: pickSeat was missing — seat buttons were broken
@@ -2201,7 +2146,6 @@
           document.getElementById('map-to-inp').value = addr;
         }
         sync();
-        scheduleEstimate(); // auto-estimate duration after reverse geocode fills the fields
       } catch (e) { }
     }
     function clearAllMarkers() {
@@ -2251,9 +2195,9 @@
       }
 
       try {
-        const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+        const token = localStorage.getItem("token");
 
-        const res = await fetch("/api/v4/rides/post-ride", {
+        const res = await fetch("http://localhost:3000/api/v4/rides/post-ride", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2299,19 +2243,71 @@
       document.getElementById('f-time').addEventListener('input', sync);
       document.getElementById('f-vtype').addEventListener('change', sync);
 
+      // ✅ Auto-geocode when user TYPES in the pickup/destination fields
+      let fromTimer, toTimer;
+
+      document.getElementById('f-from').addEventListener('input', function () {
+        clearTimeout(fromTimer);
+        const q = this.value.trim();
+        if (q.length < 3) return;
+        fromTimer = setTimeout(() => geocodeAndMark(q, 'pickup'), 700);
+      });
+
+      document.getElementById('f-to').addEventListener('input', function () {
+        clearTimeout(toTimer);
+        const q = this.value.trim();
+        if (q.length < 3) return;
+        toTimer = setTimeout(() => geocodeAndMark(q, 'drop'), 700);
+      });
+
       sync(); // Run once on load to populate defaults
       syncRange(document.getElementById('priceRange'));
     };
+
+    // ── Geocode a typed address and place marker ──────────────────
+    async function geocodeAndMark(query, type) {
+      try {
+        const res  = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', India')}&format=json&limit=1`);
+        const data = await res.json();
+        if (!data.length) return;
+
+        const { lat, lon } = data[0];
+        const latlng = L.latLng(parseFloat(lat), parseFloat(lon));
+
+        if (type === 'pickup') {
+          setPickupMarker(latlng);
+          // Sync map search input too
+          const mapInp = document.getElementById('map-from-inp');
+          if (mapInp) mapInp.value = query;
+        } else {
+          setDropMarker(latlng);
+          const mapInp = document.getElementById('map-to-inp');
+          if (mapInp) mapInp.value = query;
+        }
+
+        map.setView(latlng, 13);
+
+        // If both markers are now set → calculate route + estimated time
+        if (pickupMarker && dropMarker) {
+          fitRoute();
+          calculateRoute();
+        }
+
+        sync();
+      } catch (e) {
+        console.error('Geocode error:', e);
+      }
+    }
   </script>
 
 
   <script>
     // ── Dynamic sidebar user info ──
     (async () => {
-      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
+      const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const res = await fetch("/api/v4/user/me", {
+        const res = await fetch("http://localhost:3000/api/v4/user/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
