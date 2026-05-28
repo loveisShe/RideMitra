@@ -9,12 +9,10 @@ export const requestBookingService = async ({ rideId, seatsRequested, userId }) 
     const ride = await prisma.ride.findUnique({ where: { id: parseInt(rideId) } });
     if (!ride) throw { status: 404, message: "Ride not found" };
 
-    // Bug #7 fix: prevent a driver from booking their own ride
     if (ride.driverId === parseInt(userId)) {
         throw { status: 400, message: "You cannot book your own ride" };
     }
 
-    // Bug #8 fix: prevent duplicate pending/accepted bookings for the same ride
     const existing = await prisma.booking.findFirst({
         where: {
             rideId: parseInt(rideId),
@@ -74,8 +72,6 @@ export const handleBookingService = async ({ bookingId, action, driverId }) => {
     let newStatus;
 
     if (action === "accept") {
-        // Bug #1 fix: atomic decrement with a WHERE guard to prevent race conditions.
-        // If the update matches 0 rows, it means seats were already taken concurrently.
         try {
             await prisma.ride.update({
                 where: { id: ride.id, seats: { gte: booking.seatsRequested } },
@@ -104,7 +100,6 @@ export const handleBookingService = async ({ bookingId, action, driverId }) => {
     } else if (action === "reject") {
         newStatus = "rejected";
 
-        // Bug #2 fix: restore seats when a previously-accepted booking is rejected.
         if (booking.status === "accepted") {
             await prisma.ride.update({
                 where: { id: ride.id },
@@ -208,4 +203,62 @@ export const getMyBookingsService = async (userId) => {
         status: b.status || "pending",
         rideStatus: b.ride?.status || "pending"
     }));
+};
+
+// ================= CANCEL BOOKING =================
+export const cancelBookingService = async ({ bookingId, passengerId }) => {
+    const booking = await prisma.booking.findUnique({
+        where: { id: parseInt(bookingId) },
+        include: { ride: { include: { driver: { select: { id: true, name: true } } } } }
+    });
+
+    if (!booking) throw { status: 404, message: "Booking not found" };
+
+    if (booking.passengerId !== parseInt(passengerId)) {
+        throw { status: 403, message: "Forbidden: This is not your booking" };
+    }
+
+    if (booking.status === "cancelled") {
+        throw { status: 400, message: "Booking is already cancelled" };
+    }
+
+    if (booking.status === "rejected") {
+        throw { status: 400, message: "Cannot cancel a rejected booking" };
+    }
+
+    const wasAccepted = booking.status === "accepted";
+
+    await prisma.$transaction(async (tx) => {
+        await tx.booking.update({
+            where: { id: parseInt(bookingId) },
+            data:  { status: "cancelled" }
+        });
+
+        if (wasAccepted && booking.ride) {
+            await tx.ride.update({
+                where: { id: booking.rideId },
+                data:  { seats: { increment: booking.seatsRequested } }
+            });
+        }
+
+        if (booking.ride?.driverId) {
+            await tx.notification.create({
+                data: {
+                    userId:    booking.ride.driverId,
+                    message:   `A passenger cancelled their booking for ${booking.ride.pickup} → ${booking.ride.destination}.`,
+                    type:      "rejected",
+                    bookingId: parseInt(bookingId)
+                }
+            });
+        }
+    });
+
+    if (global.io && booking.ride?.driverId) {
+        global.io.to(booking.ride.driverId.toString()).emit("new-notification", {
+            message: `A passenger cancelled their booking for ${booking.ride.pickup} → ${booking.ride.destination}.`
+        });
+        global.io.to(booking.ride.driverId.toString()).emit("booking-updated", { status: "cancelled" });
+    }
+
+    return { message: "Booking cancelled successfully", wasAccepted };
 };

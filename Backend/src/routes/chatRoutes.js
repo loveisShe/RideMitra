@@ -1,6 +1,6 @@
 import express from "express";
 import { getMessages, sendMessage } from "../controller/chatController.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js"; // Bug #12
 import { sendMessageSchema } from "../Lib/validators.js"; // Bug #12
 

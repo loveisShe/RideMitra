@@ -1,4 +1,4 @@
-import { registerUserService, loginUserService, googleLoginService, getUserService, updateUserService, deleteUserService, sendTokenResponse } from "../services/userService.js";
+import { registerUserService, loginUserService, googleLoginService, googleOAuthCallbackService, getUserService, updateUserService, deleteUserService, sendTokenResponse } from "../services/userService.js";
 
 // ================= REGISTER =================
 export const registerUser = async (req, res) => {
@@ -30,6 +30,16 @@ export const googleLogin = async (req, res) => {
     }
 };
 
+// ================= GOOGLE OAUTH CALLBACK =================
+export const googleOAuthCallback = (req, res) => {
+    try {
+        const { token, cookieOptions, redirectUrl } = googleOAuthCallbackService(req.user);
+        res.cookie("token", token, cookieOptions).redirect(redirectUrl);
+    } catch (err) {
+        res.redirect("/?google_error=1");
+    }
+};
+
 // ================= GET USER =================
 export const getUserById = async (req, res) => {
     try {
@@ -46,9 +56,8 @@ export const updateUser = async (req, res) => {
     try {
         const updates = { ...req.body };
         if (req.file?.path) {
-            updates.profilePicture = req.file.path;   
+            updates.profilePicture = req.file.path;
         }
-
         const user = await updateUserService(req.user.id, req.params.id, updates);
         res.status(200).json({ success: true, message: "Profile updated successfully", user });
     } catch (err) {

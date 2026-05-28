@@ -4,10 +4,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import helmet from "helmet"; // Bug #21
-import rateLimit from "express-rate-limit"; // Bug #16
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import passport from "passport";
+import "./src/Lib/passport.js";
 
 dotenv.config();
 
@@ -27,8 +30,6 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// In production on Render the browser sends the Render URL as the origin.
-// We must allow it, plus localhost for local dev.
 const RENDER_URL = "https://ridemitra-hymf.onrender.com";
 
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -41,24 +42,38 @@ const allowedOrigins = process.env.CORS_ORIGIN
       RENDER_URL
     ];
 
-// Allow requests with no origin (mobile apps, Postman, curl) and listed origins
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow no-origin requests (mobile native, curl, Postman)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    // Allow any *.onrender.com subdomain (covers preview URLs)
     if (origin.endsWith(".onrender.com")) return callback(null, true);
     callback(new Error(`CORS: origin '${origin}' not allowed`));
   },
   credentials: true
 }));
-// Bug #21 fix: apply helmet security headers
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ================= SESSION & PASSPORT =================
+app.use(session({
+  secret:            process.env.SESSION_SECRET || process.env.JWT_SECRET,
+  resave:            false,
+  saveUninitialized: false,
+  cookie: {
+    secure:   process.env.NODE_ENV === "production",
+    httpOnly: true,
+    maxAge:   5 * 60 * 1000
+  }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static(path.join(__dirname, "public")));
+
+// ================= HEALTH =================
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
 // ================= ROUTES =================
 app.use("/api/v4/user",          userRoutes);
@@ -66,6 +81,11 @@ app.use("/api/v4/rides",         rideRouter);
 app.use("/api/v4/bookings",      bookingRoutes);
 app.use("/api/v4/notifications", notificationRoutes);
 app.use("/api/v4/chat",          chatRoutes);
+
+
+// ================= GOOGLE OAUTH SHORT-URL =================
+app.get("/auth/google",          (req, res) => res.redirect(302, "/api/v4/user/auth/google"));
+app.get("/auth/google/callback", (req, res) => res.redirect(302, "/api/v4/user/auth/google/callback?" + new URLSearchParams(req.query)));
 
 // ================= FRONTEND PAGES =================
 app.get("/",               (req, res) => res.render("login"));
@@ -201,3 +221,18 @@ const startServer = async () => {
 };
 
 startServer();
+
+// ================= GRACEFUL SHUTDOWN =================
+const shutdown = async (signal) => {
+  console.log(`\n${signal} received — shutting down gracefully…`);
+  try {
+    await prisma.$disconnect();
+    console.log("Prisma disconnected.");
+  } catch (e) {
+    console.error("Error during Prisma disconnect:", e.message);
+  }
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT",  () => shutdown("SIGINT"));

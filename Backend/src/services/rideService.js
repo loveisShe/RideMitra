@@ -25,16 +25,18 @@ export const postRideService = async ({ pickup, destination, date, time, vehicle
 export const getAllRidesService = async ({ pickup, destination, date }) => {
     const where = {};
 
-    // Bug #9 fix: only return active (pending) rides
     where.status = "pending";
 
     if (pickup)      where.pickup      = { contains: pickup,      mode: "insensitive" };
     if (destination) where.destination = { contains: destination, mode: "insensitive" };
 
     if (date) {
-        where.date = { gte: new Date(date), lt: new Date(new Date(date).getTime() + 86400000) };
+        const dayStart = new Date(date);
+        dayStart.setUTCHours(0, 0, 0, 0);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+        where.date = { gte: dayStart, lt: dayEnd };
     } else {
-        // Bug #10 fix: default to today and future dates when no date is provided
         where.date = { gte: new Date() };
     }
 
@@ -46,22 +48,79 @@ export const getAllRidesService = async ({ pickup, destination, date }) => {
 };
 
 // ================= UPDATE SEATS =================
-// Bug #6 fix: requires callerId so we can verify the caller owns the ride
 export const updateRideSeatsService = async (rideId, bookedSeats = 1, callerId) => {
     const ride = await prisma.ride.findUnique({ where: { id: parseInt(rideId) } });
     if (!ride) throw { status: 404, message: "Ride not found" };
 
-    // Ownership check: only the driver of the ride can adjust its seats directly
     if (ride.driverId !== parseInt(callerId)) {
         throw { status: 403, message: "Forbidden: You are not the driver of this ride" };
     }
 
-    if (ride.seats < bookedSeats) {
+    try {
+        return await prisma.ride.update({
+            where: { id: parseInt(rideId), seats: { gte: parseInt(bookedSeats) } },
+            data:  { seats: { decrement: parseInt(bookedSeats) } }
+        });
+    } catch {
         throw { status: 400, message: "Not enough seats available" };
     }
+};
 
-    return await prisma.ride.update({
+// ================= CANCEL RIDE =================
+export const cancelRideService = async (rideId, driverId) => {
+    const ride = await prisma.ride.findUnique({
         where: { id: parseInt(rideId) },
-        data:  { seats: ride.seats - bookedSeats }
+        include: {
+            bookings: {
+                where: { status: { in: ["pending", "accepted"] } },
+                include: { passenger: { select: { id: true, name: true } } }
+            }
+        }
     });
+
+    if (!ride) throw { status: 404, message: "Ride not found" };
+
+    if (ride.driverId !== parseInt(driverId)) {
+        throw { status: 403, message: "Forbidden: You are not the driver of this ride" };
+    }
+
+    if (ride.status === "completed" || ride.status === "cancelled") {
+        throw { status: 400, message: `Ride is already ${ride.status}` };
+    }
+
+    await prisma.$transaction(async (tx) => {
+        await tx.ride.update({
+            where: { id: parseInt(rideId) },
+            data:  { status: "cancelled" }
+        });
+
+        if (ride.bookings.length) {
+            await tx.booking.updateMany({
+                where: {
+                    rideId: parseInt(rideId),
+                    status: { in: ["pending", "accepted"] }
+                },
+                data: { status: "cancelled" }
+            });
+
+            const notifications = ride.bookings.map(b => ({
+                userId:    b.passengerId,
+                message:   `Your booking for ${ride.pickup} → ${ride.destination} was cancelled by the driver.`,
+                type:      "rejected",
+                bookingId: b.id
+            }));
+            await tx.notification.createMany({ data: notifications });
+        }
+    });
+
+    if (global.io && ride.bookings.length) {
+        ride.bookings.forEach(b => {
+            global.io.to(b.passengerId.toString()).emit("new-notification", {
+                message: `Your booking for ${ride.pickup} → ${ride.destination} was cancelled by the driver.`
+            });
+            global.io.to(b.passengerId.toString()).emit("booking-updated", { status: "cancelled" });
+        });
+    }
+
+    return { message: "Ride cancelled successfully" };
 };

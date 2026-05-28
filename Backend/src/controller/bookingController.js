@@ -1,4 +1,4 @@
-import { requestBookingService, handleBookingService, getMyRidesService, getMyRidesWithPassengersService, getMyBookingsService } from "../services/bookingService.js";
+import { requestBookingService, handleBookingService, getMyRidesService, getMyRidesWithPassengersService, getMyBookingsService, cancelBookingService } from "../services/bookingService.js";
 
 // ================= REQUEST BOOKING =================
 export const requestBooking = async (req, res) => {
@@ -55,5 +55,18 @@ export const getMyBookings = async (req, res) => {
         res.json(bookings);
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
+    }
+};
+
+// ================= CANCEL BOOKING (passenger) =================
+export const cancelBooking = async (req, res) => {
+    try {
+        const result = await cancelBookingService({
+            bookingId:   req.params.id,
+            passengerId: req.user.id
+        });
+        res.json(result);
+    } catch (err) {
+        res.status(err.status || 500).json({ error: err.message });
     }
 };

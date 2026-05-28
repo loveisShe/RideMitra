@@ -16,7 +16,6 @@ export const sendTokenResponse = (user, statusCode, res, message) => {
     const cookieOptions = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        // Bug #3 fix: only send cookie over HTTPS in production
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
         path: "/"
@@ -83,8 +82,6 @@ export const loginUserService = async ({ email, password }) => {
 export const googleLoginService = async (token) => {
     if (!token) throw { status: 400, message: "No Google token provided" };
 
-    // Bug #4 fix: verify the ID token via google-auth-library to ensure it was
-    // issued by Google for *this* app's client ID, not any arbitrary access token.
     let name, email, picture;
     try {
         const ticket = await googleOAuthClient.verifyIdToken({
@@ -168,8 +165,6 @@ export const deleteUserService = async (tokenId, urlId) => {
         throw { status: 403, message: "Forbidden: You can only delete your own account" };
     }
 
-    // Bug #11 fix: prisma.delete never returns null — it throws P2025 when not found.
-    // The previous `if (!deleted)` check was dead code and the 404 was never sent.
     try {
         return await prisma.user.delete({ where: { id: parseInt(tokenId) } });
     } catch (err) {
@@ -178,4 +173,25 @@ export const deleteUserService = async (tokenId, urlId) => {
         }
         throw err;
     }
+};
+
+// ================= GOOGLE OAUTH CALLBACK =================
+export const googleOAuthCallbackService = (passportUser) => {
+    if (!passportUser) {
+        throw { status: 401, message: "Google authentication failed" };
+    }
+
+    const token = passportUser._jwt || generateToken(passportUser.id);
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure:   process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        expires:  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        path:     "/"
+    };
+
+    const redirectUrl = `/dashboard?google_token=${encodeURIComponent(token)}`;
+
+    return { token, cookieOptions, redirectUrl };
 };
