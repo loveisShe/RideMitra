@@ -8,7 +8,19 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&family=Noto+Sans+Devanagari:wght@700;900&display=swap"
     rel="stylesheet">
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js" defer></script>
+
+  <!-- Capture google_token immediately before any other JS runs -->
+  <script>
+    (function () {
+      const p = new URLSearchParams(window.location.search);
+      const gt = p.get("google_token");
+      if (gt) {
+        localStorage.setItem("token", gt);
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    })();
+  </script>
   <style>
     *,
     *::before,
@@ -1592,22 +1604,7 @@
     </div>
 
     <script>
-      // ── Capture token from Google OAuth redirect ──────────────────────────
-      // After /auth/google/callback, the server appends ?google_token=... to /dashboard
-      // We grab it once, save to localStorage, then strip it from the URL.
-      (function captureGoogleToken() {
-        const params = new URLSearchParams(window.location.search);
-        const gt = params.get("google_token");
-        if (gt) {
-          localStorage.setItem("token", gt);
-          // Clean the URL without a page reload
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-        }
-      })();
-
-      const token = ( localStorage.getItem("token") || sessionStorage.getItem("token") );
-
+      const token = (localStorage.getItem("token") || sessionStorage.getItem("token"));
 
       function statusBadge(status) {
         const map = {
