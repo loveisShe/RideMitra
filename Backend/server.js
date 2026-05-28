@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import pg from "pg";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import helmet from "helmet";
@@ -57,7 +59,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ================= SESSION & PASSPORT =================
+const PgStore = connectPgSimple(session);
+const pgPool  = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+
 app.use(session({
+  store: new PgStore({
+    pool:                 pgPool,
+    createTableIfMissing: true,
+    tableName:            "user_sessions"
+  }),
   secret:            process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave:            false,
   saveUninitialized: false,
